@@ -9,9 +9,9 @@ Gem::Specification.new do |spec|
   spec.version     = Hyrax::Doi::VERSION
   spec.authors     = ["Chris Colvard"]
   spec.email       = ["chris.colvard@gmail.com"]
-  spec.homepage    = "TODO"
-  spec.summary     = "TODO: Summary of Hyrax::Doi."
-  spec.description = "TODO: Description of Hyrax::Doi."
+  spec.homepage    = ""
+  spec.summary     = "Hyrax plugin for working with DOIs."
+  spec.description = "Tools for working with DOIs in Hyrax including model attributes, minting, and fetching descriptive metadata."
   spec.license     = "MIT"
 
   # Prevent pushing this gem to RubyGems.org. To allow pushes either set the 'allowed_push_host'
