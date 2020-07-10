@@ -750,10 +750,11 @@ GEM
     simple_form (5.0.2)
       actionpack (>= 5.0)
       activemodel (>= 5.0)
-    simplecov (0.18.5)
+    simplecov (0.17.1)
       docile (~> 1.1)
-      simplecov-html (~> 0.11)
-    simplecov-html (0.12.2)
+      json (>= 1.8, < 3)
+      simplecov-html (~> 0.10.0)
+    simplecov-html (0.10.2)
     slop (4.8.2)
     solr_wrapper (2.2.0)
       faraday
@@ -854,7 +855,7 @@ DEPENDENCIES
   rspec_junit_formatter
   sass-rails (~> 5.0)
   selenium-webdriver
-  simplecov
+  simplecov (= 0.17.1, < 0.18)
   solr_wrapper (>= 0.3)
   spring
   spring-watcher-listen (~> 2.0.0)
