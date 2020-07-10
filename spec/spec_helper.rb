@@ -94,3 +94,5 @@ RSpec.configure do |config|
   Kernel.srand config.seed
 =end
 end
+
+require File.expand_path('internal_test_hyrax/spec/rails_helper.rb', __dir__)
