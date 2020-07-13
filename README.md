@@ -8,7 +8,10 @@ Docs: [![Contribution Guidelines](http://img.shields.io/badge/CONTRIBUTING-Guide
 
 Jump in: [![Slack Status](http://slack.samvera.org/badge.svg)](http://slack.samvera.org/)
 
-Hyrax plugin providing tools for working with DOIs including model attributes, minting, and fetching descriptive metadata.
+Hyrax-doi is a Hyrax plugin that provides tools for working with DOIs including model attributes, minting, and fetching descriptive metadata.
+
+## Compatibilty
+Hyrax-doi is compatible with Hyrax 2.8+ and tested with a [Hyrax 2.8.0 test application](https://github.com/ubiquitypress/hyrax_test_app) that mirrors the generated app used by Hyrax internally for testing.
 
 ## Usage
 TODO
