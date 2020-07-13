@@ -13,12 +13,15 @@ jobs:
       rails_version:
         type: string
         default: 5.2.4.3
+      parallelism:
+        type: integer
+        default: 4
 
     executor:
       name: 'samvera/ruby_fcrepo_solr_redis_postgres'
       ruby_version: << parameters.ruby_version >>
 
-    parallelism: 4
+    parallelism: << parameters.parallelism >>
 
     environment:
       RAILS_VERSION: << parameters.rails_version >>
@@ -102,6 +105,8 @@ workflows:
     jobs:
       - bundle_lint_test:
           name: ruby2-7-1
+          parallelism: 1
       - upload_coverage:
+          parallelism: 1
           requires:
             - ruby2-7-1
