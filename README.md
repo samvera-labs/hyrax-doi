@@ -46,7 +46,6 @@ solr_wrapper -v --config .solr_wrapper.yml
 fcrepo_wrapper -v --config .fcrepo_wrapper.yml
 bundle exec sidekiq -r spec/internal_test_hyrax
 bundle exec rails server -b 0.0.0.0
-bundle exec rspec
 ```
 
 ### Testing
