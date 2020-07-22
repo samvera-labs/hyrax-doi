@@ -7,7 +7,7 @@ require "hyrax/doi/version"
 # Describe your gem and declare its dependencies:
 Gem::Specification.new do |spec|
   spec.name        = "hyrax-doi"
-  spec.version     = Hyrax::Doi::VERSION
+  spec.version     = Hyrax::DOI::VERSION
   spec.authors     = ["Chris Colvard"]
   spec.email       = ["chris.colvard@gmail.com"]
   spec.homepage    = ""

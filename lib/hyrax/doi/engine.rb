@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 module Hyrax
-  module Doi
+  module DOI
     class Engine < ::Rails::Engine
-      isolate_namespace Hyrax::Doi
+      isolate_namespace Hyrax::DOI
     end
   end
 end

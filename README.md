@@ -1,4 +1,4 @@
-# Hyrax::Doi
+# Hyrax::DOI
 Code: [![CircleCI](https://circleci.com/gh/ubiquitypress/hyrax-doi.svg?style=svg)](https://circleci.com/gh/ubiquitypress/hyrax-doi)
 [![Code Climate](https://codeclimate.com/github/ubiquitypress/hyrax-doi/badges/gpa.svg)](https://codeclimate.com/github/ubiquitypress/hyrax-doi)
 
