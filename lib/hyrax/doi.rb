@@ -2,7 +2,7 @@
 require "hyrax/doi/engine"
 
 module Hyrax
-  module Doi
+  module DOI
     # Your code goes here...
   end
 end

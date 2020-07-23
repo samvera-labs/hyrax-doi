@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 module Hyrax
-  module Doi
+  module DOI
     class ApplicationMailer < ActionMailer::Base
       default from: 'from@example.com'
       layout 'mailer'
