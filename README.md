@@ -13,9 +13,6 @@ Hyrax-doi is a Hyrax plugin that provides tools for working with DOIs including 
 ## Compatibilty
 Hyrax-doi is compatible with Hyrax 2.8+ and tested with a [Hyrax 2.8.0 test application](https://github.com/ubiquitypress/hyrax_test_app) that mirrors the generated app used by Hyrax internally for testing.
 
-## Usage
-TODO
-
 ## Installation
 Add this line to your application's Gemfile:
 
@@ -31,6 +28,14 @@ $ bundle
 Or install it yourself as:
 ```bash
 $ gem install hyrax-doi
+```
+
+## Usage
+
+### Setup work type for hyrax-doi
+Run the generator to add DOI support to a given work type:
+```
+rails g hyrax:doi:add_to_work_type MyWorkType
 ```
 
 ## Development

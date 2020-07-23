@@ -135,6 +135,10 @@ GEM
       public_suffix (>= 2.0.2, < 5.0)
     almond-rails (0.3.0)
       rails (>= 4.2)
+    ammeter (1.1.4)
+      activesupport (>= 3.0)
+      railties (>= 3.0)
+      rspec-rails (>= 2.2)
     arel (9.0.0)
     ast (2.4.1)
     autoprefixer-rails (9.8.4)
@@ -854,6 +858,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  ammeter
   bixby
   bootsnap (>= 1.1.0)
   bootstrap-sass (~> 3.0)
