@@ -31,6 +31,7 @@ Gem::Specification.new do |spec|
 
   spec.add_development_dependency 'ammeter'
   spec.add_development_dependency "bixby"
+  spec.add_development_dependency "factory_bot_rails"
   spec.add_development_dependency "pg"
   spec.add_development_dependency 'rspec_junit_formatter'
   spec.add_development_dependency "rspec-rails"

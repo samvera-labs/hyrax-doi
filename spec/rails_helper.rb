@@ -6,7 +6,10 @@ ENV['RAILS_ENV'] ||= 'test'
 require File.expand_path('internal_test_hyrax/config/environment', __dir__)
 # Prevent database truncation if the environment is production
 abort("The Rails environment is running in production mode!") if Rails.env.production?
+require 'factory_bot_rails'
 require 'rspec/rails'
+require 'active_fedora/cleaner'
+require 'noid/rails/rspec'
 # Add additional requires below this line. Rails is not loaded until this point!
 # For testing generators
 require 'ammeter/init'
@@ -74,4 +77,18 @@ RSpec.configure do |config|
   config.filter_rails_from_backtrace!
   # arbitrary gems may also be filtered via:
   # config.filter_gems_from_backtrace("gem name")
+
+  config.include FactoryBot::Syntax::Methods
+
+  config.before(:suite) do
+    ActiveFedora::Cleaner.clean!
+  end
+
+  config.after(:each) do
+    ActiveFedora::Cleaner.clean!
+  end
+
+  include Noid::Rails::RSpec
+  config.before(:suite) { disable_production_minter! }
+  config.after(:suite)  { enable_production_minter! }
 end
