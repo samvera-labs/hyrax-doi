@@ -16,6 +16,14 @@ module Hyrax
         validates :doi, format: { with: /\A10\.\d{4,}(\.\d+)*\/[-._;():\/A-Za-z\d]+\z/ }, allow_nil: true
         # TODO: turn controlled vocab here into a frozen constant to allow for extensions and reuse
         validates :doi_status_when_public, inclusion: { in: [:draft, :registered, :findable] }, allow_nil: true
+
+
+        # Override setter to allow passing arrays since Hyrax::Identifier::Dispatcher does it
+        # Maybe Hyrax should introspect and send singular vs. multiple based upon property definition
+        alias_method :_doi=, :doi=
+        def doi=(value)
+          self._doi=(Array(value).first)
+        end
       end
     end
   end
