@@ -13,3 +13,19 @@ Metrics/BlockLength:
   Exclude:
     - 'lib/hyrax/doi/spec/shared_specs/*'
     - 'spec/**/*'
+
+Metrics/CyclomaticComplexity:
+  Exclude:
+    - 'app/actors/hyrax/actors/doi_actor.rb'
+
+Metrics/PerceivedComplexity:
+  Exclude:
+    - 'app/actors/hyrax/actors/doi_actor.rb'
+
+RSpec/MessageSpies:
+  Exclude:
+    - 'spec/jobs/hyrax/doi/register_doi_job_spec.rb'
+
+RSpec/VerifiedDoubles:
+  Exclude:
+    - 'spec/jobs/hyrax/doi/register_doi_job_spec.rb'

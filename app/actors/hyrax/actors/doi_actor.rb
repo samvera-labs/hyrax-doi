@@ -35,49 +35,50 @@ module Hyrax
 
       private
 
-        def create_or_update_doi(env)
-          return true unless Hyrax.config.identifier_registrars.present? && should_create_or_update_doi?(env)
+      def create_or_update_doi(env)
+        return true unless Hyrax.config.identifier_registrars.present? && should_create_or_update_doi?(env)
 
-          Hyrax::DOI::RegisterDOIJob.perform_later(env.curation_concern)
-        end
+        Hyrax::DOI::RegisterDOIJob.perform_later(env.curation_concern)
+      end
 
-        # Determine if doi job should be enqueued or not
-        def should_create_or_update_doi?(env)
-          # Return early if work isn't DOI enabled
-          return false unless env.curation_concern.class.ancestors.include? Hyrax::DOI::DOIBehavior
+      # Determine if doi job should be enqueued or not
+      def should_create_or_update_doi?(env)
+        doi_enabled?(env) && (doi_requested?(env) || doi_status_change?(env))
 
-          # Create DOI if one is wanted eventually and one doesn't already exist
-          if env.curation_concern.doi.blank? && env.curation_concern.doi_status_when_public.in?([:draft, :registered, :findable])
-            return true
-          end
+        # TODO: When registar required metadata changes
+        # Need to know registrar to do this?
+        # if env.curation_concern.changes.keys.any? { |k| k.in?(registrar::REQUIRED_METADATA)}
 
-          # Update if doi_status_when_public changes to another possible status
-          # FIXME: Come up with a cleaner way to deal with this without making it too complex?
-          if (env.curation_concern.doi.present? && env.curation_concern.doi_status_when_public_changed? &&
-               (env.curation_concern.doi_status_when_public_changed?(from: nil, to: :draft) ||
-                env.curation_concern.doi_status_when_public_changed?(from: nil, to: :registered) ||
-                env.curation_concern.doi_status_when_public_changed?(from: nil, to: :findable) ||
-                env.curation_concern.doi_status_when_public_changed?(from: :draft, to: nil) ||
-                env.curation_concern.doi_status_when_public_changed?(from: :draft, to: :registered) ||
-                env.curation_concern.doi_status_when_public_changed?(from: :draft, to: :findable) ||
-                env.curation_concern.doi_status_when_public_changed?(from: :registered, to: :findable) ||
-                env.curation_concern.doi_status_when_public_changed?(from: :findable, to: :registered)))
-            return true
-          end
+        # TODO: When work becomes public or ceases to be public
+        # The code below doesn't work because visibility_changed?(to:/from:) doesn't work because visibility isn't setup with ActiveModel::Dirty
+        # if (env.curation_concern.visibility_changed?(to: Hydra::AccessControls::AccessRight::VISIBILITY_TEXT_VALUE_PUBLIC ) ||
+        #    env.curation_concern.visibility_changed?(from: Hydra::AccessControls::AccessRight::VISIBILITY_TEXT_VALUE_PUBLIC ))
+        #  return true
+        # end
+      end
 
-          # TODO: When registar required metadata changes
-          # Need to know registrar to do this?
-          # if env.curation_concern.changes.keys.any? { |k| k.in?(registrar::REQUIRED_METADATA)}
+      # Check if work is DOI enabled
+      def doi_enabled?(env)
+        env.curation_concern.class.ancestors.include? Hyrax::DOI::DOIBehavior
+      end
 
-          # TODO: When work becomes public or ceases to be public
-          # The code below doesn't work because visibility_changed?(to:/from:) doesn't work because visibility isn't setup with ActiveModel::Dirty
-          #if (env.curation_concern.visibility_changed?(to: Hydra::AccessControls::AccessRight::VISIBILITY_TEXT_VALUE_PUBLIC ) ||
-          #    env.curation_concern.visibility_changed?(from: Hydra::AccessControls::AccessRight::VISIBILITY_TEXT_VALUE_PUBLIC ))
-          #  return true
-          #end
+      # Check if DOI is wanted eventually and one doesn't already exist
+      def doi_requested?(env)
+        env.curation_concern.doi.blank? && env.curation_concern.doi_status_when_public.in?([:draft, :registered, :findable])
+      end
 
-          false
-        end
+      # Check if doi_status_when_public changes to another possible status
+      def doi_status_change?(env)
+        env.curation_concern.doi.present? && env.curation_concern.doi_status_when_public_changed? &&
+          (env.curation_concern.doi_status_when_public_changed?(from: nil, to: :draft) ||
+           env.curation_concern.doi_status_when_public_changed?(from: nil, to: :registered) ||
+           env.curation_concern.doi_status_when_public_changed?(from: nil, to: :findable) ||
+           env.curation_concern.doi_status_when_public_changed?(from: :draft, to: nil) ||
+           env.curation_concern.doi_status_when_public_changed?(from: :draft, to: :registered) ||
+           env.curation_concern.doi_status_when_public_changed?(from: :draft, to: :findable) ||
+           env.curation_concern.doi_status_when_public_changed?(from: :registered, to: :findable) ||
+           env.curation_concern.doi_status_when_public_changed?(from: :findable, to: :registered))
+      end
     end
   end
 end
