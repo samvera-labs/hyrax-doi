@@ -11,6 +11,12 @@ module Hyrax
           inflect.acronym 'DOI'
         end
       end
+
+      config.after_initialize do
+        # Hyrax::CurationConcern.actor_factory.use Hyrax::Actors::DOIActor
+        # TODO: make this additive and put it somewhere where it can be modified or overridden; maybe in the generator?
+        Hyrax.config.identifier_registrars = { datacite: Hyrax::DOI::DataciteRegistrar }
+      end
     end
   end
 end

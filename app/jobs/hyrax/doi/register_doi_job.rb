@@ -2,25 +2,15 @@
 module Hyrax
   module DOI
     class RegisterDOIJob < ApplicationJob
-      ##
-      # @!attribute [rw] registrar_opts
-      attr_writer :registrar, :registrar_opts
-
-      def registrar
-        @registrar ||= Hyrax.config.identifier_registrars.keys.first
-      end
-
-      def registrar_opts
-        @registrar_opts ||= {}
-      end
-
       queue_as :doi_service
 
       ##
       # @param model [ActiveFedora::Base]
-      def perform(model)
+      # @param registrar [String] Note this is a string and not a symbol because ActiveJob cannot serialize a symbol
+      # @param registrar_opts [Hash]
+      def perform(model, registrar: Hyrax.config.identifier_registrars.keys.first, registrar_opts: {})
         Hyrax::Identifier::Dispatcher
-          .for(registrar, **registrar_opts)
+          .for(registrar.to_sym, **registrar_opts)
           .assign_for!(object: model, attribute: :doi)
       end
     end

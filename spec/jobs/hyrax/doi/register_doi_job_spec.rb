@@ -5,6 +5,10 @@ RSpec.describe Hyrax::DOI::RegisterDOIJob, type: :job do
   let(:model_class) do
     Class.new(GenericWork) do
       include Hyrax::DOI::DOIBehavior
+
+      def registrar_name
+        :moomin
+      end
     end
   end
   let(:work) { model_class.create(title: ['Moomin']) }
@@ -26,15 +30,8 @@ RSpec.describe Hyrax::DOI::RegisterDOIJob, type: :job do
   end
 
   describe '.perform' do
-    subject(:job) do
-      described_class.new.tap do |job|
-        job.registrar_opts = registrar_opts
-        job.registrar = registrar
-      end
-    end
-
     let(:registrar_class) do
-      Class.new do
+      Class.new(Hyrax::Identifier::Registrar) do
         def initialize(*); end
 
         def register!(*)
@@ -44,16 +41,18 @@ RSpec.describe Hyrax::DOI::RegisterDOIJob, type: :job do
     end
     let(:doi) { '10.1234/moomin/123/abc' }
     let(:registrar) { :moomin }
-    let(:registrar_opts) { { builder: double(:builder), connection: double(:connection) } }
+    let(:registrar_opts) { { builder: 'CustomBuilderClass', connection: 'CustomConnectionClass' } }
 
     before do
       allow(Hyrax.config).to receive(:identifier_registrars).and_return(abstract: Hyrax::Identifier::Registrar, moomin: registrar_class)
+      # Allow any arguments because the work calls it when creating as part of test setup
+      allow(registrar_class).to receive(:new).and_call_original
     end
 
     it 'calls the registrar' do
       expect(registrar_class).to receive(:new).with(registrar_opts).and_call_original
 
-      expect { job.perform(work) }
+      expect { described_class.perform_now(work, registrar: registrar.to_s, registrar_opts: registrar_opts) }
         .to change { work.doi }
         .to eq doi
     end
