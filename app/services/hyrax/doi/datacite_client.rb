@@ -1,7 +1,7 @@
 module Hyrax
   module DOI
     class DataciteClient
-      attr_reader :base_url, :username, :password, :prefix, :mode
+      attr_reader :username, :password, :prefix, :mode
 
       TEST_BASE_URL = "https://api.test.datacite.org/"
       TEST_MDS_BASE_URL = "https://mds.test.datacite.org/"
@@ -17,38 +17,37 @@ module Hyrax
 
       def mint_draft_doi
         # Use regular api instead of mds for metadata-less url-less draft doi creation
-        resp = connection.post('dois', draft_doi_payload.to_json, "Content-Type" => "application/json")
+        response = connection.post('dois', draft_doi_payload.to_json, "Content-Type" => "application/json")
         raise Error.new('', response) unless response.status == 201
 
-        doc = Nokogiri::XML(resp.body)
-        doc.xpath('//xmlns:identifier', doc.namespaces).text
+        JSON.parse(response.body)['data']['id']
       end
 
       def delete_draft_doi(doi)
-        resp = mds_connection.delete("doi/#{doi}")
+        response = mds_connection.delete("doi/#{doi}")
         raise Error.new('', response) unless response.status == 200
 
         doi
       end
 
       def get_metadata(doi)
-        resp = mds_connection.get("metadata/#{doi}")
+        response = mds_connection.get("metadata/#{doi}")
         raise Error.new('', response) unless response.status == 200
 
         Nokogiri::XML(response.body)
       end
 
       def put_metadata(doi, metadata)
-        resp = mds_connection.put("metadata/#{doi}", metadata)
-        raise Error.new('', response) unless response.status == 200
+        response = mds_connection.put("metadata/#{doi}", metadata, { 'Content-Type': 'application/xml;charset=UTF-8' })
+        raise Error.new('', response) unless response.status == 201
 
-        # Does this return a new metadata from the response body
-        metadata
+        /^OK \((?<new_doi>.*)\)$/ =~ response.body
+        new_doi
       end
 
       def register(doi, url)
         payload = "doi=#{doi}\nurl=#{url}"
-        resp = mds_connection.put("doi/#{doi}", payload)
+        response = mds_connection.put("doi/#{doi}", payload, { 'Content-Type': 'text/plain;charset=UTF-8' })
         raise Error.new('', response) unless response.status == 201
 
         url
@@ -78,14 +77,14 @@ module Hyrax
 
       def connection
         Faraday.new(url: base_url) do |c| 
-          c.basic_auth(dc.username, dc.password)
+          c.basic_auth(username, password)
           c.adapter(Faraday.default_adapter)
         end
       end
 
       def mds_connection
-        Faraday.new(url: base_mds_url) do |c| 
-          c.basic_auth(dc.username, dc.password)
+        Faraday.new(url: mds_base_url) do |c| 
+          c.basic_auth(username, password)
           c.adapter(Faraday.default_adapter)
         end
       end

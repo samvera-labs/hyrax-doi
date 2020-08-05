@@ -43,23 +43,22 @@ module Hyrax
 
       # Determine if doi job should be enqueued or not
       def should_create_or_update_doi?(env)
-        doi_enabled?(env) && (doi_requested?(env) || doi_status_change?(env))
-
-        # TODO: When registar required metadata changes
-        # Need to know registrar to do this?
-        # if env.curation_concern.changes.keys.any? { |k| k.in?(registrar::REQUIRED_METADATA)}
-
-        # TODO: When work becomes public or ceases to be public
-        # The code below doesn't work because visibility_changed?(to:/from:) doesn't work because visibility isn't setup with ActiveModel::Dirty
-        # if (env.curation_concern.visibility_changed?(to: Hydra::AccessControls::AccessRight::VISIBILITY_TEXT_VALUE_PUBLIC ) ||
-        #    env.curation_concern.visibility_changed?(from: Hydra::AccessControls::AccessRight::VISIBILITY_TEXT_VALUE_PUBLIC ))
-        #  return true
-        # end
+        doi_enabled_work_type?(env) &&
+        doi_minting_enabled? &&
+        (doi_requested?(env) ||
+         doi_status_change?(env) ||
+         doi_metadata_changed?(env) ||
+         public_visibility_changed?(env))
       end
 
       # Check if work is DOI enabled
-      def doi_enabled?(env)
+      def doi_enabled_work_type?(env)
         env.curation_concern.class.ancestors.include? Hyrax::DOI::DOIBehavior
+      end
+
+      def doi_minting_enabled?
+        # Check feature flipper (needs to be per tenant per work type?)
+        return true
       end
 
       # Check if DOI is wanted eventually and one doesn't already exist
@@ -78,6 +77,25 @@ module Hyrax
            env.curation_concern.doi_status_when_public_changed?(from: :draft, to: :findable) ||
            env.curation_concern.doi_status_when_public_changed?(from: :registered, to: :findable) ||
            env.curation_concern.doi_status_when_public_changed?(from: :findable, to: :registered))
+      end
+
+      # Check if metadata sent to the registrar has changed 
+      def doi_metadata_changed?(env)
+        # TODO: When registar rmetadata changes
+        # Need to know registrar to do this?
+        # if env.curation_concern.changes.keys.any? { |k| k.in?(registrar::METADATA_FIELDS)}
+        return false
+      end
+
+      # Check if the work becomes public or ceases being public
+      def public_visibility_changed?(env)
+        # TODO: When work becomes public or ceases to be public
+        # The code below doesn't work because visibility_changed?(to:/from:) doesn't work because visibility isn't setup with ActiveModel::Dirty
+        # if (env.curation_concern.visibility_changed?(to: Hydra::AccessControls::AccessRight::VISIBILITY_TEXT_VALUE_PUBLIC ) ||
+        #    env.curation_concern.visibility_changed?(from: Hydra::AccessControls::AccessRight::VISIBILITY_TEXT_VALUE_PUBLIC ))
+        #  return true
+        # end
+        return false
       end
     end
   end

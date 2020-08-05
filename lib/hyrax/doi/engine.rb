@@ -16,6 +16,9 @@ module Hyrax
         # Hyrax::CurationConcern.actor_factory.use Hyrax::Actors::DOIActor
         # TODO: make this additive and put it somewhere where it can be modified or overridden; maybe in the generator?
         Hyrax.config.identifier_registrars = { datacite: Hyrax::DOI::DataciteRegistrar }
+        Hyrax::DOI::DataciteRegistrar.prefix = "10.1234"
+
+        Bolognese::Metadata.prepend Bolognese::Readers::HyraxWorkReader
       end
     end
   end

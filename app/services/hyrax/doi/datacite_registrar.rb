@@ -17,12 +17,13 @@ module Hyrax
           Struct.new(:identifier).new(client.mint_draft_doi)
         elsif mint?
           # create metadata then register doi url
-          metadata = work.to_datacite_metadata # Use bolognese
-          new_metadata = client.put_metadata(work.doi, metadata)
-          doi = new_metadata.xpath('//xmlns:identifier', doc.namespaces).text
-          url = MainApp.routes.url_helpers.polymorphic_url(id: work.id)
-          client.register(doi, url)
-          Struct.new(:identifier).new(doi)
+          # Use bolognese to crosswalk to datacite xml
+          metadata = Bolognese::Metadata.new(input: object.attributes.merge(has_model: object.has_model.first).to_json, from: 'hyrax_work').datacite
+          new_doi = client.put_metadata(object.doi || prefix, metadata)
+          # FIXME: set host in a better way
+          url = Rails.application.routes.url_helpers.polymorphic_url(object, host: 'http://example.com')
+          client.register(new_doi, url)
+          Struct.new(:identifier).new(new_doi)
         end 
       end
 
@@ -55,6 +56,7 @@ module Hyrax
 
       # Check if DOI is wanted eventually and one doesn't already exist
       def doi_requested?(work)
+        # TODO: Need to handle the case when work.new_record? is true but doi is set
         work.doi.blank? && work.doi_status_when_public.in?([:draft, :registered, :findable])
       end
 
