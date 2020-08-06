@@ -27,7 +27,7 @@ Gem::Specification.new do |spec|
   spec.files = Dir["{app,config,db,lib}/**/*", "MIT-LICENSE", "Rakefile", "README.md"]
 
   spec.add_dependency "rails", "~> 5.2.4", ">= 5.2.4.3"
-  spec.add_dependency "hyrax", "~> 2.8"
+  spec.add_dependency "hyrax", "~> 2.9"
 
   spec.add_development_dependency 'ammeter'
   spec.add_development_dependency "bixby"
