@@ -17,18 +17,18 @@ RSpec.shared_examples "a DOI-enabled model" do
 
   describe 'validations' do
     describe 'validates format of doi' do
-      let(:valid_dois) { [nil, '10.1234/abc', '10.1234.100/abc-def', '10.1234/1', '10.1234/doi/with/more/slashes'] }
+      let(:valid_dois) { ['10.1234/abc', '10.1234.100/abc-def', '10.1234/1', '10.1234/doi/with/more/slashes'] }
       let(:invalid_dois) { ['10.123/abc', 'https://doi.org/10.1234/abc', '10.1234/abc def', ''] }
 
       it 'accepts valid dois' do
-        valid_dois.each do |valid_doi|
-          expect(subject).to allow_value(valid_doi).for(:doi)
-        end
+        expect(subject).to allow_value([]).for(:doi)
+        expect(subject).to allow_value(nil).for(:doi)
+        expect(subject).to allow_value(valid_dois).for(:doi)
       end
 
       it 'rejects invalid dois' do
         invalid_dois.each do |invalid_doi|
-          expect(subject).not_to allow_values(invalid_doi).for(:doi)
+          expect(subject).not_to allow_values([invalid_doi]).for(:doi)
         end
       end
     end
@@ -47,7 +47,7 @@ RSpec.shared_examples "a DOI-enabled model" do
     end
 
     before do
-      work.doi = "10.1234/abc"
+      work.doi = ["10.1234/abc"]
       work.doi_status_when_public = :draft
     end
 
