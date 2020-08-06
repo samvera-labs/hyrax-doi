@@ -13,18 +13,22 @@ module Hyrax
       # @return [#identifier]
       # @raise [NotImplementedError] when the method is abstract
       def register!(object: work)
-        if mint_draft?
+        if mint_draft?(object)
           Struct.new(:identifier).new(client.mint_draft_doi)
-        elsif mint?
+        elsif mint?(object)
           # create metadata then register doi url
           # Use bolognese to crosswalk to datacite xml
+          # Need to determine and set the doi status here
           metadata = Bolognese::Metadata.new(input: object.attributes.merge(has_model: object.has_model.first).to_json, from: 'hyrax_work').datacite
           new_doi = client.put_metadata(object.doi || prefix, metadata)
           # FIXME: set host in a better way
           url = Rails.application.routes.url_helpers.polymorphic_url(object, host: 'http://example.com')
           client.register(new_doi, url)
           Struct.new(:identifier).new(new_doi)
-        end 
+        else
+          # Raise an execption when no minting should be done?
+          Struct.new(:identifier).new(nil)
+        end
       end
 
       # Should the work be submitted for registration (or updating)?
@@ -76,9 +80,8 @@ module Hyrax
       # Check if metadata sent to the registrar has changed
       def doi_metadata_changed?(work)
         # TODO: When registar rmetadata changes
-        # Need to know registrar to do this?
-        # if work.changes.keys.any? { |k| k.in?(registrar::METADATA_FIELDS)}
-        return false
+        fields_to_watch = %w[title creator publisher resource_type identifier description]
+        work.changes.keys.any? { |k| k.in? fields_to_watch }
       end
 
       # Check if the work becomes public or ceases being public
@@ -93,12 +96,17 @@ module Hyrax
         return false
       end
 
-      def mint_draft?
-        return false
+      def mint_draft?(work)
+        return work.new_record?
       end
 
-      def mint?
-        return false
+      def mint?(work)
+        return check_doi_status?(work)
+      end
+
+      # Check doi_status_when_public to see if we should mint a doi
+      def check_doi_status?(work)
+        work.doi_status_when_public.in? [:draft, :registered, :findable]
       end
     end
   end
