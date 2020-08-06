@@ -45,14 +45,14 @@ RSpec.describe Hyrax::DOI::RegisterDOIJob, type: :job do
 
     before do
       allow(Hyrax.config).to receive(:identifier_registrars).and_return(abstract: Hyrax::Identifier::Registrar, moomin: registrar_class)
+      allow(registrar_class).to receive(:new).and_call_original
     end
 
     it 'calls the registrar' do
-      expect(registrar_class).to receive(:new).with(registrar_opts).and_call_original
-
       expect { described_class.perform_now(work, registrar: registrar.to_s, registrar_opts: registrar_opts) }
         .to change { work.doi }
         .to eq doi
+      expect(registrar_class).to have_received(:new).with(registrar_opts)
     end
   end
 end
