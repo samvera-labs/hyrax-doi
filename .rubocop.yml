@@ -11,5 +11,10 @@ AllCops:
 
 Metrics/BlockLength:
   Exclude:
+    - 'hyrax-doi.gemspec'
     - 'lib/hyrax/doi/spec/shared_specs/*'
     - 'spec/**/*'
+
+Layout/LineLength:
+  Exclude:
+    - 'spec/support/datacite_api_stubs.rb'

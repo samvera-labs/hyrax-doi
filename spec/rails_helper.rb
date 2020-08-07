@@ -10,6 +10,9 @@ require 'factory_bot_rails'
 require 'rspec/rails'
 require 'active_fedora/cleaner'
 require 'noid/rails/rspec'
+require 'webmock/rspec'
+WebMock.disable_net_connect!(allow_localhost: true, allow: 'chromedriver.storage.googleapis.com')
+
 # Add additional requires below this line. Rails is not loaded until this point!
 # For testing generators
 require 'ammeter/init'
