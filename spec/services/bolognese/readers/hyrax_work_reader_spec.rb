@@ -19,7 +19,7 @@ describe Bolognese::Readers::HyraxWorkReader do
       creator: [creator],
       publisher: [publisher],
       description: [description],
-      doi: doi
+      doi: [doi]
     }
   end
   let(:title) { 'Moomin' }

@@ -39,7 +39,7 @@ module Bolognese
       end
 
       def build_hyrax_work_doi
-        doi.sub('https://doi.org/', '')
+        [doi.sub('https://doi.org/', '')]
       end
     end
   end
