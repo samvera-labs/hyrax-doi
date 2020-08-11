@@ -11,6 +11,10 @@ module Hyrax
           inflect.acronym 'DOI'
         end
       end
+
+      config.after_initialize do
+        Hyrax::CurationConcern.actor_factory.use Hyrax::Actors::DOIActor
+      end
     end
   end
 end
