@@ -25,7 +25,7 @@ module Bolognese
           # "id" => meta.fetch('id', nil),
           "identifiers" => parse_attributes(meta.fetch('identifier', nil)).to_s.strip.presence,
           "types" => read_hyrax_work_types(meta),
-          "doi" => normalize_doi(meta.fetch('doi', nil)),
+          "doi" => normalize_doi(meta.fetch('doi', nil)&.first),
           # "url" => normalize_id(meta.fetch("URL", nil)),
           "titles" => read_hyrax_work_titles(meta),
           "creators" => read_hyrax_work_creators(meta),

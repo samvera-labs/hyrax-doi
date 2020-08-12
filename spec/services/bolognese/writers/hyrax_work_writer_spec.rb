@@ -19,7 +19,7 @@ describe Bolognese::Writers::HyraxWorkWriter do
       creator: [creator],
       publisher: [publisher],
       description: [description],
-      doi: doi
+      doi: [doi]
     }
   end
   let(:title) { 'Moomin' }
@@ -52,7 +52,7 @@ describe Bolognese::Writers::HyraxWorkWriter do
       expect(new_hyrax_work.creator).to eq [creator]
       expect(new_hyrax_work.publisher).to eq [publisher]
       expect(new_hyrax_work.description).to eq [description]
-      expect(new_hyrax_work.doi).to eq doi
+      expect(new_hyrax_work.doi).to eq [doi]
     end
   end
 end
