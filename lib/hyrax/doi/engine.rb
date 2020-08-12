@@ -15,6 +15,10 @@ module Hyrax
 
       config.after_initialize do
         Hyrax::CurationConcern.actor_factory.use Hyrax::Actors::DOIActor
+
+        require 'bolognese'
+        Bolognese::Metadata.prepend Bolognese::Readers::HyraxWorkReader
+        Bolognese::Metadata.prepend Bolognese::Writers::HyraxWorkWriter
       end
     end
   end

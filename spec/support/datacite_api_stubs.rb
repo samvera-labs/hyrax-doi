@@ -1,11 +1,15 @@
 # frozen_string_literal: true
 RSpec.configure do |config|
   config.before(datacite_api: true) do
-    # POST <API_BASE>/.*
-    # Post bad credentials
-    stub_request(:post, /#{Regexp.quote(Hyrax::DOI::DataciteClient::TEST_BASE_URL)}.*/)
-      .with(headers: { "Content-Type" => "application/json" })
+    # ANY <API_BASE>/.*
+    # With bad credentials
+    stub_request(:any, /#{Regexp.quote(Hyrax::DOI::DataciteClient::TEST_BASE_URL)}.*/)
       .to_return(status: 404, body: '{"errors":[{"status":"404","title":"The resource you are looking for doesn\'t exist."}]}')
+
+    # ANY <MDS_BASE>/.*
+    # With bad credentials
+    stub_request(:any, /#{Regexp.quote(Hyrax::DOI::DataciteClient::TEST_MDS_BASE_URL)}.*/)
+      .to_return(status: 401)
 
     # POST <API_BASE>/dois/
     # Create draft doi
@@ -76,6 +80,12 @@ RSpec.configure do |config|
       .with(headers: { 'Content-Type': 'application/xml;charset=UTF-8' },
             basic_auth: ['username', 'password'])
       .to_return(status: 403, body: 'Access is denied')
+
+    # DELETE <MDS_BASE>/metadata/<prefix>/draft-doi
+    # Update metadata for draft doi
+    stub_request(:delete, URI.join(Hyrax::DOI::DataciteClient::TEST_MDS_BASE_URL, "metadata/#{prefix}/draft-doi"))
+      .with(basic_auth: ['username', 'password'])
+      .to_return(status: 200, body: "OK")
 
     # GET <MDS_BASE>/doi/<prefix>/draft-doi
     # Get doi url

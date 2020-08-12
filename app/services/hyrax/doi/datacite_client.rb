@@ -42,6 +42,7 @@ module Hyrax
 
       # This will mint a new draft DOI if the passed doi parameter is blank
       # The passed datacite xml needs an identifier (just the prefix when minting new DOIs)
+      # Beware: This will convert registered DOIs into findable!
       def put_metadata(doi, metadata)
         doi = prefix if doi.blank?
         response = mds_connection.put("metadata/#{doi}", metadata, { 'Content-Type': 'application/xml;charset=UTF-8' })
@@ -49,6 +50,16 @@ module Hyrax
 
         /^OK \((?<found_or_created_doi>.*)\)$/ =~ response.body
         found_or_created_doi
+      end
+
+      # Beware: This will make findable DOIs become registered (by setting is_active to false)
+      # Otherwise this has no effect on the DOI's metadata (even when draft)
+      # Beware: Attempts to delete the metadata of an unknown DOI will actually create a blank draft DOI
+      def delete_metadata(doi)
+        response = mds_connection.delete("metadata/#{doi}")
+        raise Error.new('Failed deleting DOI metadata', response) unless response.status == 200
+
+        doi
       end
 
       def get_url(doi)

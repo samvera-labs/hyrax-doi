@@ -93,6 +93,21 @@ describe 'Hyrax::DOI::DataciteClient', :datacite_api do
     end
   end
 
+  describe '#delete_metadata' do
+    it 'returns the passed doi' do
+      expect(client.delete_metadata(draft_doi)).to eq draft_doi
+    end
+
+    context 'with incorrect credentials' do
+      let(:username) { 'bad-username' }
+      let(:password) { 'bad-password' }
+
+      it 'raises error with bad credentials' do
+        expect { client.delete_metadata(draft_doi) }.to raise_error(/Failed deleting DOI metadata/)
+      end
+    end
+  end
+
   describe '#get_url' do
     it 'returns url' do
       expect(URI.parse(client.get_url(draft_doi))).to be_a URI::HTTP

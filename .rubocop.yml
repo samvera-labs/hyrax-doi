@@ -18,3 +18,7 @@ Metrics/BlockLength:
 Layout/LineLength:
   Exclude:
     - 'spec/support/datacite_api_stubs.rb'
+
+Style/RedundantSelf:
+  Exclude:
+    - 'app/services/hyrax/doi/datacite_registrar.rb'
