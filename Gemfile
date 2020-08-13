@@ -12,7 +12,6 @@ gemspec
 # Git. Remember to move these dependencies to your gemspec before releasing
 # your gem to rubygems.org.
 
-gem 'bolognese', git: 'https://github.com/cjcolvar/bolognese.git', branch: 'cjcolvar-patch-1'
 # To use a debugger
 # gem 'byebug', group: [:development, :test]
 
