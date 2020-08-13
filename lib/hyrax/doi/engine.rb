@@ -9,6 +9,7 @@ module Hyrax
         # With this hyrax/doi/application_helper -> Hyrax::DOI::ApplicationHelper
         ActiveSupport::Inflector.inflections(:en) do |inflect|
           inflect.acronym 'DOI'
+          inflect.acronym 'DataCite'
         end
       end
 

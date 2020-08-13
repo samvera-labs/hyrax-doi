@@ -13,8 +13,7 @@ RSpec.describe Hyrax::Actors::DOIActor do
     end
   end
   let(:doi) { nil }
-  let(:doi_status_when_public) { nil }
-  let(:work) { model_class.create(title: ['Moomin'], doi: doi, doi_status_when_public: doi_status_when_public) }
+  let(:work) { model_class.create(title: ['Moomin'], doi: doi) }
 
   before do
     # Stubbed here for ActiveJob deserialization
@@ -39,7 +38,7 @@ RSpec.describe Hyrax::Actors::DOIActor do
     it 'enqueues a job' do
       expect { actor.create(env) }
         .to have_enqueued_job(Hyrax::DOI::RegisterDOIJob)
-        .with(work)
+        .with(work, registrar: nil, registrar_opts: {})
         .on_queue('doi_service')
     end
   end
@@ -59,8 +58,31 @@ RSpec.describe Hyrax::Actors::DOIActor do
     it 'enqueues a job' do
       expect { actor.create(env) }
         .to have_enqueued_job(Hyrax::DOI::RegisterDOIJob)
-        .with(work)
+        .with(work, registrar: nil, registrar_opts: {})
         .on_queue('doi_service')
+    end
+
+    context 'when the work implements registrar_name and registrar_opts' do
+      let(:model_class) do
+        Class.new(GenericWork) do
+          include Hyrax::DOI::DOIBehavior
+
+          def doi_registrar
+            :moomin
+          end
+
+          def doi_registrar_opts
+            { prefix: '10.9999' }
+          end
+        end
+      end
+
+      it 'enqueues a job' do
+        expect { actor.create(env) }
+          .to have_enqueued_job(Hyrax::DOI::RegisterDOIJob)
+          .with(work, registrar: 'moomin', registrar_opts: { prefix: '10.9999' })
+          .on_queue('doi_service')
+      end
     end
   end
 end

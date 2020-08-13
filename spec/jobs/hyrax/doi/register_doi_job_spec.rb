@@ -5,10 +5,6 @@ RSpec.describe Hyrax::DOI::RegisterDOIJob, type: :job do
   let(:model_class) do
     Class.new(GenericWork) do
       include Hyrax::DOI::DOIBehavior
-
-      def registrar_name
-        :moomin
-      end
     end
   end
   let(:work) { model_class.create(title: ['Moomin']) }

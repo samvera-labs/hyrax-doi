@@ -10,13 +10,20 @@ module Hyrax
         property :doi, predicate: ::RDF::Vocab::BIBO.doi, multiple: true do |index|
           index.as :stored_sortable
         end
-        property :doi_status_when_public, predicate: ::RDF::URI('http://samvera.org/ns/hyrax/doi#doi_status_when_public'), multiple: false do |index|
-          index.as :stored_sortable
-        end
 
         validate :validate_doi
-        # TODO: turn controlled vocab here into a frozen constant to allow for extensions and reuse
-        validates :doi_status_when_public, inclusion: { in: [:draft, :registered, :findable] }, allow_nil: true
+      end
+
+      # Override this method
+      # Specify a registrar to use with this class
+      def doi_registrar
+        nil
+      end
+
+      # Override this method
+      # Specify options for the registrar to use with this class
+      def doi_registrar_opts
+        {}
       end
 
       private
