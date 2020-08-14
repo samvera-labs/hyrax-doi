@@ -52,12 +52,12 @@ RSpec.shared_examples "a DOI-enabled model" do
   end
 
   describe 'methods' do
-    let(:methods) { [:doi_registrar, :doi_registrar_opts] }
+    it "doi_registrar is string or nil" do
+      expect(subject.doi_registrar).to be_a(String).or be_nil
+    end
 
-    it "has DOI methods" do
-      properties.each do |property|
-        expect(subject).to respond_to(property)
-      end
+    it 'doi_registrar_opts is a hash' do
+      expect(subject.doi_registrar_opts).to be_a Hash
     end
   end
 end

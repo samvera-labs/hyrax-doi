@@ -68,7 +68,7 @@ RSpec.describe Hyrax::Actors::DOIActor do
           include Hyrax::DOI::DOIBehavior
 
           def doi_registrar
-            :moomin
+            'moomin'
           end
 
           def doi_registrar_opts

@@ -9,13 +9,12 @@ module Hyrax
           index.as :stored_sortable
         end
 
-        # TODO: turn controlled vocab here into a frozen constant to allow for extensions and reuse
-        validates :doi_status_when_public, inclusion: { in: [:draft, :registered, :findable] }, allow_nil: true
+        validates :doi_status_when_public, inclusion: { in: Hyrax::DOI::DataCiteRegistrar::STATES }, allow_nil: true
       end
 
       # Override
       def doi_registrar
-        :datacite
+        'datacite'
       end
     end
   end

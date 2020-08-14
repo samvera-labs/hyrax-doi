@@ -16,7 +16,7 @@ RSpec.shared_examples "a DataCite DOI-enabled model" do
 
   describe 'validations' do
     it 'validates inclusion of doi_status_when_public' do
-      expect(subject).to validate_inclusion_of(:doi_status_when_public).in_array([nil, :draft, :registered, :findable]).allow_nil
+      expect(subject).to validate_inclusion_of(:doi_status_when_public).in_array([nil] + Hyrax::DOI::DataCiteRegistrar::STATES).allow_nil
     end
   end
 
@@ -28,7 +28,7 @@ RSpec.shared_examples "a DataCite DOI-enabled model" do
     end
 
     before do
-      work.doi_status_when_public = :draft
+      work.doi_status_when_public = 'draft'
     end
 
     it 'has solr fields' do

@@ -77,7 +77,7 @@ describe 'Hyrax::DOI::DataCiteRegistrar', :datacite_api do
 
     context 'when doi_status_when_public is draft' do
       before do
-        work.doi_status_when_public = :draft
+        work.doi_status_when_public = 'draft'
       end
 
       context 'doi is nil' do
@@ -97,7 +97,7 @@ describe 'Hyrax::DOI::DataCiteRegistrar', :datacite_api do
 
     context 'when doi_status_when_public is registered' do
       before do
-        work.doi_status_when_public = :registered
+        work.doi_status_when_public = 'registered'
         allow(registrar.send(:client)).to receive(:register_url).and_call_original
       end
 
@@ -120,7 +120,7 @@ describe 'Hyrax::DOI::DataCiteRegistrar', :datacite_api do
 
     context 'when doi_status_when_public is findable' do
       before do
-        work.doi_status_when_public = :findable
+        work.doi_status_when_public = 'findable'
         allow(registrar.send(:client)).to receive(:register_url).and_call_original
         allow(registrar.send(:client)).to receive(:delete_metadata).and_call_original
       end

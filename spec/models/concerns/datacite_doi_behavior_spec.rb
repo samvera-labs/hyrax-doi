@@ -21,7 +21,7 @@ describe 'Hyrax::DOI::DataCiteDOIBehavior' do
 
   describe '#doi_registrar' do
     it 'returns :datacite' do
-      expect(work.doi_registrar).to eq :datacite
+      expect(work.doi_registrar).to eq 'datacite'
     end
   end
 end
