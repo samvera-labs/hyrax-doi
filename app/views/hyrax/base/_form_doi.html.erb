@@ -1,0 +1,28 @@
+<div>
+  <%# TODO: Make this appear as singular? %>
+  <%= render_edit_field_partial('doi', f: f) %>
+
+  <fieldset class="set-doi-status-when-public">
+    <legend>
+      DOI status when work is public
+    </legend>
+    <div class="form-group" style="margin-left: 20px">
+      <label class="radio">
+        <%= f.radio_button :doi_status_when_public, '' %>
+        Do not mint
+      </label>
+      <label class="radio">
+        <%= f.radio_button :doi_status_when_public, 'draft' %>
+        Draft
+      </label>
+      <label class="radio">
+        <%= f.radio_button :doi_status_when_public, 'registered' %>
+        Registered
+      </label>
+      <label class="radio">
+        <%= f.radio_button :doi_status_when_public, 'findable' %>
+        Findable
+      </label>
+    </div>
+  </fieldset>
+</div>

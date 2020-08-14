@@ -49,7 +49,6 @@ To run a development server locally outside of docker do the following with each
 ```
 solr_wrapper -v --config .solr_wrapper.yml
 fcrepo_wrapper -v --config .fcrepo_wrapper.yml
-bundle exec sidekiq -r spec/internal_test_hyrax
 bundle exec rails server -b 0.0.0.0
 ```
 
@@ -61,8 +60,6 @@ To run the tests locally outside of docker do the following with each line in it
 ```
 solr_wrapper -v --config .solr_wrapper_test.yml
 fcrepo_wrapper -v --config .fcrepo_wrapper_test.yml
-bundle exec sidekiq -r spec/internal_test_hyrax
-RAILS_ENV=test bundle exec rails server -b 0.0.0.0
 bundle exec rspec
 ```
 You shouldn't need to run anything from inside `spec/internal_test_hyrax` unless explicitly told to do so.
