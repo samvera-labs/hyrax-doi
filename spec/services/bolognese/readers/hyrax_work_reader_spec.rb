@@ -38,6 +38,23 @@ describe Bolognese::Readers::HyraxWorkReader do
     expect(metadata_class.new(input: input, from: 'hyrax_work')).to be_a Bolognese::Metadata
   end
 
+  context 'publisher' do
+    let(:metadata) { metadata_class.new(input: input, from: 'hyrax_work') }
+    let(:attributes) do
+      {
+        title: [title],
+        creator: [creator],
+        publisher: [],
+        description: [description],
+        doi: [doi]
+      }
+    end
+
+    it 'gives a default value of unavailable' do
+      expect(metadata.publisher).to eq ':unav'
+    end
+  end
+
   context 'crosswalks' do
     let(:metadata) { metadata_class.new(input: input, from: 'hyrax_work') }
 

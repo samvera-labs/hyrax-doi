@@ -31,7 +31,7 @@ module Bolognese
           "creators" => read_hyrax_work_creators(meta),
           # "contributors" => contributors,
           # "container" => container,
-          "publisher" => parse_attributes(meta.fetch("publisher", nil)).to_s.strip.presence,
+          "publisher" => read_publisher(meta),
           # "related_identifiers" => related_identifiers,
           # "dates" => dates,
           "publication_year" => read_hyrax_work_publication_year(meta),
@@ -84,6 +84,11 @@ module Bolognese
       def read_hyrax_work_publication_year(_meta)
         # FIXME: pull this from the work's metadata
         Time.zone.today.year
+      end
+
+      def read_publisher(meta)
+        # Fallback to ':unav' since this is a required field for datacite
+        parse_attributes(meta.fetch("publisher")).to_s.strip.presence || ":unav"
       end
     end
   end
