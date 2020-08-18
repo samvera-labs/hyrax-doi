@@ -40,6 +40,29 @@ module Hyrax
           "  include Hyrax::DOI::WorkFormHelper"
         end
       end
+
+      def inject_into_solr_document
+        # rubocop:disable Style/RedundantSelf
+        # For some reason I had to use self.destination_root here to get all contexts to work (calling from hyrax app, calling from this engine to test app, rspec tests)
+        self.destination_root = Rails.root if self.destination_root.blank? || self.destination_root == Hyrax::DOI::Engine.root.to_s
+        solr_document_file = File.join(self.destination_root, 'app', 'models', "solr_document.rb")
+        # rubocop:enable Style/RedundantSelf
+
+        insert_into_file solr_document_file, after: 'include Hyrax::SolrDocumentBehavior' do
+          "\n" \
+          "  # Add attributes for DOIs for hyrax-doi plugin.\n" \
+          "  include Hyrax::DOI::SolrDocument::DOIBehavior"
+        end
+
+        return unless options[:datacite]
+
+        # DataCite specific behavior
+        insert_into_file solr_document_file, after: 'Hyrax::DOI::SolrDocument::DOIBehavior' do
+          "\n" \
+          "  # Add attributes for DataCite DOIs for hyrax-doi plugin.\n" \
+          "  include Hyrax::DOI::SolrDocument::DataCiteDOIBehavior"
+        end
+      end
     end
   end
 end
