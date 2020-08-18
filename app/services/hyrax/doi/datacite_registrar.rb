@@ -2,6 +2,8 @@
 module Hyrax
   module DOI
     class DataCiteRegistrar < Hyrax::Identifier::Registrar
+      STATES = %w[draft registered findable].freeze
+
       # FIXME: make this configurable in a different way so tenants can have different configs in Hyku
       class_attribute :prefix, :username, :password, :mode
 
@@ -36,7 +38,7 @@ module Hyrax
       def register?(work)
         doi_enabled_work_type?(work) &&
           doi_minting_enabled? &&
-          work.doi_status_when_public.in?([:draft, :registered, :findable])
+          work.doi_status_when_public.in?(Hyrax::DOI::DataCiteRegistrar::STATES)
         # TODO: add more checks here to catch cases when updating is unnecessary
         # TODO: check that required metadata is present if set to registered or findable
       end
@@ -66,12 +68,12 @@ module Hyrax
         client.put_metadata(doi, work_to_datacite_xml(work))
 
         # 2. Register a url with the DOI if it should be registered or findable
-        client.register_url(doi, work_url(work)) if work.doi_status_when_public.in?([:registered, :findable])
+        client.register_url(doi, work_url(work)) if work.doi_status_when_public.in?(['registered', 'findable'])
 
         # 3. Always call delete metadata unless findable and public
         # Do this because it has no real effect on the metadata and
         # the put_metadata or register_url above may have made it findable.
-        client.delete_metadata(doi) unless work.doi_status_when_public == :findable && public?(work)
+        client.delete_metadata(doi) unless work.doi_status_when_public == 'findable' && public?(work)
       end
 
       # NOTE: default_url_options[:host] must be set for this method to work
