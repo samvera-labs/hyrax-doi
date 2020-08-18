@@ -22,3 +22,7 @@ Layout/LineLength:
 Style/RedundantSelf:
   Exclude:
     - 'app/services/hyrax/doi/datacite_registrar.rb'
+
+Naming/FileName:
+  Exclude:
+    - 'lib/generators/hyrax/doi/templates/config/initializers/hyrax-doi.rb'
