@@ -68,6 +68,30 @@ module Hyrax
           "    include Hyrax::DOI::DataCiteDOIFormBehavior"
         end
       end
+
+      desc "Add DOI support to given work type presenter"
+      def inject_into_presenter
+        # rubocop:disable Style/RedundantSelf
+        # For some reason I had to use self.destination_root here to get all contexts to work (calling from hyrax app, calling from this engine to test app, rspec tests)
+        self.destination_root = Rails.root if self.destination_root.blank? || self.destination_root == Hyrax::DOI::Engine.root.to_s
+        presenter_file = File.join(self.destination_root, 'app', 'presenters', 'hyrax', *class_path, "#{file_name}_presenter.rb")
+        # rubocop:enable Style/RedundantSelf
+
+        insert_into_file presenter_file, after: 'Hyrax::WorkShowPresenter' do
+          "\n" \
+          "    # Adds behaviors for hyrax-doi plugin.\n" \
+          "    include Hyrax::DOI::DOIPresenterBehavior"
+        end
+
+        return unless options[:datacite]
+
+        # DataCite specific behavior
+        insert_into_file presenter_file, after: 'include Hyrax::DOI::DOIPresenterBehavior' do
+          "\n" \
+          "    # Adds behaviors for DataCite DOIs via hyrax-doi plugin.\n" \
+          "    include Hyrax::DOI::DataCiteDOIPresenterBehavior"
+        end
+      end
     end
   end
 end

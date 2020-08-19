@@ -17,11 +17,15 @@ describe Hyrax::DOI::AddToWorkTypeGenerator, type: :generator do
     # Helper
     FileUtils.mkdir_p destination_root.join(File.dirname(form_path))
     FileUtils.cp Rails.root.join(form_path), destination_root.join(form_path)
+    # Presenter
+    FileUtils.mkdir_p destination_root.join(File.dirname(presenter_path))
+    FileUtils.cp Rails.root.join(presenter_path), destination_root.join(presenter_path)
   end
 
   let(:klass) { 'GenericWork' }
   let(:model_path) { File.join('app', 'models', "#{klass.underscore}.rb") }
   let(:form_path) { File.join('app', 'forms', 'hyrax', "#{klass.underscore}_form.rb") }
+  let(:presenter_path) { File.join('app', 'presenters', 'hyrax', "#{klass.underscore}_presenter.rb") }
 
   describe 'inject_into_model' do
     it 'adds behavior module to model class' do
@@ -86,6 +90,40 @@ describe Hyrax::DOI::AddToWorkTypeGenerator, type: :generator do
           run_generator [klass, "--datacite"]
           expect(file(form_path)).to contain('include Hyrax::DOI::DOIFormBehavior')
           expect(file(form_path)).to contain('include Hyrax::DOI::DataCiteDOIFormBehavior')
+        end
+      end
+    end
+  end
+
+  describe 'inject_into_presenter' do
+    it 'adds behavior module to presenter class' do
+      run_generator [klass]
+      expect(file(presenter_path)).to contain('include Hyrax::DOI::DOIPresenterBehavior')
+    end
+
+    context 'with a namespaced presenter class' do
+      let(:klass) { 'NamespacedWorks::NestedWork' }
+
+      it 'adds behavior module to presenter class' do
+        run_generator [klass]
+        expect(file(presenter_path)).to contain('include Hyrax::DOI::DOIPresenterBehavior')
+      end
+    end
+
+    context 'datacite enabled' do
+      it 'adds behavior module to presenter class' do
+        run_generator [klass, "--datacite"]
+        expect(file(presenter_path)).to contain('include Hyrax::DOI::DOIPresenterBehavior')
+        expect(file(presenter_path)).to contain('include Hyrax::DOI::DataCiteDOIPresenterBehavior')
+      end
+
+      context 'with a namespaced presenter class' do
+        let(:klass) { 'NamespacedWorks::NestedWork' }
+
+        it 'adds behavior module to presenter class' do
+          run_generator [klass, "--datacite"]
+          expect(file(presenter_path)).to contain('include Hyrax::DOI::DOIPresenterBehavior')
+          expect(file(presenter_path)).to contain('include Hyrax::DOI::DataCiteDOIPresenterBehavior')
         end
       end
     end
