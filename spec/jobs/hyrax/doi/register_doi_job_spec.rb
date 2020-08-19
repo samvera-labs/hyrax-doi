@@ -21,7 +21,7 @@ RSpec.describe Hyrax::DOI::RegisterDOIJob, type: :job do
       expect { described_class.perform_later(work) }
         .to enqueue_job(described_class)
         .with(work)
-        .on_queue('doi_service')
+        .on_queue(Hyrax.config.ingest_queue_name)
     end
   end
 

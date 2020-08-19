@@ -2,7 +2,7 @@
 module Hyrax
   module DOI
     class RegisterDOIJob < ApplicationJob
-      queue_as :doi_service
+      queue_as Hyrax.config.ingest_queue_name
 
       ##
       # @param model [ActiveFedora::Base]
