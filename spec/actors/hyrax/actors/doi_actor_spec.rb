@@ -39,7 +39,7 @@ RSpec.describe Hyrax::Actors::DOIActor do
       expect { actor.create(env) }
         .to have_enqueued_job(Hyrax::DOI::RegisterDOIJob)
         .with(work, registrar: nil, registrar_opts: {})
-        .on_queue('doi_service')
+        .on_queue(Hyrax.config.ingest_queue_name)
     end
   end
 
@@ -59,7 +59,7 @@ RSpec.describe Hyrax::Actors::DOIActor do
       expect { actor.create(env) }
         .to have_enqueued_job(Hyrax::DOI::RegisterDOIJob)
         .with(work, registrar: nil, registrar_opts: {})
-        .on_queue('doi_service')
+        .on_queue(Hyrax.config.ingest_queue_name)
     end
 
     context 'when the work implements registrar_name and registrar_opts' do
@@ -81,7 +81,7 @@ RSpec.describe Hyrax::Actors::DOIActor do
         expect { actor.create(env) }
           .to have_enqueued_job(Hyrax::DOI::RegisterDOIJob)
           .with(work, registrar: 'moomin', registrar_opts: { prefix: '10.9999' })
-          .on_queue('doi_service')
+          .on_queue(Hyrax.config.ingest_queue_name)
       end
     end
   end
