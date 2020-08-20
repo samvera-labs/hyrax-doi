@@ -62,23 +62,11 @@ module Bolognese
       end
 
       def read_hyrax_work_titles(meta)
-        Array.wrap(meta.dig("title")).map do |r|
-          if r.blank?
-            nil
-          elsif r.is_a?(String)
-            { "title" => sanitize(r) }
-          end
-        end.compact
+        Array.wrap(meta.fetch("title", nil)).select(&:present?).collect { |r| { "title" => sanitize(r) } }
       end
 
       def read_hyrax_work_descriptions(meta)
-        Array.wrap(meta.dig("description")).map do |r|
-          if r.blank?
-            nil
-          elsif r.is_a?(String)
-            { "description" => sanitize(r) }
-          end
-        end.compact
+        Array.wrap(meta.fetch("description", nil)).select(&:present?).collect { |r| { "description" => sanitize(r) } }
       end
 
       def read_hyrax_work_publication_year(_meta)

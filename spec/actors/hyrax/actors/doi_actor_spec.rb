@@ -50,13 +50,13 @@ RSpec.describe Hyrax::Actors::DOIActor do
       let(:work) { FactoryBot.create(:work) }
 
       it 'does not enqueue a job' do
-        expect { actor.create(env) }
+        expect { actor.update(env) }
           .not_to have_enqueued_job(Hyrax::DOI::RegisterDOIJob)
       end
     end
 
     it 'enqueues a job' do
-      expect { actor.create(env) }
+      expect { actor.update(env) }
         .to have_enqueued_job(Hyrax::DOI::RegisterDOIJob)
         .with(work, registrar: nil, registrar_opts: {})
         .on_queue(Hyrax.config.ingest_queue_name)
@@ -78,7 +78,7 @@ RSpec.describe Hyrax::Actors::DOIActor do
       end
 
       it 'enqueues a job' do
-        expect { actor.create(env) }
+        expect { actor.update(env) }
           .to have_enqueued_job(Hyrax::DOI::RegisterDOIJob)
           .with(work, registrar: 'moomin', registrar_opts: { prefix: '10.9999' })
           .on_queue(Hyrax.config.ingest_queue_name)
