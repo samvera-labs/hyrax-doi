@@ -19,6 +19,9 @@ module Hyrax
         require 'bolognese'
         Bolognese::Metadata.prepend Bolognese::Readers::HyraxWorkReader
         Bolognese::Metadata.prepend Bolognese::Writers::HyraxWorkWriter
+
+        # Prepend our views so they have precedence
+        ActionController::Base.prepend_view_path(paths['app/views'].existent)
       end
     end
   end

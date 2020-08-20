@@ -36,8 +36,8 @@ module Hyrax
 
         insert_into_file helper_file, after: 'include Hyrax::HyraxHelperBehavior' do
           "\n" \
-          "  # Overrides #form_tabs_for for DOI tab provided by hyrax-doi plugin.\n" \
-          "  include Hyrax::DOI::WorkFormHelper"
+          "  # Helpers provided by hyrax-doi plugin.\n" \
+          "  include Hyrax::DOI::HelperBehavior"
         end
       end
 
