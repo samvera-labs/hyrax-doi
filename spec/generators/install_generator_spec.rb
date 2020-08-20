@@ -33,7 +33,7 @@ describe Hyrax::DOI::InstallGenerator, type: :generator do
   describe 'inject_into_helper' do
     it 'adds behavior module to helper' do
       run_generator
-      expect(file(helper_path)).to contain('include Hyrax::DOI::WorkFormHelper')
+      expect(file(helper_path)).to contain('include Hyrax::DOI::HelperBehavior')
     end
   end
 
