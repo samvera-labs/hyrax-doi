@@ -5,9 +5,7 @@ RSpec.shared_examples "a DOI-enabled presenter" do
   let(:presenter) { presenter_class.new(solr_document, nil, nil) }
   let(:solr_document) { instance_double(solr_document_class) }
 
-  it { is_expected.to delegate_method(:doi).to(:solr_document) }
-
-  describe 'doi_link' do
+  describe 'doi' do
     let(:doi) { '10.1234/abc' }
 
     before do
@@ -15,7 +13,7 @@ RSpec.shared_examples "a DOI-enabled presenter" do
     end
 
     it 'returns a doi url' do
-      expect(subject.doi_link).to eq "https://doi.org/#{subject.doi}"
+      expect(subject.doi).to eq "https://doi.org/#{subject.solr_document.doi}"
     end
   end
 end
