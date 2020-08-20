@@ -11,7 +11,7 @@ module Bolognese
       def hyrax_work
         attributes = {
           'doi' => build_hyrax_work_doi,
-          'identifier' => identifiers,
+          'identifier' => identifiers&.pluck("identifier"),
           'title' => titles&.pluck("title"),
           # FIXME: This may not roundtrip since datacite normalizes the creator name
           'creator' => creators&.pluck("name"),
@@ -26,20 +26,21 @@ module Bolognese
       private
 
       def determine_hyrax_work_class
-        types["hyrax"]&.safe_constantize ||
-          types["resource_type"]&.safe_constantize ||
-          build_hyrax_work_class
+        # Need to check that the class `responds_to? :doi`?
+        types["hyrax"]&.safe_constantize || build_hyrax_work_class
       end
 
       def build_hyrax_work_class
         Class.new(ActiveFedora::Base).tap do |c|
           c.include ::Hyrax::WorkBehavior
+          c.include ::Hyrax::DOI::DOIBehavior
+          # Put BasicMetadata include last since it finalizes the metadata schema
           c.include ::Hyrax::BasicMetadata
         end
       end
 
       def build_hyrax_work_doi
-        [doi.sub('https://doi.org/', '')]
+        Array(doi&.sub('https://doi.org/', ''))
       end
     end
   end

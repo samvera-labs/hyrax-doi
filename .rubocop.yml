@@ -26,3 +26,6 @@ Style/RedundantSelf:
 Naming/FileName:
   Exclude:
     - 'lib/generators/hyrax/doi/templates/config/initializers/hyrax-doi.rb'
+
+RSpec/ExampleLength:
+  Max: 10
