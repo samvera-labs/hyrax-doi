@@ -15,18 +15,25 @@ describe Bolognese::Writers::HyraxWorkWriter do
   let(:work) { model_class.create(attributes) }
   let(:attributes) do
     {
+      identifier: [identifier],
+      doi: [doi],
       title: [title],
       creator: [creator],
+      contributor: [contributor],
       publisher: [publisher],
       description: [description],
-      doi: [doi]
+      keyword: [keyword]
     }
   end
+  let(:identifier) { '123456' }
+  let(:doi) { '10.18130/v3-k4an-w022' }
   let(:title) { 'Moomin' }
   let(:creator) { 'Tove Jansson' }
+  let(:contributor) { 'Elizabeth Portch' }
   let(:publisher) { 'Schildts' }
   let(:description) { 'Swedish comic about the adventures of the residents of Moominvalley.' }
-  let(:doi) { '10.18130/v3-k4an-w022' }
+  let(:keyword) { 'Lighthouses' }
+
   let(:metadata_class) do
     Class.new(Bolognese::Metadata) do
       include Bolognese::Readers::HyraxWorkReader
@@ -48,10 +55,13 @@ describe Bolognese::Writers::HyraxWorkWriter do
     end
 
     it 'correctly populates the work' do
+      expect(new_hyrax_work.identifier).to eq [identifier]
       expect(new_hyrax_work.title).to eq [title]
       expect(new_hyrax_work.creator).to eq [creator]
+      expect(new_hyrax_work.contributor).to eq [contributor]
       expect(new_hyrax_work.publisher).to eq [publisher]
       expect(new_hyrax_work.description).to eq [description]
+      expect(new_hyrax_work.keyword).to eq [keyword]
       expect(new_hyrax_work.doi).to eq [doi]
     end
   end
@@ -67,13 +77,16 @@ describe Bolognese::Writers::HyraxWorkWriter do
     end
 
     it 'correctly populates the work' do
+      expect(new_hyrax_work.identifier).to eq ["MS-49-3632-5083"]
       expect(new_hyrax_work.title).to eq ["Eating your own Dog Food"]
       expect(new_hyrax_work.creator).to eq ["Fenner, Martin"]
+      expect(new_hyrax_work.contributor).to eq []
       expect(new_hyrax_work.publisher).to eq ["DataCite"]
       expect(new_hyrax_work.description).to eq ["Eating your own dog food is a slang term to describe that an organization "\
                                                 "should itself use the products and services it provides. For DataCite this "\
                                                 "means that we should use DOIs with appropriate metadata and strategies for "\
                                                 "long-term preservation for..."]
+      expect(new_hyrax_work.keyword).to eq ["metadata", "datacite", "doi"]
       expect(new_hyrax_work.doi).to eq ["10.5438/4k3m-nyvg"]
     end
   end

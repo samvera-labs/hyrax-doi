@@ -10,13 +10,16 @@ module Bolognese
     module HyraxWorkWriter
       def hyrax_work
         attributes = {
+          'identifier' => Array(identifiers).select { |id| id["identifierType"] != "DOI" }.pluck("identifier"),
           'doi' => build_hyrax_work_doi,
-          'identifier' => identifiers&.pluck("identifier"),
           'title' => titles&.pluck("title"),
           # FIXME: This may not roundtrip since datacite normalizes the creator name
           'creator' => creators&.pluck("name"),
+          'contributor' => contributors&.pluck("name"),
           'publisher' => Array(publisher),
-          'description' => descriptions&.pluck("description")
+          'date_created' => Array(publication_year),
+          'description' => descriptions&.pluck("description"),
+          'keyword' => subjects&.pluck("subject")
         }
         hyrax_work_class = determine_hyrax_work_class
         # Only pass attributes that the work type knows about

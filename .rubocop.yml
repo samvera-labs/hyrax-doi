@@ -29,3 +29,9 @@ Naming/FileName:
 
 RSpec/ExampleLength:
   Max: 10
+  Exclude:
+    - 'spec/services/bolognese/writers/hyrax_work_writer_spec.rb'
+
+RSpec/AnyInstance:
+  Exclude:
+    - 'spec/controllers/hyrax_doi_controller_spec.rb'
