@@ -162,4 +162,10 @@ describe 'Hyrax::DOI::DataCiteRegistrar', :datacite_api do
       end
     end
   end
+
+  describe 'mint_draft_doi' do
+    it 'returns a draft doi' do
+      expect(registrar.mint_draft_doi).to eq draft_doi
+    end
+  end
 end
