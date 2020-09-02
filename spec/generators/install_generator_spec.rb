@@ -9,6 +9,7 @@ describe Hyrax::DOI::InstallGenerator, type: :generator do
 
   let(:helper_path) { File.join('app', 'helpers', 'hyrax_helper.rb') }
   let(:solr_document_path) { File.join('app', 'models', 'solr_document.rb') }
+  let(:routes_path) { File.join('config', 'routes.rb') }
 
   before do
     # This will wipe the destination root dir
@@ -21,6 +22,10 @@ describe Hyrax::DOI::InstallGenerator, type: :generator do
     # Setup solr_document file in generator testing destination root dir
     FileUtils.mkdir_p destination_root.join(File.dirname(solr_document_path))
     FileUtils.cp Rails.root.join(solr_document_path), destination_root.join(solr_document_path)
+
+    # Setup solr_document file in generator testing destination root dir
+    FileUtils.mkdir_p destination_root.join(File.dirname(routes_path))
+    FileUtils.cp Rails.root.join(routes_path), destination_root.join(routes_path)
   end
 
   describe 'generate_config' do
@@ -48,6 +53,13 @@ describe Hyrax::DOI::InstallGenerator, type: :generator do
         run_generator ["--datacite"]
         expect(file(solr_document_path)).to contain('include Hyrax::DOI::SolrDocument::DataCiteDOIBehavior')
       end
+    end
+  end
+
+  describe 'inject_engine_routes' do
+    it 'mounts engine' do
+      run_generator
+      expect(file(routes_path)).to contain("mount Hyrax::DOI::Engine, at: '/doi'")
     end
   end
 end

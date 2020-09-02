@@ -10,6 +10,8 @@ require 'factory_bot_rails'
 require 'rspec/rails'
 require 'active_fedora/cleaner'
 require 'noid/rails/rspec'
+require 'devise'
+require 'devise/version'
 require 'webmock/rspec'
 WebMock.disable_net_connect!(allow_localhost: true, allow: 'chromedriver.storage.googleapis.com')
 
@@ -97,4 +99,10 @@ RSpec.configure do |config|
   include Noid::Rails::RSpec
   config.before(:suite) { disable_production_minter! }
   config.after(:suite)  { enable_production_minter! }
+
+  if Devise::VERSION >= '4.2'
+    config.include Devise::Test::ControllerHelpers, type: :controller
+  else
+    config.include Devise::TestHelpers, type: :controller
+  end
 end
