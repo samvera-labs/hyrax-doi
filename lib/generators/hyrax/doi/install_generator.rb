@@ -66,7 +66,7 @@ module Hyrax
 
       def mount_engine_routes
         inject_into_file 'config/routes.rb', after: /mount Hyrax::Engine, at: '\S*'\n/ do
-          "  mount Hyrax::DOI::Engine, at: '/doi'\n"
+          "  mount Hyrax::DOI::Engine, at: '/doi', as: 'hyrax_doi'\n"
         end
       end
     end

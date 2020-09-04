@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 require 'rails_helper'
-require 'support/datacite_api_stubs'
 
 describe 'Hyrax::DOI::DataCiteRegistrar', :datacite_api do
   let(:registrar) { Hyrax::DOI::DataCiteRegistrar.new }

@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 require 'rails_helper'
-require 'support/datacite_api_stubs'
 
 RSpec.describe Hyrax::DOI::HyraxDOIController, :datacite_api, type: :controller do
   routes { Hyrax::DOI::Engine.routes }
@@ -10,7 +9,7 @@ RSpec.describe Hyrax::DOI::HyraxDOIController, :datacite_api, type: :controller 
   before do
     Hyrax.config.identifier_registrars = { datacite: Hyrax::DOI::DataCiteRegistrar }
     Hyrax::DOI::DataCiteRegistrar.mode = :test
-    Hyrax::DOI::DataCiteRegistrar.prefix = '10.1234'
+    Hyrax::DOI::DataCiteRegistrar.prefix = prefix
     Hyrax::DOI::DataCiteRegistrar.username = 'username'
     Hyrax::DOI::DataCiteRegistrar.password = 'password'
   end

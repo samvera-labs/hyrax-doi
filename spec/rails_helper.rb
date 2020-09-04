@@ -8,6 +8,11 @@ require File.expand_path('internal_test_hyrax/config/environment', __dir__)
 abort("The Rails environment is running in production mode!") if Rails.env.production?
 require 'factory_bot_rails'
 require 'rspec/rails'
+require 'capybara/rails'
+require 'capybara/rspec'
+require 'selenium-webdriver'
+require 'webdrivers'
+require 'webdrivers/chromedriver'
 require 'active_fedora/cleaner'
 require 'noid/rails/rspec'
 require 'devise'
@@ -21,6 +26,27 @@ Rails.application.routes.default_url_options[:host] = 'www.example.com'
 # Add additional requires below this line. Rails is not loaded until this point!
 # For testing generators
 require 'ammeter/init'
+
+# Capybara config copied over from Hyrax
+Capybara.register_driver :selenium_chrome_headless_sandboxless do |app|
+  browser_options = ::Selenium::WebDriver::Chrome::Options.new
+  browser_options.args << '--headless'
+  browser_options.args << '--disable-gpu'
+  browser_options.args << '--no-sandbox'
+  # browser_options.args << '--disable-dev-shm-usage'
+  # browser_options.args << '--disable-extensions'
+  # client = Selenium::WebDriver::Remote::Http::Default.new
+  # client.timeout = 90 # instead of the default 60
+  # Capybara::Selenium::Driver.new(app, browser: :chrome, options: browser_options, http_client: client)
+  Capybara::Selenium::Driver.new(app, browser: :chrome, options: browser_options)
+end
+
+Capybara.default_driver = :rack_test # This is a faster driver
+Capybara.javascript_driver = :selenium_chrome_headless_sandboxless # This is slower
+Capybara.default_max_wait_time = 10 # We may have a slow application, let's give it some time.
+
+# FIXME: Pin to older version of chromedriver to avoid issue with clicking non-visible elements
+Webdrivers::Chromedriver.required_version = '72.0.3626.69'
 
 # Requires supporting ruby files with custom matchers and macros, etc, in
 # spec/support/ and its subdirectories. Files matching `spec/**/*_spec.rb` are
@@ -36,6 +62,8 @@ require 'ammeter/init'
 # require only the support files necessary.
 #
 # Dir[Rails.root.join('spec', 'support', '**', '*.rb')].sort.each { |f| require f }
+# Note: engine, not Rails.root context.
+Dir[File.join(File.dirname(__FILE__), "support/**/*.rb")].each { |f| require f }
 
 require 'shoulda-matchers'
 Shoulda::Matchers.configure do |config|
@@ -104,5 +132,29 @@ RSpec.configure do |config|
     config.include Devise::Test::ControllerHelpers, type: :controller
   else
     config.include Devise::TestHelpers, type: :controller
+  end
+
+  # Configuration for feature tests
+  config.include Features::SessionHelpers, type: :feature
+  config.include Warden::Test::Helpers, type: :feature
+  config.after(:each, type: :feature) do
+    Warden.test_reset!
+    Capybara.reset_sessions!
+    page.driver.reset!
+  end
+  config.before(:all, type: :feature) do
+    # Assets take a long time to compile. This causes two problems:
+    # 1) the profile will show the first feature test taking much longer than it
+    #    normally would.
+    # 2) The first feature test will trigger rack-timeout
+    #
+    # Precompile the assets to prevent these issues.
+    visit "/assets/application.css"
+    visit "/assets/application.js"
+  end
+  config.around(:all, type: :feature) do |example|
+    Rails.application.routes.send(:eval_block, proc { mount Hyrax::DOI::Engine, at: '/doi', as: "hyrax_doi" })
+    example.run
+    Rails.application.reload_routes!
   end
 end
