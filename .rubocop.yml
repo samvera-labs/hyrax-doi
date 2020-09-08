@@ -29,3 +29,16 @@ Naming/FileName:
 
 RSpec/ExampleLength:
   Max: 10
+  Exclude:
+    - 'spec/features/**/*'
+    - 'spec/services/bolognese/writers/hyrax_work_writer_spec.rb'
+
+RSpec/AnyInstance:
+  Exclude:
+    - 'spec/controllers/hyrax_doi_controller_spec.rb'
+    - 'spec/features/autofill_spec.rb'
+    - 'spec/features/create_draft_doi_spec.rb'
+
+RSpec/DescribeClass:
+  Exclude:
+    - 'spec/features/**/*'

@@ -1,9 +1,8 @@
 # frozen_string_literal: true
 require 'rails_helper'
-require 'support/datacite_api_stubs'
 
-describe 'Hyrax::DOI::DataciteClient', :datacite_api do
-  let(:client) { Hyrax::DOI::DataciteClient.new(username: username, password: password, prefix: prefix, mode: :test) }
+describe 'Hyrax::DOI::DataCiteClient', :datacite_api do
+  let(:client) { Hyrax::DOI::DataCiteClient.new(username: username, password: password, prefix: prefix, mode: :test) }
   let(:username) { 'username' }
   let(:password) { 'password' }
   let(:prefix) { '10.1234' }

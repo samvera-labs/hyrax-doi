@@ -23,22 +23,22 @@ module Bolognese
 
         {
           # "id" => meta.fetch('id', nil),
-          "identifiers" => parse_attributes(meta.fetch('identifier', nil)).to_s.strip.presence,
+          "identifiers" => read_hyrax_work_identifiers(meta),
           "types" => read_hyrax_work_types(meta),
           "doi" => normalize_doi(meta.fetch('doi', nil)&.first),
           # "url" => normalize_id(meta.fetch("URL", nil)),
           "titles" => read_hyrax_work_titles(meta),
           "creators" => read_hyrax_work_creators(meta),
-          # "contributors" => contributors,
+          "contributors" => read_hyrax_work_contributors(meta),
           # "container" => container,
-          "publisher" => read_publisher(meta),
+          "publisher" => read_hyrax_work_publisher(meta),
           # "related_identifiers" => related_identifiers,
           # "dates" => dates,
           "publication_year" => read_hyrax_work_publication_year(meta),
-          "descriptions" => read_hyrax_work_descriptions(meta)
+          "descriptions" => read_hyrax_work_descriptions(meta),
           # "rights_list" => rights_list,
           # "version_info" => meta.fetch("version", nil),
-          # "subjects" => subjects
+          "subjects" => read_hyrax_work_subjects(meta)
           # "state" => state
         }.merge(read_options)
       end
@@ -61,6 +61,10 @@ module Bolognese
         get_authors(Array.wrap(meta.fetch("creator", nil))) if meta.fetch("creator", nil).present?
       end
 
+      def read_hyrax_work_contributors(meta)
+        get_authors(Array.wrap(meta.fetch("contributor", nil))) if meta.fetch("contributor", nil).present?
+      end
+
       def read_hyrax_work_titles(meta)
         Array.wrap(meta.fetch("title", nil)).select(&:present?).collect { |r| { "title" => sanitize(r) } }
       end
@@ -69,12 +73,24 @@ module Bolognese
         Array.wrap(meta.fetch("description", nil)).select(&:present?).collect { |r| { "description" => sanitize(r) } }
       end
 
-      def read_hyrax_work_publication_year(_meta)
-        # FIXME: pull this from the work's metadata
+      def read_hyrax_work_publication_year(meta)
+        # FIXME: better parsing of free text dates...maybe using EDTF?
+        date = meta.fetch("date_created", nil)&.first
+        date ||= meta.fetch("date_uploaded", nil)
+        Date.parse(date.to_s).year
+      rescue Date::Error
         Time.zone.today.year
       end
 
-      def read_publisher(meta)
+      def read_hyrax_work_subjects(meta)
+        Array.wrap(meta.fetch("keyword", nil)).select(&:present?).collect { |r| { "subject" => sanitize(r) } }
+      end
+
+      def read_hyrax_work_identifiers(meta)
+        Array.wrap(meta.fetch("identifier", nil)).select(&:present?).collect { |r| { "identifier" => sanitize(r) } }
+      end
+
+      def read_hyrax_work_publisher(meta)
         # Fallback to ':unav' since this is a required field for datacite
         parse_attributes(meta.fetch("publisher")).to_s.strip.presence || ":unav"
       end

@@ -1,28 +1,73 @@
 <div>
-  <%# TODO: Make this appear as singular? %>
+  <%# TODO: Make this appear as singular %>
   <%= render_edit_field_partial('doi', f: f) %>
 
+  <%= link_to "Create draft DOI",
+              Hyrax::DOI::Engine.routes.url_helpers.create_draft_doi_path,
+              remote: true,
+              method: :get,
+              data: {
+                disable_with: "Creating draft DOI...",
+                params: {
+                  curation_concern: curation_concern.class.name.underscore,
+                  attribute: 'doi'
+                }
+              },
+              class: 'btn btn-default',
+              id: 'doi-create-draft-btn' %>
+
+  <%= link_to "Autofill form",
+              Hyrax::DOI::Engine.routes.url_helpers.autofill_path,
+              remote: true,
+              method: :get,
+              data: {
+                confirm: "This operation is destructive and will replace any information already filled in on this form.",
+                disable_with: "Autofilling form...",
+                params: { curation_concern: curation_concern.class.name.underscore }
+              },
+              class: 'btn btn-primary',
+              id: 'doi-autofill-btn' %>
+
+  <br/><br/><br/>
+
   <fieldset class="set-doi-status-when-public">
-    <legend>
-      DOI status when work is public
-    </legend>
+    <label class="control-label">DOI status when work is public</label>
+
     <div class="form-group" style="margin-left: 20px">
-      <label class="radio">
-        <%= f.radio_button :doi_status_when_public, '' %>
+      <label class="radio" style="font-weight: normal">
+        <%= f.radio_button :doi_status_when_public, '', style: 'margin-top: 0px;' %>
         Do not mint
       </label>
-      <label class="radio">
-        <%= f.radio_button :doi_status_when_public, 'draft' %>
+      <label class="radio" style="font-weight: normal">
+        <%= f.radio_button :doi_status_when_public, 'draft', style: 'margin-top: 0px;' %>
         Draft
       </label>
-      <label class="radio">
-        <%= f.radio_button :doi_status_when_public, 'registered' %>
+      <label class="radio" style="font-weight: normal">
+        <%= f.radio_button :doi_status_when_public, 'registered', style: 'margin-top: 0px;' %>
         Registered
       </label>
-      <label class="radio">
-        <%= f.radio_button :doi_status_when_public, 'findable' %>
+      <label class="radio" style="font-weight: normal">
+        <%= f.radio_button :doi_status_when_public, 'findable', style: 'margin-top: 0px;' %>
         Findable
       </label>
     </div>
   </fieldset>
 </div>
+
+<script type="text/javascript">
+  // Append the DOI filled in the form to the request
+  // Note this uses jQuery since we're using jquery-ujs still
+  // There is probably a better way to do this but this works for now
+  $("#doi-autofill-btn").on("ajax:beforeSend", function(e, xhr, settings) {
+    doi = $('#generic_work_doi').val()
+    settings.url = settings.url + "&doi=" + encodeURIComponent(doi)
+  });
+
+  $("#doi-create-draft-btn").on("ajax:error", function(e, xhr, status, error) {
+    alert(xhr.responseText);
+  });
+
+  $("#doi-autofill-btn").on("ajax:error", function(e, xhr, status, error) {
+    alert(xhr.responseText);
+  });
+</script>

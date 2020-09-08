@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 require 'rails_helper'
-require 'support/datacite_api_stubs'
 
 describe 'Hyrax::DOI::DataCiteRegistrar', :datacite_api do
   let(:registrar) { Hyrax::DOI::DataCiteRegistrar.new }
@@ -160,6 +159,12 @@ describe 'Hyrax::DOI::DataCiteRegistrar', :datacite_api do
           expect(registrar.send(:client)).to have_received(:delete_metadata).with(work.doi.first)
         end
       end
+    end
+  end
+
+  describe 'mint_draft_doi' do
+    it 'returns a draft doi' do
+      expect(registrar.mint_draft_doi).to eq draft_doi
     end
   end
 end

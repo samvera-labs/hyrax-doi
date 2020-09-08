@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 module Hyrax
   module DOI
-    class DataciteClient
+    class DataCiteClient
       attr_reader :username, :password, :prefix, :mode
 
       TEST_BASE_URL = "https://api.test.datacite.org/"

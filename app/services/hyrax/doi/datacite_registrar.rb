@@ -22,13 +22,17 @@ module Hyrax
         return Struct.new(:identifier).new(doi) unless register?(object)
 
         # Create a draft DOI (if necessary)
-        doi ||= client.create_draft_doi
+        doi ||= mint_draft_doi
 
         # Submit metadata, register url, and ensure proper status
         submit_to_datacite(object, doi)
 
         # Return the doi (old or new)
         Struct.new(:identifier).new(doi)
+      end
+
+      def mint_draft_doi
+        client.create_draft_doi
       end
 
       private
@@ -58,7 +62,7 @@ module Hyrax
       end
 
       def client
-        @client ||= Hyrax::DOI::DataciteClient.new(username: self.username, password: self.password, prefix: self.prefix, mode: mode)
+        @client ||= Hyrax::DOI::DataCiteClient.new(username: self.username, password: self.password, prefix: self.prefix, mode: mode)
       end
 
       # Do the heavy lifting of submitting the metadata, registering the url, and ensuring the correct status
