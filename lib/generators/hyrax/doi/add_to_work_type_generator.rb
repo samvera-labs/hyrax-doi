@@ -77,7 +77,7 @@ module Hyrax
         presenter_file = File.join(self.destination_root, 'app', 'presenters', 'hyrax', *class_path, "#{file_name}_presenter.rb")
         # rubocop:enable Style/RedundantSelf
 
-        insert_into_file presenter_file, after: 'Hyrax::WorkShowPresenter' do
+        insert_into_file presenter_file, after: '::WorkShowPresenter' do
           "\n" \
           "    # Adds behaviors for hyrax-doi plugin.\n" \
           "    include Hyrax::DOI::DOIPresenterBehavior"
