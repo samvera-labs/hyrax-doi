@@ -134,6 +134,17 @@ RSpec.configure do |config|
     config.include Devise::TestHelpers, type: :controller
   end
 
+  # Internal Tests to skip
+  # Make sure this around is declared first so it runs before other around callbacks
+  skip_internal_test_list = ['./spec/internal_test_hyrax/spec/features/create_generic_work_spec.rb']
+  config.around do |example|
+    if skip_internal_test_list.include? example.file_path
+      skip "Internal test skipped."
+    else
+      example.run
+    end
+  end
+
   # Configuration for feature tests
   config.include Features::SessionHelpers, type: :feature
   config.include Warden::Test::Helpers, type: :feature
@@ -152,7 +163,7 @@ RSpec.configure do |config|
     visit "/assets/application.css"
     visit "/assets/application.js"
   end
-  config.around(:all, type: :feature) do |example|
+  config.around(:each, type: :feature) do |example|
     Rails.application.routes.send(:eval_block, proc { mount Hyrax::DOI::Engine, at: '/doi', as: "hyrax_doi" })
     example.run
     Rails.application.reload_routes!
