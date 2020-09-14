@@ -87,7 +87,31 @@ describe Bolognese::Writers::HyraxWorkWriter do
                                                 "means that we should use DOIs with appropriate metadata and strategies for "\
                                                 "long-term preservation for..."]
       expect(new_hyrax_work.keyword).to eq ["metadata", "datacite", "doi"]
+      expect(new_hyrax_work.date_created).to eq ["2016"]
       expect(new_hyrax_work.doi).to eq ["10.5438/4k3m-nyvg"]
+    end
+  end
+
+  context 'with crossref data' do
+    subject(:new_hyrax_work) { metadata.hyrax_work }
+    let(:input) { File.join(Hyrax::DOI::Engine.root, 'spec', 'fixtures', 'crossref.xml') }
+    let(:metadata) { metadata_class.new(input: input) }
+
+    it 'creates a work of the proper type' do
+      expect(new_hyrax_work).to be_a ActiveFedora::Base
+      expect(new_hyrax_work.class.ancestors).to include(Hyrax::WorkBehavior, Hyrax::BasicMetadata, Hyrax::DOI::DOIBehavior)
+    end
+
+    it 'correctly populates the work' do
+      expect(new_hyrax_work.identifier).to eq ["e01567"]
+      expect(new_hyrax_work.title).to eq ["Automated quantitative histology reveals vascular morphodynamics during Arabidopsis hypocotyl secondary growth"]
+      expect(new_hyrax_work.creator).to eq ["Ragni, Laura", "Xenarios, Ioannis", "Nieminen, Kaisa", "Sankar, Martial", "Hardtke, Christian S"]
+      expect(new_hyrax_work.contributor).to eq []
+      expect(new_hyrax_work.publisher).to eq ["eLife Sciences Publications, Ltd"]
+      expect(new_hyrax_work.description.size).to eq 2
+      expect(new_hyrax_work.keyword).to eq []
+      expect(new_hyrax_work.date_created).to eq ["2014"]
+      expect(new_hyrax_work.doi).to eq ["10.7554/elife.01567"]
     end
   end
 end

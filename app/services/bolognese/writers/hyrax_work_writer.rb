@@ -18,7 +18,7 @@ module Bolognese
           'contributor' => contributors&.pluck("name"),
           'publisher' => Array(publisher),
           'date_created' => Array(publication_year),
-          'description' => descriptions&.pluck("description"),
+          'description' => build_hyrax_work_description,
           'keyword' => subjects&.pluck("subject")
         }
         hyrax_work_class = determine_hyrax_work_class
@@ -44,6 +44,11 @@ module Bolognese
 
       def build_hyrax_work_doi
         Array(doi&.sub('https://doi.org/', ''))
+      end
+
+      def build_hyrax_work_description
+        return nil if descriptions.blank?
+        descriptions.pluck("description").map { |d| Array(d).join("\n") }
       end
     end
   end
