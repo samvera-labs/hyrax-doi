@@ -1,6 +1,8 @@
 <div>
-  <%# TODO: Make this appear as singular %>
-  <%= render_edit_field_partial('doi', f: f) %>
+  <%# Render DOI input as a single field even though it is stored as multivalued %>
+  <%= f.input :doi, input_html: { value: @curation_concern.doi.first,
+                                  name: "#{f.object.model_name.param_key}[doi][]",
+                                  style: "max-width: 40em" } %>
 
   <%= link_to "Create draft DOI",
               Hyrax::DOI::Engine.routes.url_helpers.create_draft_doi_path,
