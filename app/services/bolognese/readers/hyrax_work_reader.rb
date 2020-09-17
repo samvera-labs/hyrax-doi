@@ -74,11 +74,10 @@ module Bolognese
       end
 
       def read_hyrax_work_publication_year(meta)
-        # FIXME: better parsing of free text dates...maybe using EDTF?
         date = meta.fetch("date_created", nil)&.first
         date ||= meta.fetch("date_uploaded", nil)
-        Date.parse(date.to_s).year
-      rescue Date::Error
+        Date.edtf(date.to_s).year
+      rescue StandardError
         Time.zone.today.year
       end
 
@@ -92,6 +91,7 @@ module Bolognese
 
       def read_hyrax_work_publisher(meta)
         # Fallback to ':unav' since this is a required field for datacite
+        # TODO: Should this default to application_name?
         parse_attributes(meta.fetch("publisher")).to_s.strip.presence || ":unav"
       end
     end
