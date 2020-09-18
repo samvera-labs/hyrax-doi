@@ -42,3 +42,6 @@ RSpec/AnyInstance:
 RSpec/DescribeClass:
   Exclude:
     - 'spec/features/**/*'
+
+RSpec/NestedGroups:
+  Enabled: false

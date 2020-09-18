@@ -96,8 +96,16 @@ describe Bolognese::Readers::HyraxWorkReader do
             work.date_uploaded = upload_date
           end
 
-          it 'prefers date_created' do
+          it 'sets year from date_created' do
             expect(datacite_xml.xpath('/resource/publicationYear/text()').to_s).to eq "1945"
+          end
+
+          context 'with only year' do
+            let(:create_date) { '1945' }
+
+            it 'sets year from date_created' do
+              expect(datacite_xml.xpath('/resource/publicationYear/text()').to_s).to eq "1945"
+            end
           end
         end
 
@@ -106,7 +114,7 @@ describe Bolognese::Readers::HyraxWorkReader do
             work.date_uploaded = upload_date
           end
 
-          it 'users date_uploaded' do
+          it 'sets year from date_uploaded' do
             expect(datacite_xml.xpath('/resource/publicationYear/text()').to_s).to eq "2009"
           end
         end
