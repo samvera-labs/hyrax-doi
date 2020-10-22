@@ -1,6 +1,6 @@
 # Hyrax::DOI
-Code: [![CircleCI](https://circleci.com/gh/ubiquitypress/hyrax-doi.svg?style=svg)](https://circleci.com/gh/ubiquitypress/hyrax-doi)
-[![Code Climate](https://codeclimate.com/github/ubiquitypress/hyrax-doi/badges/gpa.svg)](https://codeclimate.com/github/ubiquitypress/hyrax-doi)
+Code: [![CircleCI](https://circleci.com/gh/samvera-labs/hyrax-doi.svg?style=svg)](https://circleci.com/gh/samvera-labs/hyrax-doi)
+[![Code Climate](https://codeclimate.com/github/samvera-labs/hyrax-doi/badges/gpa.svg)](https://codeclimate.com/github/samvera-labs/hyrax-doi)
 
 
 Docs: [![Contribution Guidelines](http://img.shields.io/badge/CONTRIBUTING-Guidelines-blue.svg)](./CONTRIBUTING.md)
