@@ -90,7 +90,7 @@ git submodule update
 ```
 
 ### Running Rake Tasks and Generators
-When working on this engine rake tasks from Hyku can be run by prepending the `app` namespace (e.g. `rake app:db:migrate`). Generators provided by rails or other gems/engines can be run like normal from this engine's root (e.g. `rails g job UbiquityExporter`).
+When working on this engine rake tasks from Hyrax can be run by prepending the `app` namespace (e.g. `rake app:db:migrate`). Generators provided by rails or other gems/engines can be run like normal from this engine's root (e.g. `rails g job CheckDOIResolution`).
 
 ### Development Server
 
