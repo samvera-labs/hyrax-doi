@@ -45,3 +45,7 @@ RSpec/DescribeClass:
 
 RSpec/NestedGroups:
   Enabled: false
+
+Rails/Date:
+  Exclude:
+    - 'spec/services/bolognese/readers/hyrax_work_reader_spec.rb'
