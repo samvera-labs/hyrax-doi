@@ -121,7 +121,7 @@ describe Bolognese::Readers::HyraxWorkReader do
 
         context 'without either' do
           it 'defaults to current year' do
-            expect(datacite_xml.xpath('/resource/publicationYear/text()').to_s).to eq "2020"
+            expect(datacite_xml.xpath('/resource/publicationYear/text()').to_s).to eq Date.today.year.to_s
           end
         end
       end
