@@ -20,7 +20,7 @@ module Hyrax
       # If you already have a DOI and want to register it as a draft then go through the normal process (put_metadata/register_url)
       def create_draft_doi
         # Use regular api instead of mds for metadata-less url-less draft doi creation
-        response = connection.post('dois', draft_doi_payload.to_json, "Content-Type" => "application/json")
+        response = connection.post('dois', draft_doi_payload.to_json, "Content-Type" => "application/vnd.api+json")
         raise Error.new('Failed creating draft DOI', response) unless response.status == 201
 
         JSON.parse(response.body)['data']['id']
