@@ -45,6 +45,10 @@ module Hyrax
         Hyrax::Identifier::Registrar.for(:datacite, {})
       end
 
+      def use_sandbox
+        not doi_registrar.mode.equal?(:production)
+      end
+
       def field_selector(attribute_name)
         ".#{params[:curation_concern]}_#{attribute_name}"
       end
@@ -54,9 +58,12 @@ module Hyrax
       end
 
       def hyrax_work_from_doi(doi)
-        meta = Bolognese::Metadata.new(input: doi)
+        meta = Bolognese::Metadata.new(input: doi,
+                                       from: "datacite",
+                                       sandbox: use_sandbox)
         # Check that a record was actually loaded
         raise Hyrax::DOI::NotFoundError, "DOI (#{doi}) could not be found." if meta.blank? || meta.doi.blank?
+        meta.types["hyrax"] = params['curation_concern'].camelize
         meta.hyrax_work
       end
 
