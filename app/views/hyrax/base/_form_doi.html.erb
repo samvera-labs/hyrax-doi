@@ -82,6 +82,10 @@
     alert(xhr.responseText);
   });
 
+  $("#doi-create-draft-btn").on("ajax:success", function(e, xhr, status, error) {
+    alert('Draft DOI created');
+  });
+
   // Force the user to confirm using fallback defaults when DataCite mandatory fields
   // not filled in on the deposit form.  This only applies when the DOI is set to become
   // registered or findable.  Let drafts be drafts.
