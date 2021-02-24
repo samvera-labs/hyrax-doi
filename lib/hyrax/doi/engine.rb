@@ -13,6 +13,11 @@ module Hyrax
         end
       end
 
+      # Allow flipflop to load config/features.rb from the Hyrax gem:
+      initializer 'configure' do
+        Flipflop::FeatureLoader.current.append(self)
+      end
+
       config.after_initialize do
         Hyrax::CurationConcern.actor_factory.use Hyrax::Actors::DOIActor
 

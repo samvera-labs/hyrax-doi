@@ -4,7 +4,6 @@ module Hyrax
     module WorkFormHelper
       def form_tabs_for(form:)
         if form.model_class.ancestors.include? Hyrax::DOI::DOIBehavior
-          # TODO: Add check for feature flipper?
           super.prepend("doi")
         else
           super

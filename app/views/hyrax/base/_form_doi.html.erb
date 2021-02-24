@@ -9,7 +9,7 @@
                                   style: "max-width: 40em" } %>
 
   <%# Only show an actionable button if the work doesn't have a DOI already %>
-  <% if @curation_concern.doi.blank? %>
+  <% if @curation_concern.doi.blank? && FlipFlop.enabled?(:doi) %>
     <%= link_to "Create draft DOI",
                 Hyrax::DOI::Engine.routes.url_helpers.create_draft_doi_path,
                 remote: true,
@@ -41,28 +41,30 @@
 
   <br/><br/><br/>
 
-  <fieldset class="set-doi-status-when-public">
-    <label class="control-label">DOI status when work is public</label>
+	<% if FlipFlop.enabled?(:doi) %>
+		<fieldset class="set-doi-status-when-public">
+			<label class="control-label">DOI status when work is public</label>
 
-    <div class="form-group" style="margin-left: 20px">
-      <label class="radio" style="font-weight: normal">
-        <%= f.radio_button :doi_status_when_public, '', disabled: disable_do_not_mint, style: 'margin-top: 0px;' %>
-        Do not mint
-      </label>
-      <label class="radio" style="font-weight: normal">
-        <%= f.radio_button :doi_status_when_public, 'draft', disabled: disable_draft, style: 'margin-top: 0px;' %>
-        Draft
-      </label>
-      <label class="radio" style="font-weight: normal">
-        <%= f.radio_button :doi_status_when_public, 'registered', style: 'margin-top: 0px;' %>
-        Registered
-      </label>
-      <label class="radio" style="font-weight: normal">
-        <%= f.radio_button :doi_status_when_public, 'findable', style: 'margin-top: 0px;' %>
-        Findable
-      </label>
-    </div>
-  </fieldset>
+			<div class="form-group" style="margin-left: 20px">
+				<label class="radio" style="font-weight: normal">
+					<%= f.radio_button :doi_status_when_public, '', disabled: disable_do_not_mint, style: 'margin-top: 0px;' %>
+					Do not mint
+				</label>
+				<label class="radio" style="font-weight: normal">
+					<%= f.radio_button :doi_status_when_public, 'draft', disabled: disable_draft, style: 'margin-top: 0px;' %>
+					Draft
+				</label>
+				<label class="radio" style="font-weight: normal">
+					<%= f.radio_button :doi_status_when_public, 'registered', style: 'margin-top: 0px;' %>
+					Registered
+				</label>
+				<label class="radio" style="font-weight: normal">
+					<%= f.radio_button :doi_status_when_public, 'findable', style: 'margin-top: 0px;' %>
+					Findable
+				</label>
+			</div>
+		</fieldset>
+	<% end %>
 </div>
 
 <script type="text/javascript">

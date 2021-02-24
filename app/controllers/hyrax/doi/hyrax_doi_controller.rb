@@ -5,11 +5,18 @@ module Hyrax
       before_action :check_authorization
 
       def create_draft_doi
-        draft_doi = mint_draft_doi
+        if FlipFlop.enabled?(:doi)
+          draft_doi = mint_draft_doi
 
-        respond_to do |format|
-          format.js { render js: autofill_field(doi_attribute_name, draft_doi), status: :created }
-          format.json { render_json_response(response_type: :created, options: { data: draft_doi }) }
+          respond_to do |format|
+            format.js { render js: autofill_field(doi_attribute_name, draft_doi), status: :created }
+            format.json { render_json_response(response_type: :created, options: { data: draft_doi }) }
+          end
+        else
+          respond_to do |format|
+            format.js { render plain: I18n.t("errors.doi.disabled"), status: :internal_error }
+            format.json { render_json_response(response_type: :internal_error, message: I18n.t("errors.doi.disabled")) }
+          end
         end
       rescue Hyrax::DOI::DataCiteClient::Error => e
         respond_to do |format|
