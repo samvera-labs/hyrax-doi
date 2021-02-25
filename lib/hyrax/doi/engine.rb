@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 module Hyrax
   module DOI
     class Engine < ::Rails::Engine

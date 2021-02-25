@@ -3,6 +3,7 @@ PATH
   specs:
     hyrax-doi (0.2.0)
       bolognese (~> 1.8, >= 1.8.6)
+      flipflop (~> 2.3)
       hyrax (~> 2.9)
       rails (~> 5.2.4, >= 5.2.4.3)
 
@@ -956,6 +957,7 @@ DEPENDENCIES
   devise-guests (~> 0.6)
   factory_bot_rails
   fcrepo_wrapper
+  flipflop
   hyrax (= 2.9.0)
   hyrax-doi!
   jbuilder (~> 2.5)

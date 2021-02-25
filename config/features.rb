@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-FlipFlop.configure do
+Flipflop.configure do
   feature :doi,
           default: true,
           description: "Toggle the DOI minting for this tenant"
