@@ -73,4 +73,24 @@ RSpec.describe 'creating a draft DOI', :datacite_api, :js do
     click_link "doi-create-draft-btn"
     expect(page).to have_field('generic_work_doi', with: '10.1234/draft-doi')
   end
+
+  describe "when the DOI has been disabled" do
+    before do
+      Flipflop::FeatureSet.current.replace do
+        Flipflop.configure do
+          feature :doi, default: false
+        end
+      end
+
+      visit "/concern/generic_works/new"
+    end
+
+    scenario "disables the button" do
+      expect(page).to have_button("#doi-create-draft-btn", disabled: true)
+    end
+
+    scenario "hides the minting options" do
+      expect(page).not_to have_selector(".set-doi-status-when-public")
+    end
+  end
 end
