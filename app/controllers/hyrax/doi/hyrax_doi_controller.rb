@@ -5,7 +5,7 @@ module Hyrax
       before_action :check_authorization
 
       def create_draft_doi
-        if FlipFlop.enabled?(:doi)
+        if Flipflop.enabled?(:doi)
           draft_doi = mint_draft_doi
 
           respond_to do |format|

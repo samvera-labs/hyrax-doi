@@ -9,7 +9,7 @@
                                   style: "max-width: 40em" } %>
 
   <%# Only show an actionable button if the work doesn't have a DOI already %>
-  <% if @curation_concern.doi.blank? && FlipFlop.enabled?(:doi) %>
+  <% if @curation_concern.doi.blank? && Flipflop.enabled?(:doi) %>
     <%= link_to "Create draft DOI",
                 Hyrax::DOI::Engine.routes.url_helpers.create_draft_doi_path,
                 remote: true,
@@ -41,7 +41,7 @@
 
   <br/><br/><br/>
 
-	<% if FlipFlop.enabled?(:doi) %>
+	<% if Flipflop.enabled?(:doi) %>
 		<fieldset class="set-doi-status-when-public">
 			<label class="control-label">DOI status when work is public</label>
 
