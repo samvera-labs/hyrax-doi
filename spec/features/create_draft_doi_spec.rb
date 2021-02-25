@@ -78,7 +78,7 @@ RSpec.describe 'creating a draft DOI', :datacite_api, :js do
     before do
       Flipflop::FeatureSet.current.replace do
         Flipflop.configure do
-          feature :doi, default: false
+          feature :doi_minting, default: false
         end
       end
 

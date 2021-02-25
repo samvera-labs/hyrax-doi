@@ -5,7 +5,7 @@ module Hyrax
       before_action :check_authorization
 
       def create_draft_doi
-        if Flipflop.enabled?(:doi)
+        if Flipflop.enabled?(:doi_minting)
           draft_doi = mint_draft_doi
 
           respond_to do |format|
@@ -14,8 +14,8 @@ module Hyrax
           end
         else
           respond_to do |format|
-            format.js { render plain: I18n.t("errors.doi.disabled"), status: :internal_error }
-            format.json { render_json_response(response_type: :internal_error, message: I18n.t("errors.doi.disabled")) }
+            format.js { render plain: I18n.t("errors.doi_minting.disabled"), status: :internal_error }
+            format.json { render_json_response(response_type: :internal_error, message: I18n.t("errors.doi_minting.disabled")) }
           end
         end
       rescue Hyrax::DOI::DataCiteClient::Error => e
