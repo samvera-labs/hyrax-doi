@@ -15,6 +15,10 @@ Metrics/BlockLength:
     - 'lib/hyrax/doi/spec/shared_specs/*'
     - 'spec/**/*'
 
+Metrics/MethodLength:
+  Exclude:
+    - 'app/controllers/hyrax/doi/hyrax_doi_controller.rb'
+
 Layout/LineLength:
   Exclude:
     - 'spec/support/datacite_api_stubs.rb'
