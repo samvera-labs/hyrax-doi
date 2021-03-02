@@ -76,17 +76,15 @@ RSpec.describe 'creating a draft DOI', :datacite_api, :js do
 
   describe "when the DOI has been disabled" do
     before do
-      Flipflop::FeatureSet.current.replace do
-        Flipflop.configure do
-          feature :doi_minting, default: false
-        end
-      end
+      test_strategy = Flipflop::FeatureSet.current.test!
+      test_strategy.switch!(:doi_minting, false)
 
       visit "/concern/generic_works/new"
     end
 
     scenario "disables the button" do
-      expect(page).to have_button("#doi-create-draft-btn", disabled: true)
+      # For some reason page.find_button('#doi-create-draft-btn', disabled: true) isn't working
+      expect(page.find('#doi-create-draft-btn')[:disabled]).to eq "true"
     end
 
     scenario "hides the minting options" do
