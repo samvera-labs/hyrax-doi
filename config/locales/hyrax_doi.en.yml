@@ -5,3 +5,6 @@ en:
       form:
         tab:
           doi: DOI
+  errors:
+    doi_minting:
+      disabled: DOI minting is disabled by your administrator
