@@ -74,12 +74,20 @@
     settings.url = settings.url + "&doi=" + encodeURIComponent(doi)
   });
 
-  $("#doi-create-draft-btn").on("ajax:error", function(e, xhr, status, error) {
-    alert(xhr.responseText);
+  $("#doi-autofill-btn").on("ajax:error", function(e, xhr, status, error) {
+    alert('Some form fields prefilled. Please check for accuracy.');
   });
 
-  $("#doi-autofill-btn").on("ajax:error", function(e, xhr, status, error) {
-    alert(xhr.responseText);
+  $("#doi-autofill-btn").on("ajax:success", function(e, xhr, status, error) {
+    alert('Form fields autofilled');
+  });
+
+  $("#doi-create-draft-btn").on("ajax:error", function(e, xhr, status, error) {
+    alert('Please check DOI credentials');
+  });
+
+  $("#doi-create-draft-btn").on("ajax:success", function(e, xhr, status, error) {
+    alert('Draft DOI created');
   });
 
   // Force the user to confirm using fallback defaults when DataCite mandatory fields
