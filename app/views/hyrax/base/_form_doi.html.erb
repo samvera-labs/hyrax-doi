@@ -72,7 +72,7 @@
   // Note this uses jQuery since we're using jquery-ujs still
   // There is probably a better way to do this but this works for now
   $("#doi-autofill-btn").on("ajax:beforeSend", function(e, xhr, settings) {
-    doi = $('#generic_work_doi').val()
+    doi = $('<%= "##{curation_concern.class.name.underscore}_doi" %>').val()
     settings.url = settings.url + "&doi=" + encodeURIComponent(doi)
   });
 
