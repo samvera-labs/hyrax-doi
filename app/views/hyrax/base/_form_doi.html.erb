@@ -88,18 +88,19 @@
   // not filled in on the deposit form.  This only applies when the DOI is set to become
   // registered or findable.  Let drafts be drafts.
   $(document).ready(function() {
+    curation_concern = '<%= curation_concern.class.name.underscore %>';
     document.getElementById('with_files_submit').addEventListener("click", function(event){
-      if (["findable", "registered"].indexOf(document.querySelector('input[name="generic_work[doi_status_when_public]"]:checked').value) < 0)
+      if (["findable", "registered"].indexOf(document.querySelector('input[name="' + curation_concern + '[doi_status_when_public]"]:checked').value) < 0)
         return;
 
       const empty_fields = [];
-      if (document.querySelector('.generic_work_title .form-control').value == "")
+      if (document.querySelector('.' + curation_concern + '_title .form-control').value == "")
         empty_fields.push("Title")
-      if (document.querySelector('.generic_work_creator .form-control').value == "")
+      if (document.querySelector('.' + curation_concern + '_creator .form-control').value == "")
         empty_fields.push("Creator")
-      if (document.querySelector('.generic_work_publisher .form-control').value == "")
+      if (document.querySelector('.' + curation_concern + '_publisher .form-control').value == "")
         empty_fields.push("Publisher")
-      if (document.querySelector('.generic_work_date_created .form-control').value == "")
+      if (document.querySelector('.' + curation_concern + '_date_created .form-control').value == "")
         empty_fields.push("Date Created")
       if (empty_fields.length == 0)
         return;
