@@ -3,6 +3,13 @@ en:
   hyrax:
     works:
       form:
+        mint:
+          button:
+            disable_with: Creating draft DOI...
+        autofill:
+          button:
+            disable_with: Autofilling form...
+            confirm: This operation is destructive and will replace any information already filled in on this form.
         tab:
           doi: DOI
   errors:
