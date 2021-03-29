@@ -32,8 +32,8 @@
               remote: true,
               method: :get,
               data: {
-                confirm: "This operation is destructive and will replace any information already filled in on this form.",
-                disable_with: "Autofilling form...",
+                confirm: t("hyrax.works.form.autofill.button.confirm"),
+                disable_with: t("hyrax.works.form.autofill.button.disable_with"),
                 params: { curation_concern: curation_concern.class.name.underscore }
               },
               class: 'btn btn-primary',
