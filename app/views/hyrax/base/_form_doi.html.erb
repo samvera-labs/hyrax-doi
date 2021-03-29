@@ -15,7 +15,7 @@
                 remote: true,
                 method: :get,
                 data: {
-                  disable_with: "Creating draft DOI...",
+									disable_with: t("hyrax.works.form.mint.button.disable_with"),
                   params: {
                     curation_concern: @curation_concern.class.name.underscore,
                     attribute: 'doi'

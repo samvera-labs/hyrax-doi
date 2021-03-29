@@ -3,6 +3,9 @@ en:
   hyrax:
     works:
       form:
+        mint:
+          button:
+            disable_with: Creating draft DOI...
         autofill:
           button:
             disable_with: Autofilling form...
