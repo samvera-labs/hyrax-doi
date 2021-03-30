@@ -80,6 +80,8 @@
     alert(xhr.responseText);
   });
 
+	// To override this action and add your own ajax error listener, you can use jQuery's `off` method,
+	// before registering your own listener. E.g. $("#doi-autofill-btn").off("ajax:error")
   $("#doi-autofill-btn").on("ajax:error", function(e, xhr, status, error) {
     alert(xhr.responseText);
   });
