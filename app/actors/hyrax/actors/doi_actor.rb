@@ -36,7 +36,7 @@ module Hyrax
       private
 
       def create_or_update_doi(work)
-        return true unless doi_enabled_work_type?(work)
+        return true unless doi_enabled_work_type?(work) && work.doi.present?
 
         Hyrax::DOI::RegisterDOIJob.perform_later(work, registrar: work.doi_registrar.presence, registrar_opts: work.doi_registrar_opts)
       end
