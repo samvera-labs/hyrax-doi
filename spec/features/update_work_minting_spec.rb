@@ -56,7 +56,7 @@ RSpec.describe "Minting a DOI for an existing work", js: true do
     Bolognese::DataciteUtils.class_eval do
       def insert_alternate_identifiers(xml)
         alternate_identifiers = Array.wrap(identifiers).select { |r| r["identifierType"] != "DOI" }.sort_by { |h| h["identifier"] }
-        return xml unless alternate_identifiers.present?
+        return xml if alternate_identifiers.blank?
 
         xml.alternateIdentifiers do
           Array.wrap(alternate_identifiers).each do |alternate_identifier|
