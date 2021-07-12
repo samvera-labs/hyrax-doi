@@ -15,7 +15,9 @@ module Hyrax
     #   env = Hyrax::Actors::Environment.new(object, ability, attributes)
     #   last_actor = Hyrax::Actors::Terminator.new
     #   stack.build(last_actor).create(env)
-    class DOIActor < AbstractActor
+    class DOIActor < BaseActor
+      delegate :destroy, to: :next_actor
+
       ##
       # @return [Boolean]
       #
@@ -30,6 +32,10 @@ module Hyrax
       #
       # @see Hyrax::Actors::AbstractActor
       def update(env)
+        # Ensure that the work has any changed attributes persisted before we create the job
+        apply_save_data_to_curation_concern(env)
+        save(env)
+
         create_or_update_doi(env.curation_concern) && next_actor.update(env)
       end
 
