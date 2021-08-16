@@ -53,7 +53,7 @@ module Hyrax
       end
 
       def use_sandbox
-        not doi_registrar.mode.equal?(:production)
+        !doi_registrar.mode.equal?(:production)
       end
 
       def field_selector(attribute_name)
