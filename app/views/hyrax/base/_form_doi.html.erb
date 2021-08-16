@@ -9,13 +9,13 @@
                                   style: "max-width: 40em" } %>
 
   <%# Only show an actionable button if the work doesn't have a DOI already %>
-  <% if @curation_concern.doi.blank? %>
+  <% if @curation_concern.doi.blank? && Flipflop.enabled?(:doi_minting) %>
     <%= link_to "Create draft DOI",
                 Hyrax::DOI::Engine.routes.url_helpers.create_draft_doi_path,
                 remote: true,
                 method: :get,
                 data: {
-                  disable_with: "Creating draft DOI...",
+									disable_with: t("hyrax.works.form.mint.button.disable_with"),
                   params: {
                     curation_concern: @curation_concern.class.name.underscore,
                     attribute: 'doi'
@@ -32,8 +32,8 @@
               remote: true,
               method: :get,
               data: {
-                confirm: "This operation is destructive and will replace any information already filled in on this form.",
-                disable_with: "Autofilling form...",
+                confirm: t("hyrax.works.form.autofill.button.confirm"),
+                disable_with: t("hyrax.works.form.autofill.button.disable_with"),
                 params: { curation_concern: curation_concern.class.name.underscore }
               },
               class: 'btn btn-primary',
@@ -41,28 +41,30 @@
 
   <br/><br/><br/>
 
-  <fieldset class="set-doi-status-when-public">
-    <label class="control-label">DOI status when work is public</label>
+	<% if Flipflop.enabled?(:doi_minting) %>
+		<fieldset class="set-doi-status-when-public">
+			<label class="control-label">DOI status when work is public</label>
 
-    <div class="form-group" style="margin-left: 20px">
-      <label class="radio" style="font-weight: normal">
-        <%= f.radio_button :doi_status_when_public, '', disabled: disable_do_not_mint, style: 'margin-top: 0px;' %>
-        Do not mint
-      </label>
-      <label class="radio" style="font-weight: normal">
-        <%= f.radio_button :doi_status_when_public, 'draft', disabled: disable_draft, style: 'margin-top: 0px;' %>
-        Draft
-      </label>
-      <label class="radio" style="font-weight: normal">
-        <%= f.radio_button :doi_status_when_public, 'registered', style: 'margin-top: 0px;' %>
-        Registered
-      </label>
-      <label class="radio" style="font-weight: normal">
-        <%= f.radio_button :doi_status_when_public, 'findable', style: 'margin-top: 0px;' %>
-        Findable
-      </label>
-    </div>
-  </fieldset>
+			<div class="form-group" style="margin-left: 20px">
+				<label class="radio" style="font-weight: normal">
+					<%= f.radio_button :doi_status_when_public, '', disabled: disable_do_not_mint, style: 'margin-top: 0px;' %>
+					Do not mint
+				</label>
+				<label class="radio" style="font-weight: normal">
+					<%= f.radio_button :doi_status_when_public, 'draft', disabled: disable_draft, style: 'margin-top: 0px;' %>
+					Draft
+				</label>
+				<label class="radio" style="font-weight: normal">
+					<%= f.radio_button :doi_status_when_public, 'registered', style: 'margin-top: 0px;' %>
+					Registered
+				</label>
+				<label class="radio" style="font-weight: normal">
+					<%= f.radio_button :doi_status_when_public, 'findable', style: 'margin-top: 0px;' %>
+					Findable
+				</label>
+			</div>
+		</fieldset>
+	<% end %>
 </div>
 
 <script type="text/javascript">
@@ -74,20 +76,14 @@
     settings.url = settings.url + "&doi=" + encodeURIComponent(doi)
   });
 
-  $("#doi-autofill-btn").on("ajax:error", function(e, xhr, status, error) {
-    alert('Some form fields prefilled. Please check for accuracy.');
-  });
-
-  $("#doi-autofill-btn").on("ajax:success", function(e, xhr, status, error) {
-    alert('Form fields autofilled');
-  });
-
   $("#doi-create-draft-btn").on("ajax:error", function(e, xhr, status, error) {
-    alert('Please check DOI credentials');
+    alert(xhr.responseText);
   });
 
-  $("#doi-create-draft-btn").on("ajax:success", function(e, xhr, status, error) {
-    alert('Draft DOI created');
+	// To override this action and add your own ajax error listener, you can use jQuery's `off` method,
+	// before registering your own listener. E.g. $("#doi-autofill-btn").off("ajax:error")
+  $("#doi-autofill-btn").on("ajax:error", function(e, xhr, status, error) {
+    alert(xhr.responseText);
   });
 
   // Force the user to confirm using fallback defaults when DataCite mandatory fields
@@ -96,7 +92,7 @@
   $(document).ready(function() {
     curation_concern = '<%= curation_concern.class.name.underscore %>';
     document.getElementById('with_files_submit').addEventListener("click", function(event){
-      if (["findable", "registered"].indexOf(document.querySelector('input[name='+curation_concern+'"[doi_status_when_public]"]:checked').value) < 0)
+      if (["findable", "registered"].indexOf(document.querySelector('input[name="' + curation_concern + '[doi_status_when_public]"]:checked').value) < 0)
         return;
 
       const empty_fields = [];

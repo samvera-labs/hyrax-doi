@@ -15,7 +15,9 @@ module Hyrax
     #   env = Hyrax::Actors::Environment.new(object, ability, attributes)
     #   last_actor = Hyrax::Actors::Terminator.new
     #   stack.build(last_actor).create(env)
-    class DOIActor < AbstractActor
+    class DOIActor < BaseActor
+      delegate :destroy, to: :next_actor
+
       ##
       # @return [Boolean]
       #
@@ -30,13 +32,17 @@ module Hyrax
       #
       # @see Hyrax::Actors::AbstractActor
       def update(env)
+        # Ensure that the work has any changed attributes persisted before we create the job
+        apply_save_data_to_curation_concern(env)
+        save(env)
+
         create_or_update_doi(env.curation_concern) && next_actor.update(env)
       end
 
       private
 
       def create_or_update_doi(work)
-        return true unless doi_enabled_work_type?(work)
+        return true unless doi_enabled_work_type?(work) && Flipflop.enabled?(:doi_minting)
 
         Hyrax::DOI::RegisterDOIJob.perform_later(work, registrar: work.doi_registrar.presence, registrar_opts: work.doi_registrar_opts)
       end

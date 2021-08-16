@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 module Hyrax
   module DOI
     class Engine < ::Rails::Engine
@@ -11,6 +12,11 @@ module Hyrax
           inflect.acronym 'DOI'
           inflect.acronym 'DataCite'
         end
+      end
+
+      # Allow flipflop to load config/features.rb from the Hyrax gem:
+      initializer 'configure' do
+        Flipflop::FeatureLoader.current.append(self)
       end
 
       config.after_initialize do
