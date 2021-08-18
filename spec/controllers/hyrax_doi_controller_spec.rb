@@ -102,7 +102,7 @@ RSpec.describe Hyrax::DOI::HyraxDOIController, :datacite_api, type: :controller 
         before do
           allow(Bolognese::Metadata).to receive(:new).and_return(metadata)
           GenericWork.include(::Hyrax::DOI::DOIBehavior)
-          GenericWork.include(::Hyrax::Hyrax::DOI::DataCiteDOIBehavior)
+          GenericWork.include(::Hyrax::DOI::DataCiteDOIBehavior)
           GenericWork.include(::Hyrax::BasicMetadata)
         end
 
