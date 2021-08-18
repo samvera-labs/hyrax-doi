@@ -47,8 +47,8 @@ describe 'Hyrax::DOI::WorkFormHelper' do
     end
 
     context 'with a non-DOI-enabled model' do
-      let(:work) { Image.new(title: ['Moomin']) }
-      let(:form) { Hyrax::ImageForm.new(work, nil, nil) }
+      let(:work) { GenericWork.new(title: ['Moomin']) }
+      let(:form) { Hyrax::GenericWorkForm.new(work, nil, nil) }
 
       it 'does not add doi tab' do
         expect(helper.form_tabs_for(form: form)).not_to include('doi')
