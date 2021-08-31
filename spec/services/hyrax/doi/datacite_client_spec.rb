@@ -130,8 +130,9 @@ describe 'Hyrax::DOI::DataCiteClient', :datacite_api do
   end
 
   describe 'valid production url' do
+    let(:url) { Hyrax::DOI::DataCiteClient::PRODUCTION_BASE_URL }
+
     it 'ends with a slash' do
-      let(:url) { Hyrax::DOI::DataCiteClient::PRODUCTION_BASE_URL }
       expect(url.chars.last(1).first).to eq('/')
     end
   end
