@@ -6,7 +6,7 @@ module Hyrax
 
       TEST_BASE_URL = "https://api.test.datacite.org/"
       TEST_MDS_BASE_URL = "https://mds.test.datacite.org/"
-      PRODUCTION_BASE_URL = "https://api.datacite.org"
+      PRODUCTION_BASE_URL = "https://api.datacite.org/"
       PRODUCTION_MDS_BASE_URL = "https://mds.datacite.org/"
 
       def initialize(username:, password:, prefix:, mode: :production)

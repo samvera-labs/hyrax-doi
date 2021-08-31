@@ -128,4 +128,12 @@ describe 'Hyrax::DOI::DataCiteClient', :datacite_api do
       expect { client.register_url(unknown_doi, url) }.to raise_error(/Failed registering url for DOI/)
     end
   end
+
+  describe 'valid production url' do
+    let(:url) { Hyrax::DOI::DataCiteClient::PRODUCTION_BASE_URL }
+
+    it 'ends with a slash' do
+      expect(url.chars.last(1).first).to eq('/')
+    end
+  end
 end
