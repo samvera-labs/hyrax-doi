@@ -13,7 +13,7 @@ module Hyrax
         @username = username
         @password = password
         @prefix = prefix
-        @mode = mode
+        @mode = mode.to_sym
       end
 
       # Mint a draft DOI without metadata or a url
