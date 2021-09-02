@@ -48,28 +48,7 @@ describe 'Hyrax::DOI::DataCiteClient', :datacite_api do
   end
 
   describe '#put_metadata' do
-    let(:metadata) do
-      <<-XML.chomp
-        <?xml version="1.0" encoding="UTF-8"?>
-        <resource xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://datacite.org/schema/kernel-4" xsi:schemaLocation="http://datacite.org/schema/kernel-4 http://schema.datacite.org/meta/kernel-4/metadata.xsd">
-          <identifier identifierType="DOI">#{doi}</identifier>
-          <creators>
-            <creator>
-              <creatorName>Chris Colvard</creatorName>
-            </creator>
-          </creators>
-          <titles>
-            <title>Test datacite registration work</title>
-          </titles>
-          <publisher>Ubiquity Press</publisher>
-          <publicationYear>2020</publicationYear>
-          <resourceType resourceTypeGeneral="Other">GenericWork</resourceType>
-          <sizes/>
-          <formats/>
-          <version/>
-        </resource>
-      XML
-    end
+    let(:metadata) { File.join(Hyrax::DOI::Engine.root, 'spec', 'fixtures', 'metadata.xml') }
     let(:doi) { draft_doi }
 
     context 'when doi param is blank' do
@@ -134,6 +113,86 @@ describe 'Hyrax::DOI::DataCiteClient', :datacite_api do
 
     it 'ends with a slash' do
       expect(url.chars.last(1).first).to eq('/')
+    end
+  end
+
+  describe "base_url" do
+    let(:client) { Hyrax::DOI::DataCiteClient.new(username: username, password: password, prefix: prefix, mode: mode) }
+
+    context "when in production" do
+      context "when the mode is a symbol" do
+        let(:mode) { :production }
+
+        it "equals production" do
+          expect(client.send(:base_url)).to eq client.class::PRODUCTION_BASE_URL
+        end
+      end
+
+      context "when the mode is a string" do
+        let(:mode) { "production" }
+
+        it "equals production" do
+          expect(client.send(:base_url)).to eq client.class::PRODUCTION_BASE_URL
+        end
+      end
+    end
+
+    context "when in test" do
+      context "when the mode is a symbol" do
+        let(:mode) { :test }
+
+        it "equals production" do
+          expect(client.send(:base_url)).to eq client.class::TEST_BASE_URL
+        end
+      end
+
+      context "when the mode is a string" do
+        let(:mode) { "test" }
+
+        it "equals production" do
+          expect(client.send(:base_url)).to eq client.class::TEST_BASE_URL
+        end
+      end
+    end
+  end
+
+  describe "mds_base_url" do
+    let(:client) { Hyrax::DOI::DataCiteClient.new(username: username, password: password, prefix: prefix, mode: mode) }
+
+    context "when in production" do
+      context "when the mode is a symbol" do
+        let(:mode) { :production }
+
+        it "equals production" do
+          expect(client.send(:mds_base_url)).to eq client.class::PRODUCTION_MDS_BASE_URL
+        end
+      end
+
+      context "when the mode is a string" do
+        let(:mode) { "production" }
+
+        it "equals production" do
+          expect(client.send(:mds_base_url)).to eq client.class::PRODUCTION_MDS_BASE_URL
+        end
+      end
+    end
+
+    context "when in test" do
+      context "when the mode is a symbol" do
+        let(:mode) { :test }
+
+        it "equals production" do
+          expect(client.send(:mds_base_url)).to eq client.class::TEST_MDS_BASE_URL
+        end
+      end
+
+      context "when the mode is a string" do
+        let(:mode) { "test" }
+
+        it "equals production" do
+          expect(client.send(:mds_base_url)).to eq client.class::TEST_MDS_BASE_URL
+        end
+      end
     end
   end
 end
