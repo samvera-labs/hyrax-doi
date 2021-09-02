@@ -124,7 +124,7 @@ describe 'Hyrax::DOI::DataCiteClient', :datacite_api do
         let(:mode) { :production }
 
         it "equals production" do
-          expect(client.send(:base_url)).to eq described_class::PRODUCTION_BASE_URL
+          expect(client.send(:base_url)).to eq client.class::PRODUCTION_BASE_URL
         end
       end
 
@@ -132,7 +132,7 @@ describe 'Hyrax::DOI::DataCiteClient', :datacite_api do
         let(:mode) { "production" }
 
         it "equals production" do
-          expect(client.send(:base_url)).to eq described_class::PRODUCTION_BASE_URL
+          expect(client.send(:base_url)).to eq client.class::PRODUCTION_BASE_URL
         end
       end
     end
@@ -142,7 +142,7 @@ describe 'Hyrax::DOI::DataCiteClient', :datacite_api do
         let(:mode) { :test }
 
         it "equals production" do
-          expect(client.send(:base_url)).to eq described_class::TEST_BASE_URL
+          expect(client.send(:base_url)).to eq client.class::TEST_BASE_URL
         end
       end
 
@@ -150,7 +150,7 @@ describe 'Hyrax::DOI::DataCiteClient', :datacite_api do
         let(:mode) { "test" }
 
         it "equals production" do
-          expect(client.send(:base_url)).to eq described_class::TEST_BASE_URL
+          expect(client.send(:base_url)).to eq client.class::TEST_BASE_URL
         end
       end
     end
@@ -164,7 +164,7 @@ describe 'Hyrax::DOI::DataCiteClient', :datacite_api do
         let(:mode) { :production }
 
         it "equals production" do
-          expect(client.send(:mds_base_url)).to eq described_class::PRODUCTION_MDS_BASE_URL
+          expect(client.send(:mds_base_url)).to eq client.class::PRODUCTION_MDS_BASE_URL
         end
       end
 
@@ -172,7 +172,7 @@ describe 'Hyrax::DOI::DataCiteClient', :datacite_api do
         let(:mode) { "production" }
 
         it "equals production" do
-          expect(client.send(:mds_base_url)).to eq described_class::PRODUCTION_MDS_BASE_URL
+          expect(client.send(:mds_base_url)).to eq client.class::PRODUCTION_MDS_BASE_URL
         end
       end
     end
@@ -182,7 +182,7 @@ describe 'Hyrax::DOI::DataCiteClient', :datacite_api do
         let(:mode) { :test }
 
         it "equals production" do
-          expect(client.send(:mds_base_url)).to eq described_class::TEST_MDS_BASE_URL
+          expect(client.send(:mds_base_url)).to eq client.class::TEST_MDS_BASE_URL
         end
       end
 
@@ -190,7 +190,7 @@ describe 'Hyrax::DOI::DataCiteClient', :datacite_api do
         let(:mode) { "test" }
 
         it "equals production" do
-          expect(client.send(:mds_base_url)).to eq described_class::TEST_MDS_BASE_URL
+          expect(client.send(:mds_base_url)).to eq client.class::TEST_MDS_BASE_URL
         end
       end
     end
