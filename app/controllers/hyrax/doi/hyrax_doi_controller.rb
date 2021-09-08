@@ -71,6 +71,7 @@ module Hyrax
                                        sandbox: use_sandbox)
         # Check that a record was actually loaded
         raise Hyrax::DOI::NotFoundError, "DOI (#{doi}) could not be found." if meta.blank? || meta.doi.blank?
+        meta.types["hyrax"] = params['curation_concern'].camelize
         meta.hyrax_work
       end
 

@@ -98,13 +98,23 @@ RSpec.describe Hyrax::DOI::HyraxDOIController, :datacite_api, type: :controller 
       context 'with valid doi' do
         let(:input) { File.join(Hyrax::DOI::Engine.root, 'spec', 'fixtures', 'datacite.json') }
         let(:metadata) { Bolognese::Metadata.new(input: input) }
+        let(:model_class) do
+          Class.new(GenericWork) do
+            include Hyrax::DOI::DOIBehavior
+
+            # Defined here for ActiveModel::Validations error messages
+            def self.name
+              "WorkWithDOI"
+            end
+          end
+        end
 
         before do
           allow(Bolognese::Metadata).to receive(:new).and_return(metadata)
         end
 
         it 'returns autofill JS' do
-          get :autofill, params: { format: :js, curation_concern: 'generic_work', doi: '10.5438/4k3m-nyvg' }, xhr: true
+          get :autofill, params: { format: :js, curation_concern: 'work_with_doi', doi: '10.5438/4k3m-nyvg' }, xhr: true
 
           expect(response).to have_http_status(:ok)
           expect(response.body).to include '10.5438/4k3m-nyvg'
