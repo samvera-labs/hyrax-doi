@@ -13,7 +13,7 @@ module Hyrax
         @username = username
         @password = password
         @prefix = prefix
-        @mode = mode.to_sym
+        @mode = mode
       end
 
       # Mint a draft DOI without metadata or a url
@@ -126,12 +126,13 @@ module Hyrax
         }
       end
 
+      # Ensre that `mode` is not a string
       def base_url
-        mode == :production ? PRODUCTION_BASE_URL : TEST_BASE_URL
+        mode&.to_sym == :production ? PRODUCTION_BASE_URL : TEST_BASE_URL
       end
 
       def mds_base_url
-        mode == :production ? PRODUCTION_MDS_BASE_URL : TEST_MDS_BASE_URL
+        mode&.to_sym == :production ? PRODUCTION_MDS_BASE_URL : TEST_MDS_BASE_URL
       end
     end
   end
