@@ -42,7 +42,7 @@ module Hyrax
       private
 
       def create_or_update_doi(work)
-        return true unless doi_enabled_work_type?(work) && Flipflop.enabled?(:doi_minting)
+        return true unless doi_enabled_work_type?(work) && Flipflop.enabled?(:doi_minting) && work.doi_status_when_public.in?(Hyrax::DOI::DataCiteRegistrar::STATES)
 
         Hyrax::DOI::RegisterDOIJob.perform_later(work, registrar: work.doi_registrar.presence, registrar_opts: work.doi_registrar_opts)
       end
