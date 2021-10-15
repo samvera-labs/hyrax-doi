@@ -26,8 +26,16 @@ module Hyrax
         Bolognese::Metadata.prepend Bolognese::Readers::HyraxWorkReader
         Bolognese::Metadata.prepend Bolognese::Writers::HyraxWorkWriter
 
-        # Prepend our views so they have precedence
-        ActionController::Base.prepend_view_path(paths['app/views'].existent)
+        # Prepend our views in front of Hyrax but after the main app, so they have precedence
+        # but can still be overridden
+        paths = ActionController::Base.view_paths.collect(&:to_s)
+        hyrax_path = paths.detect { |path| path.match(/\/hyrax-[\d\.]+.*/) }
+        paths = if hyrax_path
+                  paths.insert(paths.index(hyrax_path), paths['app/views'].existent)
+                else
+                  paths.insert(1, paths['app/views'].existent)
+                end
+        ActionController::Base.view_paths = paths
       end
     end
   end
