@@ -28,14 +28,15 @@ module Hyrax
 
         # Prepend our views in front of Hyrax but after the main app, so they have precedence
         # but can still be overridden
-        all_paths = ActionController::Base.view_paths.collect(&:to_s)
-        hyrax_path = all_paths.detect { |path| path.match(/\/hyrax-[\d\.]+.*/) }
-        all_paths = if hyrax_path
-                  all_paths.insert(all_paths.index(hyrax_path), paths['app/views'].existent)
+        my_engine_root = Hyrax::DOI::Engine.root.to_s
+        paths = ActionController::Base.view_paths.collect(&:to_s)
+        hyrax_path = paths.detect { |path| path.match(/\/hyrax-[\d\.]+.*/) }
+        paths = if hyrax_path
+                  paths.insert(paths.index(hyrax_path), my_engine_root + '/app/views')
                 else
-                  all_paths.insert(1, paths['app/views'].existent)
+                  paths.insert(0, my_engine_root + '/app/views')
                 end
-        ActionController::Base.view_paths = all_paths
+        ActionController::Base.view_paths = paths
       end
     end
   end
