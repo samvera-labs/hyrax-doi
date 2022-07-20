@@ -21,7 +21,7 @@ Our words should be accessible.  Favor descriptive words that give
 meaning while avoiding reinforcing systemic inequities.  For example,
 in the Samvera community, we should favor using allowed\_list instead
 of whitelist, denied\_list instead of blacklist, or source/copy
-instead of main/slave.
+instead of master/slave.
 
 We're going to get it wrong, but this is a call to keep working to
 make it right.  View our code and the words we choose as a chance to
