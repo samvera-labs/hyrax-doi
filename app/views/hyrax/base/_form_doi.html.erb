@@ -87,7 +87,7 @@
   // registered or findable.  Let drafts be drafts.
   $(document).ready(function() {
     document.getElementById('with_files_submit').addEventListener("click", function(event){
-      if (["findable", "registered"].indexOf(document.querySelector('input[name='generic_work'"[doi_status_when_public]"]:checked').value) < 0)
+      if (["findable", "registered"].indexOf(document.querySelector('input[name="generic_work[doi_status_when_public]"]:checked').value) < 0)
         return;
 
       const empty_fields = [];
