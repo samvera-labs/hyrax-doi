@@ -66,7 +66,7 @@ Hyrax::DOI::DataCiteRegistrar.password = ENV['DATACITE_PASSWORD']
 * Should you be using something like a Helm Chart to manage your production and development environment variables then you will want to store your production credentials in the `app_name/chart/production-values.yaml.enc` and your test credentials from Fabrica in the `app_name/chart/dev-values.yaml.enc`
 
 ## Step 5
-Connect your application's metadata to the metadata provided by your DOI RA.  See this wiki page on [Crosswalking Metadata with Bolognese](https://github.com/K8Sewell/hyrax-doi/wiki/Metadata-Crosswalking-with-Bolognese) for additional details.
+Connect your application's metadata to the metadata provided by your DOI RA.  See the METADATA_CROSSWALK.md in the docs folder for additional details.
 
 ## Step 6
 Make the DOI visible on the work's show page.  Add a line to your `views/hyrax/base/_attribute_rows.html.erb` to make the field visible.
