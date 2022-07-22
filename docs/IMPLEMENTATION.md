@@ -1,6 +1,6 @@
 # IMPLEMENTATION PROCESS DETAILS
 # Summary
-A step by step guide to accompany [README](https://github.com/K8Sewell/hyrax-doi) implementation, usage, and configuration with the [DataCite RA](https://datacite.org/) and [Hyrax v2.9.0](https://github.com/samvera/hyrax/tree/v2.9.0) application.
+A step by step guide to accompany [README](https://github.com/samvera-labs/hyrax-doi) implementation, usage, and configuration with the [DataCite RA](https://datacite.org/) and [Hyrax v2.9.0](https://github.com/samvera/hyrax/tree/v2.9.0) application.
 
 
 ## Step 1
