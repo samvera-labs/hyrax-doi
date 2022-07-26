@@ -42,7 +42,7 @@ module Hyrax
       private
 
       def create_or_update_doi(work)
-        return true unless doi_enabled_work_type?(work) && Flipflop.enabled?(:doi_minting) && work.doi_status_when_public.in?(Hyrax::DOI::DataCiteRegistrar::STATES)
+        return true unless doi_enabled_work_type?(work) && Flipflop.enabled?(:doi_minting) && valid_public_status?(work)
 
         Hyrax::DOI::RegisterDOIJob.perform_later(work, registrar: work.doi_registrar.presence, registrar_opts: work.doi_registrar_opts)
       end
@@ -50,6 +50,12 @@ module Hyrax
       # Check if work is DOI enabled
       def doi_enabled_work_type?(work)
         work.class.ancestors.include? Hyrax::DOI::DOIBehavior
+      end
+
+      # FIXME: Find a way to push this into the registrar since it is Datacite specific
+      # Check that requested doi_status_when_public is valid
+      def valid_public_status?(work)
+        !work.respond_to?(:doi_status_when_public) || work.doi_status_when_public.in?(Hyrax::DOI::DataCiteRegistrar::STATES)
       end
     end
   end
