@@ -981,7 +981,7 @@ DEPENDENCIES
   factory_bot_rails
   fcrepo_wrapper
   flipflop
-  hyrax (= 2.9.0)
+  hyrax (>= 2.9, < 4.0)
   hyrax-doi!
   jbuilder (~> 2.5)
   jquery-rails
