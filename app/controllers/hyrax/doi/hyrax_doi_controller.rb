@@ -67,7 +67,6 @@ module Hyrax
       def hyrax_work_from_doi(doi)
         # TODO: generalize this
         meta = Bolognese::Metadata.new(input: doi,
-                                       from: "datacite",
                                        sandbox: use_sandbox)
         # Check that a record was actually loaded
         raise Hyrax::DOI::NotFoundError, "DOI (#{doi}) could not be found." if meta.blank? || meta.doi.blank?
