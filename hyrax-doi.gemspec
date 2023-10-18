@@ -26,13 +26,12 @@ Gem::Specification.new do |spec|
 
   spec.files = Dir["{app,config,db,lib}/**/*", "MIT-LICENSE", "Rakefile", "README.md"]
 
-  spec.add_dependency "rails", "~> 5.2.4", ">= 5.2.4.3"
+  spec.add_dependency "rails", ">= 5.2.4.3", "< 8.0"
 
-  spec.add_dependency "hyrax", ">= 2.9", "< 4.0"
+  spec.add_dependency "hyrax", ">= 2.9", "< 6.0"
   spec.add_dependency "flipflop", "~> 2.3"
-  spec.add_dependency "bolognese", ">= 1.8.6", "~> 1.8"
+  spec.add_dependency "bolognese", ">= 1.8.6", "< 2.0"
 
-  spec.add_development_dependency 'flipflop'
   spec.add_development_dependency 'ammeter'
   spec.add_development_dependency 'capybara'
   spec.add_development_dependency 'chromedriver-helper', '~> 2.1'
