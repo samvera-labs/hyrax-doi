@@ -30,7 +30,7 @@ Gem::Specification.new do |spec|
 
   spec.add_dependency "hyrax", ">= 2.9", "< 6.0"
   spec.add_dependency "flipflop", "~> 2.3"
-  spec.add_dependency "bolognese", ">= 1.8.6", "< 2.0"
+  spec.add_dependency "bolognese", ">= 1.8.6", "< 3.0"
 
   spec.add_development_dependency 'ammeter'
   spec.add_development_dependency 'capybara'
