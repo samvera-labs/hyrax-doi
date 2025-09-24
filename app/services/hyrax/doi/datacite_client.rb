@@ -103,14 +103,14 @@ module Hyrax
 
       def connection
         Faraday.new(url: base_url) do |c|
-          c.basic_auth(username, password)
+          c.try(:basic_auth) ? c.basic_auth(username, password) : c.request(:authorization, :basic, username, password)
           c.adapter(Faraday.default_adapter)
         end
       end
 
       def mds_connection
         Faraday.new(url: mds_base_url) do |c|
-          c.basic_auth(username, password)
+          c.try(:basic_auth) ? c.basic_auth(username, password) : c.request(:authorization, :basic, username, password)
           c.adapter(Faraday.default_adapter)
         end
       end
