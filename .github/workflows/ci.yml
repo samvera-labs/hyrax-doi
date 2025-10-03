@@ -35,7 +35,7 @@ jobs:
           - 6379:6379
 
       fedora:
-        image: samveralabs/fcrepo4:4.7.5
+        image: ghcr.io/samvera/fcrepo4:4.7.5
         ports:
           - 8080:8080
 
