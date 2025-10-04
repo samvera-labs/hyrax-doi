@@ -94,21 +94,25 @@ When working on this engine rake tasks from Hyrax can be run by prepending the `
 
 ### Development Server
 
-To run a development server locally outside of docker do the following with each line in its own shell from the root of the engine:
+To run a development server locally, start the required services using Docker Compose:
 ```
-solr_wrapper -v --config .solr_wrapper.yml
-fcrepo_wrapper -v --config .fcrepo_wrapper.yml
+docker-compose up -d
 bundle exec rails server -b 0.0.0.0
+```
+
+To stop the services:
+```
+docker-compose down
 ```
 
 ### Testing
 
-Tests are run automatically on CircleCI with rubocop and codeclimate.  These tests must pass before pull requests can be merged.
+Tests are run automatically in CI with rubocop and codeclimate. These tests must pass before pull requests can be merged.
 
-To run the tests locally outside of docker do the following with each line in its own shell from the root of the engine:
+To run the tests locally, start the test services using Docker Compose:
 ```
-solr_wrapper -v --config .solr_wrapper_test.yml
-fcrepo_wrapper -v --config .fcrepo_wrapper_test.yml
+docker-compose up -d
 bundle exec rspec
 ```
+
 You shouldn't need to run anything from inside `spec/internal_test_hyrax` unless explicitly told to do so.

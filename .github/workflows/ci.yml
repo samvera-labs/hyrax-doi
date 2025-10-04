@@ -34,16 +34,6 @@ jobs:
         ports:
           - 6379:6379
 
-      fedora:
-        image: ghcr.io/samvera/fcrepo4:4.7.5
-        ports:
-          - 8080:8080
-
-      solr:
-        image: solr:8
-        ports:
-          - 8983:8983
-
     env:
       RAILS_VERSION: 5.2.4.3
       DATABASE_NAME: circle_test
@@ -56,7 +46,7 @@ jobs:
       BUNDLE_RETRY: 3
       RAILS_ENV: test
       RACK_ENV: test
-      FCREPO_TEST_PORT: 8080/fcrepo
+      FCREPO_TEST_PORT: 8986
       SPEC_OPTS: --profile 10 --format RspecJunitFormatter --out /tmp/test-results/rspec.xml --format progress
       CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
 
@@ -77,24 +67,12 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y libpq-dev
 
-      - name: Setup Solr
+      - name: Start Fedora and Solr services
         run: |
-          # Wait for Solr to be ready
-          timeout 30 bash -c 'until curl -f http://localhost:8983/solr/admin/cores; do sleep 1; done'
-          # Create solr core
-          curl "http://localhost:8983/solr/admin/cores?action=CREATE&name=hydra-test&instanceDir=/var/solr/data/hydra-test&config=solrconfig.xml&dataDir=data"
-          # Upload solr config
-          if [ -d "spec/internal_test_hyrax/solr/config" ]; then
-            # Copy config files to solr
-            docker exec $(docker ps -q --filter ancestor=solr:8) mkdir -p /var/solr/data/hydra-test/conf
-            for file in spec/internal_test_hyrax/solr/config/*; do
-              if [ -f "$file" ]; then
-                docker cp "$file" $(docker ps -q --filter ancestor=solr:8):/var/solr/data/hydra-test/conf/
-              fi
-            done
-            # Reload core
-            curl "http://localhost:8983/solr/admin/cores?action=RELOAD&core=hydra-test"
-          fi
+          docker-compose up -d
+          # Wait for services to be ready
+          timeout 60 bash -c 'until curl -f http://localhost:8986/fcrepo/rest; do echo "Waiting for Fedora..."; sleep 2; done'
+          timeout 60 bash -c 'until curl -f http://localhost:8985/solr/admin/cores; do echo "Waiting for Solr..."; sleep 2; done'
 
       - name: Setup database
         run: |
