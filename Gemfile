@@ -21,8 +21,8 @@ group :development, :test do
   gem 'pry' unless ENV['CI']
   gem 'pry-byebug' unless ENV['CI']
   gem 'rspec'
-  gem 'rspec-rails'
   gem 'rspec_junit_formatter'
+  gem 'rspec-rails'
   gem 'ruby-prof', require: false
   gem 'semaphore_test_boosters'
   gem 'shoulda-matchers'

@@ -4,3 +4,4 @@ pkg/
 .byebug_history
 coverage/
 tmp/
+rubocop.xml
