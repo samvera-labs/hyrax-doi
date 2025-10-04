@@ -61,8 +61,11 @@ jobs:
           detached: true
       - name: Set GITHUB_SHA
         run: |
-          cd vendor/engines/hyrax
           echo "GITHUB_SHA=`git rev-parse HEAD`" >> ${GITHUB_ENV};
+        working-directory: vendor/engines/hyrax
+      - name: Spit out SHA
+        run: |
+          echo $GITHUB_SHA
       - name: Start containers
         run: |
           docker compose -f docker-compose.yml up -d --quiet-pull --pull missing --no-build
