@@ -59,6 +59,10 @@ jobs:
         with:
           limit-access-to-actor: true
           detached: true
+      - name: Set GITHUB_SHA
+        run: |
+          cd vendor/engines/hyrax
+          echo "GITHUB_SHA=`git rev-parse HEAD`" >> ${GITHUB_ENV};
       - name: Start containers
         run: |
           docker compose -f docker-compose.yml up -d --quiet-pull --pull missing --no-build
