@@ -2,54 +2,55 @@ inherit_gem:
   bixby: bixby_default.yml
 
 AllCops:
-  TargetRubyVersion: 2.4
+  TargetRubyVersion: 3.2
+  NewCops: enable
   DisplayCopNames: true
   Exclude:
-    - 'spec/internal_test_hyrax/**/*'
-    - 'tmp/**/*'
-    - 'vendor/**/*'
+    - "spec/internal_test_hyrax/**/*"
+    - "tmp/**/*"
+    - "vendor/**/*"
 
 Metrics/BlockLength:
   Exclude:
-    - 'hyrax-doi.gemspec'
-    - 'lib/hyrax/doi/spec/shared_specs/*'
-    - 'spec/**/*'
+    - "hyrax-doi.gemspec"
+    - "lib/hyrax/doi/spec/shared_specs/*"
+    - "spec/**/*"
 
 Metrics/MethodLength:
   Exclude:
-    - 'app/controllers/hyrax/doi/hyrax_doi_controller.rb'
+    - "app/controllers/hyrax/doi/hyrax_doi_controller.rb"
 
 Layout/LineLength:
   Exclude:
-    - 'spec/support/datacite_api_stubs.rb'
+    - "spec/support/datacite_api_stubs.rb"
 
 Style/RedundantSelf:
   Exclude:
-    - 'app/services/hyrax/doi/datacite_registrar.rb'
+    - "app/services/hyrax/doi/datacite_registrar.rb"
 
 Naming/FileName:
   Exclude:
-    - 'lib/generators/hyrax/doi/templates/config/initializers/hyrax-doi.rb'
+    - "lib/generators/hyrax/doi/templates/config/initializers/hyrax-doi.rb"
 
 RSpec/ExampleLength:
   Max: 10
   Exclude:
-    - 'spec/features/**/*'
-    - 'spec/services/bolognese/writers/hyrax_work_writer_spec.rb'
+    - "spec/features/**/*"
+    - "spec/services/bolognese/writers/hyrax_work_writer_spec.rb"
 
 RSpec/AnyInstance:
   Exclude:
-    - 'spec/controllers/hyrax_doi_controller_spec.rb'
-    - 'spec/features/autofill_spec.rb'
-    - 'spec/features/create_draft_doi_spec.rb'
+    - "spec/controllers/hyrax_doi_controller_spec.rb"
+    - "spec/features/autofill_spec.rb"
+    - "spec/features/create_draft_doi_spec.rb"
 
 RSpec/DescribeClass:
   Exclude:
-    - 'spec/features/**/*'
+    - "spec/features/**/*"
 
 RSpec/NestedGroups:
   Enabled: false
 
 Rails/Date:
   Exclude:
-    - 'spec/services/bolognese/readers/hyrax_work_reader_spec.rb'
+    - "spec/services/bolognese/readers/hyrax_work_reader_spec.rb"

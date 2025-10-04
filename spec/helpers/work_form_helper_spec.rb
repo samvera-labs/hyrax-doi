@@ -42,7 +42,7 @@ describe 'Hyrax::DOI::WorkFormHelper' do
 
     context 'with a DOI-enabled model' do
       it 'adds doi tab' do
-        expect(helper.form_tabs_for(form: form)).to include('doi')
+        expect(helper.form_tabs_for(form:)).to include('doi')
       end
     end
 
@@ -51,7 +51,7 @@ describe 'Hyrax::DOI::WorkFormHelper' do
       let(:form) { Hyrax::GenericWorkForm.new(work, nil, nil) }
 
       it 'does not add doi tab' do
-        expect(helper.form_tabs_for(form: form)).not_to include('doi')
+        expect(helper.form_tabs_for(form:)).not_to include('doi')
       end
     end
   end

@@ -42,11 +42,11 @@ describe Bolognese::Readers::HyraxWorkReader do
   let(:input) { work.attributes.merge(has_model: work.has_model.first).to_json }
 
   it 'reads a GenericWork' do
-    expect(metadata_class.new(input: input, from: 'hyrax_work')).to be_a Bolognese::Metadata
+    expect(metadata_class.new(input:, from: 'hyrax_work')).to be_a Bolognese::Metadata
   end
 
   context 'publisher' do
-    let(:metadata) { metadata_class.new(input: input, from: 'hyrax_work') }
+    let(:metadata) { metadata_class.new(input:, from: 'hyrax_work') }
     before do
       work.publisher = []
     end
@@ -57,7 +57,7 @@ describe Bolognese::Readers::HyraxWorkReader do
   end
 
   context 'crosswalks' do
-    let(:metadata) { metadata_class.new(input: input, from: 'hyrax_work') }
+    let(:metadata) { metadata_class.new(input:, from: 'hyrax_work') }
 
     context 'datacite' do
       subject(:datacite_xml) { Nokogiri::XML(datacite_string, &:strict).remove_namespaces! }

@@ -4,7 +4,7 @@ module Hyrax
     module DOIBehavior
       extend ActiveSupport::Concern
 
-      DOI_REGEX = /\A10\.\d{4,}(\.\d+)*\/[-._;():\/A-Za-z\d]+\z/.freeze
+      DOI_REGEX = /\A10\.\d{4,}(\.\d+)*\/[-._;():\/A-Za-z\d]+\z/
 
       included do
         property :doi, predicate: ::RDF::Vocab::BIBO.doi, multiple: true do |index|

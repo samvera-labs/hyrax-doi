@@ -2,7 +2,7 @@
 require 'rails_helper'
 
 describe 'Hyrax::DOI::DataCiteClient', :datacite_api do
-  let(:client) { Hyrax::DOI::DataCiteClient.new(username: username, password: password, prefix: prefix, mode: :test) }
+  let(:client) { Hyrax::DOI::DataCiteClient.new(username:, password:, prefix:, mode: :test) }
   let(:username) { 'username' }
   let(:password) { 'password' }
   let(:prefix) { '10.1234' }
@@ -117,7 +117,7 @@ describe 'Hyrax::DOI::DataCiteClient', :datacite_api do
   end
 
   describe "base_url" do
-    let(:client) { Hyrax::DOI::DataCiteClient.new(username: username, password: password, prefix: prefix, mode: mode) }
+    let(:client) { Hyrax::DOI::DataCiteClient.new(username:, password:, prefix:, mode:) }
 
     context "when in production" do
       context "when the mode is a symbol" do
@@ -157,7 +157,7 @@ describe 'Hyrax::DOI::DataCiteClient', :datacite_api do
   end
 
   describe "mds_base_url" do
-    let(:client) { Hyrax::DOI::DataCiteClient.new(username: username, password: password, prefix: prefix, mode: mode) }
+    let(:client) { Hyrax::DOI::DataCiteClient.new(username:, password:, prefix:, mode:) }
 
     context "when in production" do
       context "when the mode is a symbol" do

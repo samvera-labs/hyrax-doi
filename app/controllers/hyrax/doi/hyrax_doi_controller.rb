@@ -77,7 +77,7 @@ module Hyrax
       # TODO: Move this out to a partial that gets rendered?
       def autofill_js(doi)
         # TODO: Need to wipe old data or is this just supplemental?
-        js = hyrax_work_from_doi(doi).attributes.collect { |k, v| autofill_field(k, v) }.reject(&:blank?).join("\n")
+        js = hyrax_work_from_doi(doi).attributes.collect { |k, v| autofill_field(k, v) }.compact_blank.join("\n")
         js << "document.location = '#metadata';"
       end
 
@@ -91,13 +91,13 @@ module Hyrax
           js << "document.querySelectorAll('#{field_selector(attribute_name)} button.add')[0].click();" unless index.zero?
           js << "document.querySelectorAll('#{field_selector(attribute_name)} .form-control')[#{index}].value = '#{helpers.escape_javascript(v)}';"
         end
-        js.reject(&:blank?).join("\n")
+        js.compact_blank.join("\n")
       end
 
       # Override of Hyrax method (See https://github.com/samvera/hyrax/pull/4495)
       # render a json response for +response_type+
       def render_json_response(response_type: :success, message: nil, options: {})
-        json_body = Hyrax::API.generate_response_body(response_type: response_type, message: message, options: options)
+        json_body = Hyrax::API.generate_response_body(response_type:, message:, options:)
         render json: json_body, status: Hyrax::API.default_responses[response_type][:code]
       end
     end

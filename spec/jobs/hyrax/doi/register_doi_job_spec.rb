@@ -45,7 +45,7 @@ RSpec.describe Hyrax::DOI::RegisterDOIJob, type: :job do
     end
 
     it 'calls the registrar' do
-      expect { described_class.perform_now(work, registrar: registrar.to_s, registrar_opts: registrar_opts) }
+      expect { described_class.perform_now(work, registrar: registrar.to_s, registrar_opts:) }
         .to change { work.doi }
         .to eq doi
       expect(registrar_class).to have_received(:new).with(registrar_opts)

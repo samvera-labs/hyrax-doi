@@ -46,7 +46,7 @@ RSpec.describe 'autofilling the form from DOI', :js do
 
   let(:user) { create(:admin) }
   let(:input) { File.join(Hyrax::DOI::Engine.root, 'spec', 'fixtures', 'datacite.json') }
-  let(:metadata) { Bolognese::Metadata.new(input: input) }
+  let(:metadata) { Bolognese::Metadata.new(input:) }
 
   before do
     # Override test app classes and module to simulate generators having been run
