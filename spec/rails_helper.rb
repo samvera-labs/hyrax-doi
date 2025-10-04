@@ -102,7 +102,15 @@ RSpec.configure do |config|
   end
   config.around(:each, type: :feature) do |example|
     Rails.application.routes.send(:eval_block, proc { mount Hyrax::DOI::Engine, at: '/doi', as: "hyrax_doi" })
+
+    # Ensure the datacite registrar is configured for feature tests
+    original_registrars = Hyrax.config.identifier_registrars
+    Hyrax.config.identifier_registrars = { datacite: Hyrax::DOI::DataCiteRegistrar }
+
     example.run
+
+    # Restore original registrars
+    Hyrax.config.identifier_registrars = original_registrars
     Rails.application.reload_routes!
   end
 end
