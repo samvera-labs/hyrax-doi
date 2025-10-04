@@ -68,13 +68,13 @@ jobs:
           echo $HYRAX_SHA
       - name: Start containers
         run: |
-          GITHUB_SHA=$HYRAX_SHA docker compose -f docker-compose.yml up -d --quiet-pull --pull missing --no-build
+          GITHUB_SHA=latest docker compose -f docker-compose.yml up -d --quiet-pull --pull missing --no-build
       - name: RSpec
         env:
           CI_NODE_TOTAL: ${{ matrix.ci_node_total }}
           CI_NODE_INDEX: ${{ matrix.ci_node_index }}
         run: >-
-          GITHUB_SHA=$HYRAX_SHA docker compose -f docker-compose.yml exec -T -w /app/samvera/hyrax-doi web sh -c
+          GITHUB_SHA=latest docker compose -f docker-compose.yml exec -T -w /app/samvera/hyrax-doi web sh -c
           "bundle install && yarn install && rspec_booster --job ${{ matrix.ci_node_index }}/${{ matrix.ci_node_total }}"
       - name: Capture Container Logs
         if: always()
