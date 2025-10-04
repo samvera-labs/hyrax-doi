@@ -99,5 +99,3 @@ RSpec.configure do |config|
   #   # as the one that triggered the  failure.
   #   Kernel.srand config.seed
 end
-
-require File.expand_path('internal_test_hyrax/spec/spec_helper.rb', __dir__)

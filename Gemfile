@@ -1,18 +1,32 @@
 # frozen_string_literal: true
 source 'https://rubygems.org'
-git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 
-# Declare your gem's dependencies in hyrax-doi.gemspec.
-# Bundler will treat runtime dependencies like base dependencies, and
-# development dependencies will be added by default to the :development group.
-gemspec
+# Please see hyrax.gemspec for dependency information.
+# Install gems from test app
+if ENV['RAILS_ROOT']
+  test_app_gemfile_path = File.expand_path('Gemfile', ENV['RAILS_ROOT'])
+  eval_gemfile test_app_gemfile_path
+else
+  gemspec
+end
 
-# Declare any dependencies that are still in development here instead of in
-# your gemspec. These might include edge Rails or gems from your path or
-# Git. Remember to move these dependencies to your gemspec before releasing
-# your gem to rubygems.org.
-
-# To use a debugger
-# gem 'byebug', group: [:development, :test]
-
-eval_gemfile File.expand_path('spec/internal_test_hyrax/Gemfile', File.dirname(__FILE__))
+group :development, :test do
+  gem 'ammeter'
+  gem 'benchmark-ips'
+  gem 'bixby'
+  gem 'capybara'
+  gem 'easy_translate'
+  gem 'factory_bot_rails'
+  gem 'i18n-tasks'
+  gem 'pry' unless ENV['CI']
+  gem 'pry-byebug' unless ENV['CI']
+  gem 'rspec'
+  gem 'rspec-rails'
+  gem 'rspec_junit_formatter'
+  gem 'ruby-prof', require: false
+  gem 'semaphore_test_boosters'
+  gem 'shoulda-matchers'
+  gem 'simplecov', require: false
+  gem 'timecop'
+  gem 'webmock'
+end

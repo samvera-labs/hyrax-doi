@@ -6,7 +6,6 @@ AllCops:
   NewCops: enable
   DisplayCopNames: true
   Exclude:
-    - "spec/internal_test_hyrax/**/*"
     - "tmp/**/*"
     - "vendor/**/*"
 

@@ -1,44 +1,77 @@
-version: "3.8"
+x-app: &app
+  volumes:
+    - ./vendor/engines/hyrax/bin:/app/samvera
+    - ./vendor/engines/hyrax/.dassie:/app/samvera/hyrax-webapp
+    - ./vendor/engines/hyrax:/app/samvera/hyrax-engine
+    - .:/app/samvera/hyrax-doi
+    - bundle:/app/bundle
+    - clamav:/var/lib/clamav
+    - hyrax-derivatives:/app/samvera/hyrax-webapp/derivatives
+    - hyrax-uploads:/app/samvera/hyrax-webapp/uploads
+    - rails-public:/app/samvera/hyrax-webapp/public
+    - rails-tmp:/app/samvera/hyrax-webapp/tmp
 
 services:
-  fedora:
-    image: ghcr.io/samvera/fcrepo4:4.7.5
-    ports:
-      - "8986:8080" # Test port
-    volumes:
-      - fedora_data:/opt/fcrepo/data
-    environment:
-      - CATALINA_OPTS=-Djava.awt.headless=true -Dfile.encoding=UTF-8 -server -Xms512m -Xmx1024m -XX:NewSize=256m -XX:MaxNewSize=256m -XX:PermSize=256m -XX:MaxPermSize=256m -XX:+DisableExplicitGC
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/fcrepo/rest"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
+  web:
+    <<: *app
+    extends:
+      file: vendor/engines/hyrax/docker-compose-dassie.yml
+      service: web
+
+  worker:
+    <<: *app
+    extends:
+      file: vendor/engines/hyrax/docker-compose-dassie.yml
+      service: worker
+
+  chrome:
+    extends:
+      file: vendor/engines/hyrax/docker-compose-dassie.yml
+      service: chrome
+
+  postgres:
+    extends:
+      file: vendor/engines/hyrax/docker-compose-dassie.yml
+      service: postgres
+
+  fcrepo:
+    extends:
+      file: vendor/engines/hyrax/docker-compose-dassie.yml
+      service: fcrepo
+
+  fits:
+    extends:
+      file: vendor/engines/hyrax/docker-compose-dassie.yml
+      service: fits
+
+  memcached:
+    extends:
+      file: vendor/engines/hyrax/docker-compose-dassie.yml
+      service: memcached
+
+  redis:
+    extends:
+      file: vendor/engines/hyrax/docker-compose-dassie.yml
+      service: redis
 
   solr:
-    image: solr:9.9
-    ports:
-      - "8985:8983" # Test port
-    volumes:
-      - solr_data:/var/solr:cached
-      - ./spec/internal_test_hyrax/solr/conf:/opt/solr/server/configsets/hyraxconf
-    command:
-      - sh
-      - -c
-      - "precreate-core hyrax-test /opt/solr/server/configsets/hyraxconf; solr-precreate hyrax /opt/solr/server/configsets/hyraxconf"
-    ulimits:
-      nofile:
-        soft: 65536
-        hard: 524288
-    environment:
-      - SOLR_CORE_CONF_DIR=/opt/solr/server/configsets/hyraxconf
-      - SOLR_MODULES=analysis-extras,extraction
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8983/solr/admin/cores"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-
+    extends:
+      file: vendor/engines/hyrax/docker-compose-dassie.yml
+      service: solr
 volumes:
-  fedora_data:
-  solr_data:
+  bundle:
+  clamav:
+  db:
+  fcrepo:
+  hyrax-derivatives:
+  hyrax-uploads:
+  rails-public:
+  rails-tmp:
+  redis:
+  solr_home:
+
+networks:
+  hyrax:
+    driver: bridge
+    driver_opts:
+      com.docker.network.bridge.name: br-hyrax

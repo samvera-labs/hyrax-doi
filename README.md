@@ -23,7 +23,7 @@ The deposit form has a button for creating a draft DOI without requiring submitt
 The uploader is allowed to choose the DOI status (draft, registered, findable) they want for the work when it becomes public.  If findable is chosen the DOI will remain as registered until the work become public.
 
 #### Form Validation (DataCite)
-Hyrax-doi will provide defaults or placeholders for fields which Hyrax doesn't require but which are mandatory for DataCite.  In this case the uploader will be notified of the missing fields and given the opportunity of filling them in before submittign or of continuing with the defaults. 
+Hyrax-doi will provide defaults or placeholders for fields which Hyrax doesn't require but which are mandatory for DataCite.  In this case the uploader will be notified of the missing fields and given the opportunity of filling them in before submittign or of continuing with the defaults.
 
 ### Form autofilling
 When submitting a work with an existing DOI (like a scholarly article), the uploader can fill in the DOI and click a button to autofill the deposit form with metadata from the DOI.  This is not limited to DataCite and works with DOIs from a variety of registrars (DataCite, CrossRef, JaLC, ISTIC, , etc.)
@@ -96,13 +96,13 @@ When working on this engine rake tasks from Hyrax can be run by prepending the `
 
 To run a development server locally, start the required services using Docker Compose:
 ```
-docker-compose up -d
+docker compose up -d
 bundle exec rails server -b 0.0.0.0
 ```
 
 To stop the services:
 ```
-docker-compose down
+docker compose down
 ```
 
 ### Testing
@@ -111,8 +111,22 @@ Tests are run automatically in CI with rubocop and codeclimate. These tests must
 
 To run the tests locally, start the test services using Docker Compose:
 ```
-docker-compose up -d
+docker compose up -d
+docker compose exec web bash
+cd /app/samvera/hyrax-doi
+bundle
 bundle exec rspec
 ```
 
-You shouldn't need to run anything from inside `spec/internal_test_hyrax` unless explicitly told to do so.
+### Linting
+
+To run the linter locally, start the test services using Docker Compose:
+```
+docker compose up -d
+docker compose exec web bash
+cd /app/samvera/hyrax-doi
+bundle
+bundle exec rubocop
+```
+
+You shouldn't need to run anything from inside `vendor/engines/hyrax` unless explicitly told to do so.
