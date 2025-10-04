@@ -52,7 +52,7 @@ describe Bolognese::Readers::HyraxWorkReader do
     end
 
     it 'gives a default value of unavailable' do
-      expect(metadata.publisher).to eq({"name"=>":unav"})
+      expect(metadata.publisher).to eq({ "name" => ":unav" })
     end
   end
 
