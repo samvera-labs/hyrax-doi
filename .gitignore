@@ -5,3 +5,4 @@ pkg/
 coverage/
 tmp/
 rubocop.xml
+spec/examples.txt

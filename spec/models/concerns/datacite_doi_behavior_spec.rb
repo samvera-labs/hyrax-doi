@@ -12,6 +12,11 @@ describe 'Hyrax::DOI::DataCiteDOIBehavior' do
       def self.name
         "WorkWithDataCiteDOI"
       end
+
+      def self.to_s
+        name
+      end
+
     end
   end
   let(:work) { model_class.new(title: ['Moomin']) }

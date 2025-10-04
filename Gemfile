@@ -25,7 +25,7 @@ group :development, :test do
   gem 'rspec-rails'
   gem 'ruby-prof', require: false
   gem 'semaphore_test_boosters'
-  gem 'shoulda-matchers'
+  gem 'shoulda-matchers', '~> 6.5'
   gem 'simplecov', require: false
   gem 'timecop'
   gem 'webmock'

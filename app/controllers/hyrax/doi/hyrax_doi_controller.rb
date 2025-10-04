@@ -49,7 +49,7 @@ module Hyrax
 
       def doi_registrar
         # TODO: generalize this
-        Hyrax::Identifier::Registrar.for(:datacite, {})
+        Hyrax::Identifier::Registrar.for(:datacite)
       end
 
       def use_sandbox
