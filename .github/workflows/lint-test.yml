@@ -1,0 +1,107 @@
+name: "Lint Build Test"
+run-name: Lint Build Test of ${{ github.ref_name }} by @${{ github.actor }}
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      debug_enabled:
+        type: boolean
+        description: "Run the build with tmate debugging enabled (https://github.com/marketplace/actions/debugging-with-tmate)"
+        required: false
+        default: false
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: hyrax-dev
+  DOCKER_BUILDKIT: 1
+  COMPOSE_DOCKER_CLI_BUILD: 1
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.3"
+          bundler-cache: true
+          cache-version: 1
+      - name: Rubocop
+        run: bundle install && bundle exec rubocop --parallel --format progress --format junit --out rubocop.xml --display-only-failed
+      - name: Archive rubocop reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: rubocop-reports
+          path: "rubocop*.xml"
+
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        ci_test_app: [dassie]
+        ci_node_total: [4]
+        ci_node_index: [0, 1, 2, 3]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+      - name: Setup tmate debug session
+        uses: mxschmitt/action-tmate@v3
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.debug_enabled }}
+        with:
+          limit-access-to-actor: true
+          detached: true
+      - name: Set HYRAX_SHA
+        run: |
+          echo "HYRAX_SHA=`git rev-parse HEAD`" >> ${GITHUB_ENV};
+        working-directory: vendor/engines/hyrax
+      - name: Spit out SHA
+        run: |
+          echo $HYRAX_SHA
+      - name: Start containers
+        run: |
+          GITHUB_SHA=latest docker compose -f docker-compose.yml up -d --quiet-pull --pull missing --no-build
+      - name: RSpec
+        env:
+          CI_NODE_TOTAL: ${{ matrix.ci_node_total }}
+          CI_NODE_INDEX: ${{ matrix.ci_node_index }}
+        run: >-
+          GITHUB_SHA=latest docker compose -f docker-compose.yml exec -T -w /app/samvera/hyrax-doi web sh -c
+          "bundle install && yarn install && rspec_booster --job ${{ matrix.ci_node_index }}/${{ matrix.ci_node_total }}"
+      - name: Capture Container Logs
+        if: always()
+        uses: jwalton/gh-docker-logs@v2
+        with:
+          images: "selenium/standalone-chromium,postgres,fcrepo/fcrepo,solr,bitnami/redis,ghcr.io/samvera/fitsservlet,ghcr.io/samvera/fcrepo4"
+      - name: Move Test Files
+        if: always()
+        env:
+          CI_TEST_APP: ${{ matrix.ci_test_app }}
+          CI_NODE_TOTAL: ${{ matrix.ci_node_total }}
+          CI_NODE_INDEX: ${{ matrix.ci_node_index }}
+        run: >-
+          mv rspec.xml rspec-${CI_TEST_APP}-${CI_NODE_INDEX}.xml
+      - name: Archive spec reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: spec-reports-${{ matrix.ci_test_app }}-${{ matrix.ci_node_index }}
+          path: "**/rspec*.xml"
+
+  event_file:
+    name: "Event File"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: Event File
+          path: ${{ github.event_path }}

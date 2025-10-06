@@ -1,11 +1,8 @@
 .bundle/
 log/*.log
 pkg/
-spec/internal_test_hyrax/log/*.log
-spec/internal_test_hyrax/node_modules/
-spec/internal_test_hyrax/yarn-error.log
-spec/internal_test_hyrax/storage/
-spec/internal_test_hyrax/tmp/
 .byebug_history
 coverage/
 tmp/
+rubocop.xml
+spec/examples.txt

@@ -27,7 +27,7 @@ describe 'Hyrax::DOI::DataCiteRegistrar', :datacite_api do
       creator: [creator],
       publisher: [publisher],
       description: [description],
-      doi: doi
+      doi:
     }
   end
   let(:title) { 'Moomin' }

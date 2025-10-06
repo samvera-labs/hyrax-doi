@@ -16,7 +16,7 @@ module Bolognese
           # FIXME: This may not roundtrip since datacite normalizes the creator name
           'creator' => creators&.pluck("name"),
           'contributor' => contributors&.pluck("name"),
-          'publisher' => Array(publisher),
+          'publisher' => build_hyrax_work_publisher,
           'date_created' => Array(publication_year),
           'description' => build_hyrax_work_description,
           'keyword' => subjects&.pluck("subject")
@@ -34,11 +34,21 @@ module Bolognese
       end
 
       def build_hyrax_work_class
-        Class.new(ActiveFedora::Base).tap do |c|
-          c.include ::Hyrax::WorkBehavior
-          c.include ::Hyrax::DOI::DOIBehavior
+        @hyrax_work_class ||= begin
+          klass = Class.new(ActiveFedora::Base) do
+            def self.name
+              "Bolognese::Writers::DynamicHyraxWork"
+            end
+
+            def self.to_s
+              name
+            end
+          end
+          klass.include ::Hyrax::WorkBehavior
+          klass.include ::Hyrax::DOI::DOIBehavior
           # Put BasicMetadata include last since it finalizes the metadata schema
-          c.include ::Hyrax::BasicMetadata
+          klass.include ::Hyrax::BasicMetadata
+          klass
         end
       end
 
@@ -49,6 +59,21 @@ module Bolognese
       def build_hyrax_work_description
         return nil if descriptions.blank?
         descriptions.pluck("description").map { |d| Array(d).join("\n") }
+      end
+
+      def build_hyrax_work_publisher
+        return [] if publisher.blank?
+        # For crossref data, publisher can be a hash like {"name" => "eLife Sciences Publications, Ltd"}
+        # For datacite data, publisher is usually a string
+        case publisher
+        when Hash
+          # Extract the actual publisher name
+          Array(publisher['name'])
+        when String
+          [publisher]
+        else
+          Array(publisher)
+        end
       end
     end
   end

@@ -19,10 +19,18 @@ describe 'Hyrax::DOI::WorkFormHelper' do
       Class.new(SolrDocument) do
         include Hyrax::DOI::SolrDocument::DOIBehavior
         include Hyrax::DOI::SolrDocument::DataCiteDOIBehavior
+
+        def flexible?
+          false
+        end
       end
     end
     let(:presenter) { presenter_class.new(solr_document, nil, nil) }
-    let(:solr_document) { instance_double(solr_document_class) }
+    let(:solr_document) do
+      doc_double = instance_double(solr_document_class)
+      allow(doc_double).to receive(:flexible?).and_return(false)
+      doc_double
+    end
 
     # Override rspec-rails defined helper
     # This allow us to inject HyraxHelper which is being overriden

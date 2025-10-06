@@ -3,7 +3,11 @@ RSpec.shared_examples "a DataCite DOI-enabled presenter" do
   subject { presenter }
 
   let(:presenter) { presenter_class.new(solr_document, nil, nil) }
-  let(:solr_document) { instance_double(solr_document_class) }
+  let(:solr_document) do
+    solr_double = instance_double(solr_document_class)
+    allow(solr_double).to receive(:flexible?).and_return(false)
+    solr_double
+  end
 
   it { is_expected.to delegate_method(:doi_status_when_public).to(:solr_document) }
 

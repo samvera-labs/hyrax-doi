@@ -49,7 +49,7 @@ module Hyrax
 
       def doi_registrar
         # TODO: generalize this
-        Hyrax::Identifier::Registrar.for(:datacite, {})
+        Hyrax::Identifier::Registrar.for(:datacite)
       end
 
       def use_sandbox
@@ -70,34 +70,36 @@ module Hyrax
                                        sandbox: use_sandbox)
         # Check that a record was actually loaded
         raise Hyrax::DOI::NotFoundError, "DOI (#{doi}) could not be found." if meta.blank? || meta.doi.blank?
-        meta.types["hyrax"] = params['curation_concern'].camelize
+        meta.types["hyrax"] = (params['curation_concern'] || 'GenericWork').camelize
         meta.hyrax_work
       end
 
       # TODO: Move this out to a partial that gets rendered?
       def autofill_js(doi)
         # TODO: Need to wipe old data or is this just supplemental?
-        js = hyrax_work_from_doi(doi).attributes.collect { |k, v| autofill_field(k, v) }.reject(&:blank?).join("\n")
+        js = hyrax_work_from_doi(doi).attributes.collect { |k, v| autofill_field(k, v) }.compact_blank.join("\n")
         js << "document.location = '#metadata';"
       end
 
       # TODO: Move this out to a partial that gets rendered?
       def autofill_field(attribute_name, value)
         js = []
+        curation_concern = params[:curation_concern] || 'generic_work'
         # TODO: add error handling in the JS so an error doesn't leave the autofilling incomplete
         Array(value).each_with_index do |v, index|
           # Is this the right way to do this?
           # Need to be smarter to see if all repeated fields are filled before trying to create a new one by clicking?
           js << "document.querySelectorAll('#{field_selector(attribute_name)} button.add')[0].click();" unless index.zero?
-          js << "document.querySelectorAll('#{field_selector(attribute_name)} .form-control')[#{index}].value = '#{helpers.escape_javascript(v)}';"
+          # Use the field ID directly - this is more reliable than complex selectors
+          js << "var field = document.getElementById('#{curation_concern}_#{attribute_name}'); if (field) { field.value = '#{helpers.escape_javascript(v)}'; }"
         end
-        js.reject(&:blank?).join("\n")
+        js.compact_blank.join("\n")
       end
 
       # Override of Hyrax method (See https://github.com/samvera/hyrax/pull/4495)
       # render a json response for +response_type+
       def render_json_response(response_type: :success, message: nil, options: {})
-        json_body = Hyrax::API.generate_response_body(response_type: response_type, message: message, options: options)
+        json_body = Hyrax::API.generate_response_body(response_type:, message:, options:)
         render json: json_body, status: Hyrax::API.default_responses[response_type][:code]
       end
     end

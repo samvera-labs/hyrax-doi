@@ -97,7 +97,7 @@ RSpec.describe Hyrax::DOI::HyraxDOIController, :datacite_api, type: :controller 
 
       context 'with valid doi' do
         let(:input) { File.join(Hyrax::DOI::Engine.root, 'spec', 'fixtures', 'datacite.json') }
-        let(:metadata) { Bolognese::Metadata.new(input: input) }
+        let(:metadata) { Bolognese::Metadata.new(input:) }
         let(:model_class) do
           Class.new(GenericWork) do
             include Hyrax::DOI::DOIBehavior

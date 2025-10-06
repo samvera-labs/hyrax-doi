@@ -13,7 +13,7 @@ RSpec.describe Hyrax::Actors::DOIActor do
     end
   end
   let(:doi) { nil }
-  let(:work) { model_class.create(title: ['Moomin'], doi: doi) }
+  let(:work) { model_class.create(title: ['Moomin'], doi:) }
 
   before do
     # Stubbed here for ActiveJob deserialization

@@ -48,7 +48,7 @@ describe Bolognese::Writers::HyraxWorkWriter do
   context 'roundtrips' do
     subject(:new_hyrax_work) { metadata.hyrax_work }
     let(:input) { work.attributes.merge(has_model: work.has_model.first).to_json }
-    let(:metadata) { metadata_class.new(input: input, from: 'hyrax_work') }
+    let(:metadata) { metadata_class.new(input:, from: 'hyrax_work') }
 
     it 'creates a work of the proper type' do
       expect(new_hyrax_work).to be_a WorkWithDOI
@@ -69,7 +69,7 @@ describe Bolognese::Writers::HyraxWorkWriter do
   context 'without model hint' do
     subject(:new_hyrax_work) { metadata.hyrax_work }
     let(:input) { File.join(Hyrax::DOI::Engine.root, 'spec', 'fixtures', 'datacite.json') }
-    let(:metadata) { metadata_class.new(input: input) }
+    let(:metadata) { metadata_class.new(input:) }
 
     it 'creates a work of the proper type' do
       expect(new_hyrax_work).to be_a ActiveFedora::Base
@@ -95,7 +95,7 @@ describe Bolognese::Writers::HyraxWorkWriter do
   context 'with crossref data' do
     subject(:new_hyrax_work) { metadata.hyrax_work }
     let(:input) { File.join(Hyrax::DOI::Engine.root, 'spec', 'fixtures', 'crossref.xml') }
-    let(:metadata) { metadata_class.new(input: input) }
+    let(:metadata) { metadata_class.new(input:) }
 
     it 'creates a work of the proper type' do
       expect(new_hyrax_work).to be_a ActiveFedora::Base

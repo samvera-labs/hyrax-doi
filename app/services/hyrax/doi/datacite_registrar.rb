@@ -62,7 +62,7 @@ module Hyrax
       end
 
       def client
-        @client ||= Hyrax::DOI::DataCiteClient.new(username: self.username, password: self.password, prefix: self.prefix, mode: mode)
+        @client ||= Hyrax::DOI::DataCiteClient.new(username: self.username, password: self.password, prefix: self.prefix, mode:)
       end
 
       # Do the heavy lifting of submitting the metadata, registering the url, and ensuring the correct status

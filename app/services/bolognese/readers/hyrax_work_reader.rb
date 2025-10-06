@@ -1,6 +1,4 @@
 # frozen_string_literal: true
-require 'bolognese'
-
 module Bolognese
   module Readers
     # Use this with Bolognese like the following:
