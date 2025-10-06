@@ -2,7 +2,7 @@ name: Test Results
 run-name: Test Results of ${{ github.ref_name }} by @${{ github.actor }}
 on:
   workflow_run:
-    workflows: ["Lint Build Test"]
+    workflows: ["Lint Test"]
     types:
       - completed
 permissions: {}

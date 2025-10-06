@@ -1,4 +1,4 @@
-name: "Lint Build Test"
+name: "Lint Test"
 run-name: Lint Build Test of ${{ github.ref_name }} by @${{ github.actor }}
 on:
   push:
