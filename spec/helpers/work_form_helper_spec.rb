@@ -35,20 +35,42 @@ describe 'Hyrax::DOI::WorkFormHelper' do
       end
     end
 
-    before do
-      # Stubbed here for form class's model_class attribute
-      stub_const("WorkWithDOI", model_class)
-    end
-
     context 'with a DOI-enabled model' do
+      before do
+        # Stubbed here for form class's model_class attribute
+        stub_const("WorkWithDOI", model_class)
+      end
+
       it 'adds doi tab' do
         expect(helper.form_tabs_for(form:)).to include('doi')
       end
     end
 
     context 'with a non-DOI-enabled model' do
-      let(:work) { GenericWork.new(title: ['Moomin']) }
-      let(:form) { Hyrax::GenericWorkForm.new(work, nil, nil) }
+      # Create a clean class that definitely doesn't include DOI behavior
+      let(:clean_model_class) do
+        Class.new(GenericWork) do
+          # Explicitly define a clean model class without DOI behavior
+          def self.name
+            "CleanGenericWork"
+          end
+        end
+      end
+
+      let(:clean_form_class) do
+        clean_class = clean_model_class
+        Class.new(Hyrax::GenericWorkForm) do
+          self.model_class = clean_class
+        end
+      end
+
+      let(:work) { clean_model_class.new(title: ['Moomin']) }
+      let(:form) { clean_form_class.new(work, nil, nil) }
+
+      before do
+        # Stub a clean constant to ensure isolation
+        stub_const("CleanGenericWork", clean_model_class)
+      end
 
       it 'does not add doi tab' do
         expect(helper.form_tabs_for(form:)).not_to include('doi')
