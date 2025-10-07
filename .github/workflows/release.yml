@@ -7,7 +7,7 @@ on:
 
 jobs:
   push:
-    if: github.repository == 'samvera-labs/hyrax-iiif_av'
+    if: github.repository == 'samvera-labs/hyrax-doi'
     name: Push gem to RubyGems.org
     runs-on: ubuntu-latest
 
