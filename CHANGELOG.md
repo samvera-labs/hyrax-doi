@@ -30,6 +30,17 @@ Work toward 1.0.0: a Valkyrie-native, flexible-metadata-aware rewrite. See the n
 
 ### Added
 
+- `Hyrax::DOI::PersistentIdentifier`, one row per identifier per resource. Replaces storing a
+  DOI in a single overwritable attribute, so a resource can hold several identifiers at once
+  (a DOI and a RAiD, say), each with its own state and sync history. Install the table with
+  `rails g hyrax:doi:migrations` — the gem ships a generator rather than a migration.
+- `Hyrax::DOI::RegistrationResult`, returned from `register!`. Carries state, errors, and the
+  raw provider response, so a caller can tell a skip from a failure and record what happened.
+- `Hyrax::DOI::RecordedIdentifier` with ORCID and ROR implementations, for identifiers that
+  are recorded rather than minted. These have no `register!` and do not belong in the
+  registrar interface.
+- `Hyrax::DOI.config.default_providers`, mapping each scheme to the provider that mints it
+  (`doi` → `datacite` by default) instead of hardcoding DataCite at each call site.
 - `.ruby-version` pinning Ruby 3.3, matching the container and CI. Without it a version
   manager may select an older Ruby in which host-side rubocop cannot run.
 
