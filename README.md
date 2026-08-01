@@ -10,6 +10,12 @@ Jump in: [![Slack Status](http://slack.samvera.org/badge.svg)](http://slack.samv
 
 Hyrax-doi is a Hyrax plugin that provides tools for working with DOIs including model attributes, minting, and fetching descriptive metadata.
 
+> **The usage and configuration sections below describe the 0.3.x ActiveFedora API and are
+> out of date.** The gem is being rewritten for Valkyrie and Hyrax 5.3+ (see
+> [CHANGELOG.md](CHANGELOG.md)); the generator commands and `DataCiteRegistrar.mode =`
+> configuration shown here no longer work. Updated instructions land with 1.0.0. For
+> ActiveFedora applications, use the `0.3-stable` branch.
+
 ## Features
 ### DOI Creation and Updating
 DOIs are created and updated when a work of a DOI-enabled work type is saved.  This happens in a background job using the [external identifier interface](https://github.com/samvera/hyrax/pull/4458) provided by Hyrax.

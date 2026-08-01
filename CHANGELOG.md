@@ -12,6 +12,11 @@ Work toward 1.0.0: a Valkyrie-native, flexible-metadata-aware rewrite. See the n
 
 ### Changed
 
+- Work types now carry `doi` as a Valkyrie attribute instead of an ActiveFedora
+  `property`, and `doi_status_when_public` records the depositor's **intent** only. What
+  the provider currently reports lives on the `PersistentIdentifier` record, reachable as
+  `doi_state`. The two legitimately differ: a work intended to be findable stays
+  registered while it is private.
 - **Minimum Hyrax is now 5.3.0.** The flexible metadata stack (`Hyrax::Flexibility`,
   `Hyrax::M3SchemaLoader`, `Hyrax::FlexibleSchema`, the `HYRAX_FLEXIBLE` config, and the
   `allinson` test app) first ships in 5.3.0 and is absent from every earlier 5.x release.
@@ -30,6 +35,22 @@ Work toward 1.0.0: a Valkyrie-native, flexible-metadata-aware rewrite. See the n
 
 ### Added
 
+- `holds_doi_in`, so a work type can hold its DOI in an attribute other than `doi`:
+
+  ```ruby
+  class Monograph < Hyrax::Work
+    include Hyrax::DOI::DOIBehavior
+    holds_doi_in :identifier
+  end
+  ```
+
+  Read it back with `doi_value` regardless of the name. Where the host already declares
+  the attribute — from a metadata profile, a YAML schema, or its own DOI support — that
+  declaration wins and the gem does not redeclare it.
+- `Hyrax::DOI::Indexers::DOIIndexer`, emitting `doi_ssim`, `doi_tesim`,
+  `doi_status_when_public_ssi`, and `doi_state_ssi`. A no-op where a schema loader
+  already supplies those keys.
+- `config/metadata/doi.yaml`, so a non-flex application can `include Hyrax::Schema(:doi)`.
 - `Hyrax::DOI::PersistentIdentifier`, one row per identifier per resource. Replaces storing a
   DOI in a single overwritable attribute, so a resource can hold several identifiers at once
   (a DOI and a RAiD, say), each with its own state and sync history. Install the table with

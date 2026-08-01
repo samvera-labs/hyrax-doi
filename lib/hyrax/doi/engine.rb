@@ -19,6 +19,15 @@ module Hyrax
         Flipflop::FeatureLoader.current.append(self)
       end
 
+      # Lets a non-flex application `include Hyrax::Schema(:doi)` and pick up
+      # config/metadata/doi.yaml from this gem. Unshifted so the application can still
+      # shadow it with its own doi.yaml -- first match wins.
+      initializer 'hyrax_doi.schema_search_path' do
+        root = Hyrax::DOI::Engine.root
+        paths = Hyrax.config.schema_loader_config_search_paths
+        paths.unshift(root) unless paths.include?(root)
+      end
+
       config.after_initialize do
         Hyrax::CurationConcern.actor_factory.use Hyrax::Actors::DOIActor
 
