@@ -35,16 +35,12 @@ Gem::Specification.new do |spec|
 
   spec.add_development_dependency 'ammeter'
   spec.add_development_dependency 'capybara'
-  spec.add_development_dependency 'chromedriver-helper', '~> 2.1'
   spec.add_development_dependency "bixby"
   spec.add_development_dependency "factory_bot_rails"
   spec.add_development_dependency "pg"
   spec.add_development_dependency 'rspec_junit_formatter'
   spec.add_development_dependency "rspec-rails"
   spec.add_development_dependency 'shoulda-matchers'
+  spec.add_development_dependency 'simplecov'
   spec.add_development_dependency 'webmock'
-  # Workaround for cc-test-reporter with SimpleCov 0.18.
-  # Stop upgrading SimpleCov until the following issue will be resolved.
-  # https://github.com/codeclimate/test-reporter/issues/418
-  spec.add_development_dependency('simplecov', '0.17.1', '< 0.18')
 end

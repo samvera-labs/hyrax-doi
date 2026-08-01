@@ -1,11 +1,16 @@
+# Mounts the .koppie app directory with Fedora Valkyrie adapters. Postgres is still
+# present, so the gem's ActiveRecord tables work here.
+name: hyrax-doi-sirenia
+
 x-app: &app
   volumes:
     - ./vendor/engines/hyrax/bin:/app/samvera
-    - ./vendor/engines/hyrax/.dassie:/app/samvera/hyrax-webapp
+    - ./vendor/engines/hyrax/.koppie:/app/samvera/hyrax-webapp
     - ./vendor/engines/hyrax:/app/samvera/hyrax-engine
     - .:/app/samvera/hyrax-doi
     - bundle:/app/bundle
     - clamav:/var/lib/clamav
+    - hyrax-storage:/app/samvera/hyrax-webapp/storage
     - hyrax-derivatives:/app/samvera/hyrax-webapp/derivatives
     - hyrax-uploads:/app/samvera/hyrax-webapp/uploads
     - rails-public:/app/samvera/hyrax-webapp/public
@@ -15,54 +20,56 @@ services:
   web:
     <<: *app
     extends:
-      file: vendor/engines/hyrax/docker-compose-dassie.yml
+      file: vendor/engines/hyrax/docker-compose-sirenia.yml
       service: web
 
   worker:
     <<: *app
     extends:
-      file: vendor/engines/hyrax/docker-compose-dassie.yml
+      file: vendor/engines/hyrax/docker-compose-sirenia.yml
       service: worker
 
   chrome:
     extends:
-      file: vendor/engines/hyrax/docker-compose-dassie.yml
+      file: vendor/engines/hyrax/docker-compose-sirenia.yml
       service: chrome
 
   postgres:
     extends:
-      file: vendor/engines/hyrax/docker-compose-dassie.yml
+      file: vendor/engines/hyrax/docker-compose-sirenia.yml
       service: postgres
 
   fcrepo:
     extends:
-      file: vendor/engines/hyrax/docker-compose-dassie.yml
+      file: vendor/engines/hyrax/docker-compose-sirenia.yml
       service: fcrepo
 
   fits:
     extends:
-      file: vendor/engines/hyrax/docker-compose-dassie.yml
+      file: vendor/engines/hyrax/docker-compose-sirenia.yml
       service: fits
 
   memcached:
     extends:
-      file: vendor/engines/hyrax/docker-compose-dassie.yml
+      file: vendor/engines/hyrax/docker-compose-sirenia.yml
       service: memcached
 
   redis:
     extends:
-      file: vendor/engines/hyrax/docker-compose-dassie.yml
+      file: vendor/engines/hyrax/docker-compose-sirenia.yml
       service: redis
 
   solr:
     extends:
-      file: vendor/engines/hyrax/docker-compose-dassie.yml
+      file: vendor/engines/hyrax/docker-compose-sirenia.yml
       service: solr
+
 volumes:
   bundle:
   clamav:
   db:
   fcrepo:
+  hyrax-storage:
   hyrax-derivatives:
   hyrax-uploads:
   rails-public:
@@ -71,7 +78,5 @@ volumes:
   solr_home:
 
 networks:
-  hyrax:
+  sirenia:
     driver: bridge
-    driver_opts:
-      com.docker.network.bridge.name: br-hyrax

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 require 'rails_helper'
 
-RSpec.describe Hyrax::DOI::HyraxDOIController, :datacite_api, type: :controller do
+RSpec.describe Hyrax::DOI::HyraxDOIController, :datacite_api, :active_fedora, type: :controller do
   routes { Hyrax::DOI::Engine.routes }
 
   let(:prefix) { '10.1234' }

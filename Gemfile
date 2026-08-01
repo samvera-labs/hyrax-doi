@@ -10,6 +10,11 @@ else
   gemspec
 end
 
+# Match Hyrax's own constraint. Without pinning, bundler resolves erb 6, whose
+# ERB.new signature sprockets 3.7.2 cannot call -- the asset pipeline then raises
+# "wrong number of arguments (given 3, expected 1)" on any .erb asset.
+gem 'erb', '~> 4.0'
+
 group :development, :test do
   gem 'ammeter'
   gem 'benchmark-ips'

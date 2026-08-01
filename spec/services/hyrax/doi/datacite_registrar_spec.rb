@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 require 'rails_helper'
 
-describe 'Hyrax::DOI::DataCiteRegistrar', :datacite_api do
+describe 'Hyrax::DOI::DataCiteRegistrar', :datacite_api, :active_fedora do
   let(:registrar) { Hyrax::DOI::DataCiteRegistrar.new }
   let(:username) { 'username' }
   let(:password) { 'password' }

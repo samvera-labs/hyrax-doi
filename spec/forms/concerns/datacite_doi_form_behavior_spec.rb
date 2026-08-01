@@ -2,7 +2,7 @@
 require 'rails_helper'
 require 'hyrax/doi/spec/shared_specs'
 
-describe 'Hyrax::DOI::DataCiteDOIFormBehavior' do
+describe 'Hyrax::DOI::DataCiteDOIFormBehavior', :active_fedora do
   let(:model_class) do
     Class.new(GenericWork) do
       include Hyrax::DOI::DOIBehavior

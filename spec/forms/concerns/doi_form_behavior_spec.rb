@@ -2,7 +2,7 @@
 require 'rails_helper'
 require 'hyrax/doi/spec/shared_specs'
 
-describe 'Hyrax::DOI::DOIFormBehavior' do
+describe 'Hyrax::DOI::DOIFormBehavior', :active_fedora do
   let(:model_class) do
     Class.new(GenericWork) do
       include Hyrax::DOI::DOIBehavior

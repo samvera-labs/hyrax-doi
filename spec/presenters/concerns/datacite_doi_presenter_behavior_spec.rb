@@ -2,7 +2,7 @@
 require 'rails_helper'
 require 'hyrax/doi/spec/shared_specs'
 
-describe 'Hyrax::DOI::DataCiteDOIPresenterBehavior' do
+describe 'Hyrax::DOI::DataCiteDOIPresenterBehavior', :active_fedora do
   let(:presenter_class) do
     Class.new(Hyrax::GenericWorkPresenter) do
       include Hyrax::DOI::DOIPresenterBehavior

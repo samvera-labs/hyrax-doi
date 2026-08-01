@@ -31,8 +31,17 @@ When submitting a work with an existing DOI (like a scholarly article), the uplo
 ### Metadata Crosswalking
 DOI submission and form autofilling happens by crosswalking the work's metadata with DataCite's schema through the [bolognese gem](https://github.com/datacite/bolognese) which enables crosswalking with a number of metadata formats besides those required by DOI registars including RIS, BibTeX, Crosscite, and Schema.org.
 
-## Compatibilty
-Hyrax-doi is compatible with Hyrax 2.9+ and tested with a [Hyrax 2.9.0 test application](https://github.com/ubiquitypress/hyrax_test_app) that mirrors the generated app used by Hyrax internally for testing.
+## Compatibility
+Hyrax-doi requires **Hyrax 5.3 or later** and is **Valkyrie-only**. Hyrax 5.3 is the first
+release containing the flexible metadata stack, and the gem supports both
+`HYRAX_FLEXIBLE=false` and `HYRAX_FLEXIBLE=true`.
+
+ActiveFedora is not supported as of 1.0.0. For ActiveFedora applications, use the
+`0.3-stable` branch.
+
+It is tested against Hyrax's own test applications in three configurations — koppie,
+allinson, and sirenia — covering both flex modes and both Postgres and Fedora metadata
+backends. See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Installation
 Add this line to your application's Gemfile:
@@ -82,51 +91,8 @@ Hyrax-doi is currently implemented for a single-tenant Hyrax application with co
 
 ## Development
 
-### Setting up Development Environment
-After checking out the code, initialize the internal hyrax test application:
-```
-git submodule init
-git submodule update
-```
+See [CONTRIBUTING.md](CONTRIBUTING.md) for setting up a development environment, running
+specs against the three test apps, and linting.
 
-### Running Rake Tasks and Generators
-When working on this engine rake tasks from Hyrax can be run by prepending the `app` namespace (e.g. `rake app:db:migrate`). Generators provided by rails or other gems/engines can be run like normal from this engine's root (e.g. `rails g job CheckDOIResolution`).
-
-### Development Server
-
-To run a development server locally, start the required services using Docker Compose:
-```
-docker compose up -d
-bundle exec rails server -b 0.0.0.0
-```
-
-To stop the services:
-```
-docker compose down
-```
-
-### Testing
-
-Tests are run automatically in CI with rubocop and codeclimate. These tests must pass before pull requests can be merged.
-
-To run the tests locally, start the test services using Docker Compose:
-```
-docker compose up -d
-docker compose exec web bash
-cd /app/samvera/hyrax-doi
-bundle
-bundle exec rspec
-```
-
-### Linting
-
-To run the linter locally, start the test services using Docker Compose:
-```
-docker compose up -d
-docker compose exec web bash
-cd /app/samvera/hyrax-doi
-bundle
-bundle exec rubocop
-```
-
-You shouldn't need to run anything from inside `vendor/engines/hyrax` unless explicitly told to do so.
+For community guidelines — code of conduct, commit conventions, and the pull request
+process — see [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md).

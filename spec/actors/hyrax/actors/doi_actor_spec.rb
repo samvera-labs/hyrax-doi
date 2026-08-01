@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 require 'rails_helper'
 
-RSpec.describe Hyrax::Actors::DOIActor do
+RSpec.describe Hyrax::Actors::DOIActor, :active_fedora do
   subject(:actor)  { described_class.new(next_actor) }
   let(:ability)    { Ability.new(user) }
   let(:env)        { Hyrax::Actors::Environment.new(work, ability, {}) }

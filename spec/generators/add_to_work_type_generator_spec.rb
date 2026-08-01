@@ -3,7 +3,7 @@ require 'rails_helper'
 # Generators are not automatically loaded by Rails
 require 'generators/hyrax/doi/add_to_work_type_generator'
 
-describe Hyrax::DOI::AddToWorkTypeGenerator, type: :generator do
+describe Hyrax::DOI::AddToWorkTypeGenerator, :active_fedora, type: :generator do
   # Tell the generator where to put its output (what it thinks of as Rails.root)
   destination Hyrax::DOI::Engine.root.join("tmp", "generator_testing")
   before do

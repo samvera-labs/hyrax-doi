@@ -1,0 +1,75 @@
+# Mounts the .koppie app directory: allinson is koppie with flex on, not a separate app.
+name: hyrax-doi-allinson
+
+x-app: &app
+  volumes:
+    - ./vendor/engines/hyrax/bin:/app/samvera
+    - ./vendor/engines/hyrax/.koppie:/app/samvera/hyrax-webapp
+    - ./vendor/engines/hyrax:/app/samvera/hyrax-engine
+    - .:/app/samvera/hyrax-doi
+    - bundle:/app/bundle
+    - clamav:/var/lib/clamav
+    - hyrax-storage:/app/samvera/hyrax-webapp/storage
+    - hyrax-derivatives:/app/samvera/hyrax-webapp/derivatives
+    - hyrax-uploads:/app/samvera/hyrax-webapp/uploads
+    - rails-public:/app/samvera/hyrax-webapp/public
+    - rails-tmp:/app/samvera/hyrax-webapp/tmp
+
+services:
+  web:
+    <<: *app
+    extends:
+      file: vendor/engines/hyrax/docker-compose-allinson.yml
+      service: web
+
+  worker:
+    <<: *app
+    extends:
+      file: vendor/engines/hyrax/docker-compose-allinson.yml
+      service: worker
+
+  chrome:
+    extends:
+      file: vendor/engines/hyrax/docker-compose-allinson.yml
+      service: chrome
+
+  postgres:
+    extends:
+      file: vendor/engines/hyrax/docker-compose-allinson.yml
+      service: postgres
+
+  fits:
+    extends:
+      file: vendor/engines/hyrax/docker-compose-allinson.yml
+      service: fits
+
+  memcached:
+    extends:
+      file: vendor/engines/hyrax/docker-compose-allinson.yml
+      service: memcached
+
+  redis:
+    extends:
+      file: vendor/engines/hyrax/docker-compose-allinson.yml
+      service: redis
+
+  solr:
+    extends:
+      file: vendor/engines/hyrax/docker-compose-allinson.yml
+      service: solr
+
+volumes:
+  bundle:
+  clamav:
+  db:
+  hyrax-storage:
+  hyrax-derivatives:
+  hyrax-uploads:
+  rails-public:
+  rails-tmp:
+  redis:
+  solr_home:
+
+networks:
+  allinson:
+    driver: bridge

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 require 'rails_helper'
 
-describe Bolognese::Writers::HyraxWorkWriter do
+describe Bolognese::Writers::HyraxWorkWriter, :active_fedora do
   let(:model_class) do
     Class.new(GenericWork) do
       include Hyrax::DOI::DOIBehavior

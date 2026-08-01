@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 require 'rails_helper'
 
-RSpec.describe 'autofilling the form from DOI', :js do
+RSpec.describe 'autofilling the form from DOI', :js, :active_fedora do
   let(:model_class) do
     Class.new(GenericWork) do
       include Hyrax::DOI::DOIBehavior

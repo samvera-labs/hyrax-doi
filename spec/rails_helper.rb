@@ -36,7 +36,7 @@ RSpec.configure do |config|
   config.expose_dsl_globally = true
 
   # Remove this line if you're not using ActiveRecord or ActiveRecord fixtures
-  config.fixture_path = "#{::Rails.root}/spec/fixtures"
+  config.fixture_paths = [Rails.root.join('spec', 'fixtures')]
 
   # If you're not using ActiveRecord, or you'd prefer not to run each of your
   # examples within a transaction, remove the following line or assign false
@@ -68,13 +68,8 @@ RSpec.configure do |config|
 
   config.include FactoryBot::Syntax::Methods
 
-  config.before(:suite) do
-    ActiveFedora::Cleaner.clean!
-  end
-
-  config.after do
-    ActiveFedora::Cleaner.clean!
-  end
+  # No ActiveFedora::Cleaner hooks: this gem is Valkyrie-only, and sirenia reaches
+  # Fedora through a Valkyrie adapter rather than ActiveFedora.
 
   if Devise::VERSION >= '4.2'
     config.include Devise::Test::ControllerHelpers, type: :controller

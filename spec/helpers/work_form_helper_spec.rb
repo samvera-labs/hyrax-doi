@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 require 'rails_helper'
 
-describe 'Hyrax::DOI::WorkFormHelper' do
+describe 'Hyrax::DOI::WorkFormHelper', :active_fedora do
   describe 'form_tabs_for' do
     let(:model_class) do
       Class.new(GenericWork) do

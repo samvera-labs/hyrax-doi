@@ -1,4 +1,0 @@
-# Use dedicated lock files for dassie/koppie to avoid gem mismatches
-eval_gemfile 'Gemfile'
-
-gem 'hyrax-doi', path: '.'

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 require 'rails_helper'
 
-describe 'Hyrax::DOI::WorkFormHelper' do
+describe 'Hyrax::DOI::WorkFormHelper', :active_fedora do
   describe 'render_doi?' do
     let(:doi_presenter_class) do
       Class.new(Hyrax::GenericWorkPresenter) do

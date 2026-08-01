@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 require 'rails_helper'
 
-RSpec.describe Hyrax::DOI::RegisterDOIJob, type: :job do
+RSpec.describe Hyrax::DOI::RegisterDOIJob, :active_fedora, type: :job do
   let(:model_class) do
     Class.new(GenericWork) do
       include Hyrax::DOI::DOIBehavior
