@@ -52,10 +52,6 @@ module Hyrax
         Hyrax::Identifier::Registrar.for(:datacite)
       end
 
-      def use_sandbox
-        !doi_registrar.mode.equal?(:production)
-      end
-
       def field_selector(attribute_name)
         ".#{params[:curation_concern]}_#{attribute_name}"
       end
@@ -64,14 +60,10 @@ module Hyrax
         params[:attribute] || "doi"
       end
 
-      def hyrax_work_from_doi(doi)
-        # TODO: generalize this
-        meta = Bolognese::Metadata.new(input: doi,
-                                       sandbox: use_sandbox)
-        # Check that a record was actually loaded
-        raise Hyrax::DOI::NotFoundError, "DOI (#{doi}) could not be found." if meta.blank? || meta.doi.blank?
-        meta.types["hyrax"] = (params['curation_concern'] || 'GenericWork').camelize
-        meta.hyrax_work
+      # Replaced by Hyrax::DOI::DOIResolver, which resolves a DOI through doi.org content
+      # negotiation. The bolognese lookup this used has been removed.
+      def hyrax_work_from_doi(_doi)
+        raise NotImplementedError, 'DOI autofill is not implemented yet'
       end
 
       # TODO: Move this out to a partial that gets rendered?

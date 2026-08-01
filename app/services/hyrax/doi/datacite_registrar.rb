@@ -85,37 +85,11 @@ module Hyrax
         Rails.application.routes.url_helpers.polymorphic_url(work)
       end
 
-      def work_to_datacite_xml(work)
-        Bolognese::Metadata.new(input: work.attributes.merge(has_model: work.has_model.first).to_json, from: 'hyrax_work').datacite
+      # Replaced by Hyrax::DOI::DataCiteSerializer, which builds DataCite JSON for the
+      # REST API directly. The bolognese XML crosswalk this used has been removed.
+      def work_to_datacite_xml(_work)
+        raise NotImplementedError, 'DataCite serialization is not implemented yet'
       end
-
-      ## Unused methods for now but may be brought in later when filling in TODOs
-
-      # Fetch the DOI information from DataCite
-      # def datacite_record(work)
-      #   # TODO: Add some level of caching (could be memoization)
-      #   # TODO: Add error handling?
-      #   Bolognese::Metadata(input: Array(work.doi).first)
-      # end
-
-      # # Check if metadata sent to the registrar has changed
-      # def metadata_changed?(work)
-      #   fields_to_watch = %w[title creator publisher resource_type identifier description]
-      #   diff_work = datacite_record.hyrax_work
-      #   diff_work.update_attributes(work.attributes.slice(**fields_to_watch))
-      #   diff_work.changes.keys.any? { |k| k.in? fields_to_watch }
-      # end
-
-      # # Check if the status in datacite matches the expected status
-      # # except when work is not public and doi_status_when_public is findable
-      # def status_needs_updating?(work)
-      #   current_status = datacite_record.status
-      #   expected_status = work.doi_status_when_public
-      #
-      #   return false if expected_status == :findable && current_status == :registered && !is_public?(work)
-      #
-      #   current_status != expected_status
-      # end
     end
   end
 end

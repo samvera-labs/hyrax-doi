@@ -26,12 +26,14 @@ Gem::Specification.new do |spec|
 
   spec.files = Dir["{app,config,db,lib}/**/*", "MIT-LICENSE", "Rakefile", "README.md"]
 
-  spec.add_dependency "rails", ">= 5.2.4.3", "< 8.0"
+  spec.required_ruby_version = '>= 3.2'
 
-  spec.add_dependency "hyrax", ">= 2.9", "< 6.0"
+  spec.add_dependency "rails", "> 6.1", "< 8.0"
+
+  # 5.3 is the first release containing the flexible metadata stack.
+  spec.add_dependency "hyrax", ">= 5.3", "< 7.0"
   spec.add_dependency "flipflop", "~> 2.3"
-  spec.add_dependency "bolognese", ">= 1.8.6", "< 3.0"
-  spec.add_dependency 'addressable', '2.8.1' # remove once https://github.com/postrank-labs/postrank-uri/issues/49 is fixed
+  spec.add_dependency "faraday", "~> 2.0"
 
   spec.add_development_dependency 'ammeter'
   spec.add_development_dependency 'capybara'

@@ -80,6 +80,13 @@ before opening a pull request** — CI does.
 Each stack needs its own `bundle install` the first time, since allinson uses a different
 Gemfile and therefore a different lockfile.
 
+On an Apple Silicon machine, bundler may report that `aarch64-linux` is missing from the
+lockfile's platforms. Add it once per lockfile:
+
+```
+bundle lock --add-platform aarch64-linux
+```
+
 Tear down when finished:
 
 ```
@@ -106,6 +113,10 @@ It can also run on the host, which is faster for a quick check. `.ruby-version` 
 to match the container and CI; without it a version manager may select an older Ruby that
 cannot load the gem's rubocop. The container remains authoritative, since it uses the bundled
 rubocop version rather than whatever is installed on the host.
+
+Note the two Ruby versions answer different questions: `.ruby-version` (3.3) is what this
+project is developed and tested on, while the gemspec's `required_ruby_version` (>= 3.2) is
+the minimum an adopting application needs, matching Hyrax's own floor.
 
 ## Rake tasks and generators
 

@@ -41,6 +41,12 @@ Work toward 1.0.0: a Valkyrie-native, flexible-metadata-aware rewrite. See the n
 
 ### Removed
 
+- The `bolognese` dependency, along with `Bolognese::Readers::HyraxWorkReader` and
+  `Bolognese::Writers::HyraxWorkWriter`. DataCite REST v2 accepts JSON directly, so the XML
+  crosswalk has no remaining purpose, and autofill moves to doi.org content negotiation.
+  Drops 28 transitive dependencies.
+- The exact `addressable` 2.8.1 pin, which existed to work around postrank-uri#49 — fixed in
+  postrank-uri 1.1.
 - The `dassie` (ActiveFedora) test harness: `docker-compose.yml`, `Gemfile.dassie`, and
   `Gemfile.dassie.lock`. The gem is Valkyrie-only as of 1.0.0.
 - `chromedriver-helper` development dependency — unmaintained since 2019 and incompatible with

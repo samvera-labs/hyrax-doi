@@ -22,10 +22,6 @@ module Hyrax
       config.after_initialize do
         Hyrax::CurationConcern.actor_factory.use Hyrax::Actors::DOIActor
 
-        require 'bolognese'
-        Bolognese::Metadata.prepend Bolognese::Readers::HyraxWorkReader
-        Bolognese::Metadata.prepend Bolognese::Writers::HyraxWorkWriter
-
         # Prepend our views in front of Hyrax but after the main app, so they have precedence
         # but can still be overridden
         my_engine_root = Hyrax::DOI::Engine.root.to_s
