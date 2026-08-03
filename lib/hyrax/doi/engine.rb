@@ -28,6 +28,16 @@ module Hyrax
         paths.unshift(root) unless paths.include?(root)
       end
 
+      # to_prepare rather than after_initialize so the prepend survives a dev reload,
+      # which discards and redefines the Hyrax constant.
+      config.to_prepare do
+        require 'hyrax/doi/flexible_schema_validator_service_decorator'
+
+        decorator = Hyrax::DOI::FlexibleSchemaValidatorServiceDecorator
+        service = Hyrax::FlexibleSchemaValidatorService
+        service.prepend(decorator) unless service.ancestors.include?(decorator)
+      end
+
       config.after_initialize do
         Hyrax::CurationConcern.actor_factory.use Hyrax::Actors::DOIActor
 

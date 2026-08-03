@@ -21,6 +21,12 @@ end
 #
 # See http://rubydoc.info/gems/rspec-core/RSpec/Core/Configuration
 RSpec.configure do |config|
+  # ActiveFedora-era specs awaiting rewrite for Valkyrie. Hyrax excludes these only when
+  # Wings is disabled, but this gem is Valkyrie-only as of 1.0.0, so they are pending
+  # regardless -- including on the freyja target, which deliberately runs with Wings
+  # loaded to prove the gem works in an application migrating off ActiveFedora.
+  config.filter_run_excluding(:active_fedora)
+
   # rspec-expectations config goes here. You can use an alternate
   # assertion/expectation library such as wrong or the stdlib/minitest
   # assertions if you prefer.

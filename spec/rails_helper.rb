@@ -35,8 +35,14 @@ end
 RSpec.configure do |config|
   config.expose_dsl_globally = true
 
-  # Remove this line if you're not using ActiveRecord or ActiveRecord fixtures
-  config.fixture_paths = [Rails.root.join('spec', 'fixtures')]
+  # rspec-rails renamed fixture_path to fixture_paths in 7. The dassie test app is still
+  # on Rails 6.1 with the older gem, so support both.
+  fixtures = Rails.root.join('spec', 'fixtures')
+  if config.respond_to?(:fixture_paths=)
+    config.fixture_paths = [fixtures]
+  else
+    config.fixture_path = fixtures
+  end
 
   # If you're not using ActiveRecord, or you'd prefer not to run each of your
   # examples within a transaction, remove the following line or assign false

@@ -23,11 +23,12 @@ the container:
 As of 1.0.0 this gem is Valkyrie-only, and every configuration must pass. They differ in
 metadata backend and schema mode:
 
-| App | Valkyrie metadata | `HYRAX_FLEXIBLE` | Fedora |
-|---|---|---|---|
-| **koppie** | Postgres | `false` | no |
-| **allinson** | Postgres | `true` | no |
-| **sirenia** | Fedora | `false` | yes |
+| App | Valkyrie metadata | `HYRAX_FLEXIBLE` | Fedora | Wings |
+|---|---|---|---|---|
+| **koppie** | Postgres | `false` | no | no |
+| **allinson** | Postgres | `true` | no | no |
+| **sirenia** | Fedora | `false` | yes | no |
+| **freyja** | Postgres (via Freyja) | `false` | yes | **yes** |
 
 **Both flex modes are required.** This gem is platform code: `HYRAX_FLEXIBLE=false` uses the
 simple YAML schema loader, `true` uses the m3 profile-driven loader, and they resolve
@@ -36,6 +37,14 @@ silently break the other.
 
 **Sirenia matters** because it is the only configuration where Valkyrie resources live in
 Fedora while the gem's ActiveRecord tables live in Postgres.
+
+**Freyja matters** because it is the only configuration with Wings loaded. It runs dassie
+with `VALKYRIE_TRANSITION=true`, which swaps in Hyrax's Freyja adapter — reads go through
+Wings, writes come back as Valkyrie. That is the shape of an application partway through
+migrating off ActiveFedora, and it is a supported configuration: **Wings may be loaded, but
+works must be Valkyrie resources.** A work still persisted as an ActiveFedora object cannot
+carry a Valkyrie attribute. Note dassie runs Rails 6.1 where the others run 7.2, so it also
+catches gem-version assumptions the other three miss.
 
 Allinson mounts the **same `.koppie` app directory** as koppie — it is koppie with flex
 enabled, not a separate app. It has its own `Gemfile.allinson` purely so it gets its own

@@ -1,6 +1,20 @@
 ---
 en:
   hyrax:
+    doi:
+      flexible_schema_validators:
+        doi_validator:
+          warnings:
+            property_missing: >-
+              This profile has no `doi` property. DOIs will still work if a work class
+              declares the attribute itself, but the DOI will not appear on the show page
+              and will not be indexed from the profile.
+            no_view_block: >-
+              The `doi` property has no `view:` options, so it will not be rendered on the
+              show page. Add `view: { render_as: doi, html_dl: true }`.
+            unreachable_available_on: >-
+              The `doi` property's `available_on.class` names no class declared in this
+              profile, so no work type will receive it.
     works:
       form:
         mint:

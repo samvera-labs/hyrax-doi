@@ -45,10 +45,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # Both flex modes are required -- this gem is platform code. sirenia is the
-        # only configuration where Valkyrie resources live in Fedora while the gem's
-        # ActiveRecord tables live in Postgres. See CONTRIBUTING.md.
-        ci_test_app: [koppie, allinson, sirenia]
+        # Both flex modes are required -- this gem is platform code. sirenia is the only
+        # configuration where Valkyrie resources live in Fedora while the gem's
+        # ActiveRecord tables live in Postgres. freyja runs with Wings loaded, covering
+        # applications still migrating off ActiveFedora. See CONTRIBUTING.md.
+        ci_test_app: [koppie, allinson, sirenia, freyja]
         ci_node_total: [4]
         ci_node_index: [0, 1, 2, 3]
     steps:

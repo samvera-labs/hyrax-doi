@@ -21,9 +21,10 @@ Work toward 1.0.0: a Valkyrie-native, flexible-metadata-aware rewrite. See the n
   `Hyrax::M3SchemaLoader`, `Hyrax::FlexibleSchema`, the `HYRAX_FLEXIBLE` config, and the
   `allinson` test app) first ships in 5.3.0 and is absent from every earlier 5.x release.
   Supporting both flex modes is a requirement, so there is no earlier version to support.
-- Test harness now runs against Hyrax's own Valkyrie test apps: `koppie` (Postgres metadata,
-  flex off), `allinson` (Postgres metadata, flex on), and `sirenia` (Fedora
-  metadata/storage, flex off). CI runs all three.
+- Test harness now runs against Hyrax's own test apps: `koppie` (Postgres metadata, flex
+  off), `allinson` (Postgres metadata, flex on), `sirenia` (Fedora metadata/storage), and
+  `freyja` (dassie with `VALKYRIE_TRANSITION=true`, the only target with Wings loaded). CI
+  runs all four.
 - The Hyrax submodule tracks `main` rather than a release tag. The released `hyrax-v5.3.0`
   cannot boot — `Hyrax::Forms::ResourceForm` includes `CompoundFieldBehavior`, but the tag
   omits the file defining it. Pin to a release tag once a fixed one ships.
@@ -51,6 +52,14 @@ Work toward 1.0.0: a Valkyrie-native, flexible-metadata-aware rewrite. See the n
   `doi_status_when_public_ssi`, and `doi_state_ssi`. A no-op where a schema loader
   already supplies those keys.
 - `config/metadata/doi.yaml`, so a non-flex application can `include Hyrax::Schema(:doi)`.
+- `rails hyrax:doi:install_flexible_profile`, adding the `doi` properties to an m3 profile.
+  It creates a **new** profile version rather than editing the current one, since saved
+  works pin `schema_version` to a row id. Pass `CLASSES=Monograph,Image` to limit which
+  work types receive them.
+- A profile validator that warns when an m3 profile's `doi` property is missing, has no
+  `view:` block (which would keep it off the show page), or is available on no class the
+  profile declares. It only ever warns: the attribute may be declared on the work class
+  alone, which no profile can see.
 - `Hyrax::DOI::PersistentIdentifier`, one row per identifier per resource. Replaces storing a
   DOI in a single overwritable attribute, so a resource can hold several identifiers at once
   (a DOI and a RAiD, say), each with its own state and sync history. Install the table with
@@ -79,8 +88,9 @@ Work toward 1.0.0: a Valkyrie-native, flexible-metadata-aware rewrite. See the n
   Drops 28 transitive dependencies.
 - The exact `addressable` 2.8.1 pin, which existed to work around postrank-uri#49 — fixed in
   postrank-uri 1.1.
-- The `dassie` (ActiveFedora) test harness: `docker-compose.yml`, `Gemfile.dassie`, and
-  `Gemfile.dassie.lock`. The gem is Valkyrie-only as of 1.0.0.
+- The ActiveFedora-only `docker-compose.yml` and its committed `Gemfile.dassie.lock`. The
+  dassie app is still used, but only via the `freyja` target, which runs it with
+  `VALKYRIE_TRANSITION=true` so writes come back as Valkyrie.
 - `chromedriver-helper` development dependency — unmaintained since 2019 and incompatible with
   current Chrome. The test apps' `chrome` service is used instead.
 - The `simplecov` version pin (`0.17.1`), which existed to work around a long-since-resolved
