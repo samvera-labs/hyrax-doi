@@ -42,6 +42,27 @@ Work toward 1.0.0: a Valkyrie-native, flexible-metadata-aware rewrite. See the n
 
 ### Added
 
+- `Hyrax::DOI::DataCiteSerializer`, building a DataCite REST v2 payload from a work. Which
+  work field feeds which DataCite field is read from `datacite_mapping` on m3 profile
+  properties, so it can be changed without a deploy:
+
+  ```yaml
+  contributor:
+    datacite_mapping: creators
+  ```
+
+  Values that must be derived rather than read come from a configured extractor instead —
+  a repository with no `creator` field can build creators from its typed-role
+  contributors:
+
+  ```ruby
+  Hyrax::DOI.configure do |config|
+    config.creator_extractor = ->(work) { ... }
+  end
+  ```
+
+  `#missing_required` reports which fields a registered or findable DOI still needs, so a
+  caller can say so before DataCite rejects the submission.
 - `Hyrax::DOI::CredentialStore`, the seam credentials are read through. Defaults to
   `EnvCredentialStore` (`DATACITE_PREFIX`, `DATACITE_USERNAME`, `DATACITE_PASSWORD`,
   `DATACITE_MODE`), which is enough for a single-tenant application:

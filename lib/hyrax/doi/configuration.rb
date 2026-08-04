@@ -23,6 +23,12 @@ module Hyrax
       def credential_store
         @credential_store ||= Hyrax::DOI::EnvCredentialStore.new
       end
+
+      ##
+      # Supply a DataCite value the work cannot simply be read for. A repository with no
+      # creator field has to derive creators from its typed-role contributors, which no
+      # profile mapping expresses. Called with the work; nil means read the field.
+      attr_accessor :creator_extractor, :publisher_extractor
     end
 
     class << self
