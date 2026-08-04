@@ -12,6 +12,12 @@ Work toward 1.0.0: a Valkyrie-native, flexible-metadata-aware rewrite. See the n
 
 ### Changed
 
+- **`DataCiteRegistrar.prefix=`, `.username=`, `.password=`, and `.mode=` are gone.**
+  Credentials are now held per registrar instance and resolved per call. Those were
+  `class_attribute`s, which are process-wide: two Sidekiq threads serving different tenants
+  could overwrite each other's credentials mid-flight. Configure a credential store instead.
+- `:doi_minting` is now actually consulted before registering. The check was previously
+  stubbed to always return true.
 - Work types now carry `doi` as a Valkyrie attribute instead of an ActiveFedora
   `property`, and `doi_status_when_public` records the depositor's **intent** only. What
   the provider currently reports lives on the `PersistentIdentifier` record, reachable as
@@ -36,6 +42,24 @@ Work toward 1.0.0: a Valkyrie-native, flexible-metadata-aware rewrite. See the n
 
 ### Added
 
+- `Hyrax::DOI::CredentialStore`, the seam credentials are read through. Defaults to
+  `EnvCredentialStore` (`DATACITE_PREFIX`, `DATACITE_USERNAME`, `DATACITE_PASSWORD`,
+  `DATACITE_MODE`), which is enough for a single-tenant application:
+
+  ```ruby
+  Hyrax::DOI.configure do |config|
+    config.credential_store = MyTenantAwareStore.new
+  end
+  ```
+
+  The gem ships no persistence model — a host that already stores provider credentials
+  should not be handed a second place to keep them.
+- `CredentialStore.field_schema_for('datacite')`, describing the fields a provider needs
+  (including which are secret and which offer fixed choices), so an admin form can render
+  itself instead of hardcoding field names.
+- `DataCiteRegistrar#ping`, confirming both that DataCite is reachable and that the
+  credentials work, without minting anything or consuming quota. An outage and a rejected
+  password report differently, so the message is actionable.
 - `holds_doi_in`, so a work type can hold its DOI in an attribute other than `doi`:
 
   ```ruby

@@ -16,6 +16,35 @@ module Hyrax
         @mode = mode
       end
 
+      # Is DataCite reachable? The heartbeat endpoint answers regardless of who is
+      # asking, so this says nothing about whether the credentials work.
+      def heartbeat
+        response = connection.get('heartbeat')
+        if response.status == 200
+          PingResult.new(success: true, message: 'DataCite is reachable.')
+        else
+          PingResult.new(success: false, message: "DataCite returned #{response.status}.")
+        end
+      rescue Faraday::Error => e
+        PingResult.new(success: false, message: "Could not reach DataCite: #{e.message}")
+      end
+
+      # Do these credentials work? Lists a single DOI, the cheapest authenticated read
+      # available: it mints nothing and consumes no quota.
+      def verify_credentials
+        response = connection.get('dois', 'page[size]' => 1)
+        case response.status
+        when 200
+          PingResult.new(success: true, message: 'DataCite accepted these credentials.')
+        when 401, 403
+          PingResult.new(success: false, message: 'DataCite rejected these credentials.')
+        else
+          PingResult.new(success: false, message: "DataCite returned #{response.status}.")
+        end
+      rescue Faraday::Error => e
+        PingResult.new(success: false, message: "Could not reach DataCite: #{e.message}")
+      end
+
       # Mint a draft DOI without metadata or a url
       # If you already have a DOI and want to register it as a draft then go through the normal process (put_metadata/register_url)
       def create_draft_doi

@@ -60,8 +60,8 @@ module Hyrax
         params[:attribute] || "doi"
       end
 
-      # Replaced by Hyrax::DOI::DOIResolver, which resolves a DOI through doi.org content
-      # negotiation. The bolognese lookup this used has been removed.
+      # Awaiting Hyrax::DOI::DOIResolver, which resolves a DOI through doi.org content
+      # negotiation.
       def hyrax_work_from_doi(_doi)
         raise NotImplementedError, 'DOI autofill is not implemented yet'
       end

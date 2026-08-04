@@ -17,6 +17,12 @@ module Hyrax
       def provider_for(scheme)
         default_providers[scheme.to_s]
       end
+
+      attr_writer :credential_store
+
+      def credential_store
+        @credential_store ||= Hyrax::DOI::EnvCredentialStore.new
+      end
     end
 
     class << self
@@ -28,7 +34,12 @@ module Hyrax
         yield config
       end
 
-      # Intended for tests.
+      # Resolved per call rather than cached, so a request or job that has switched
+      # tenants gets that tenant's credentials.
+      def credentials_for(provider)
+        config.credential_store.fetch(provider: provider)
+      end
+
       def reset_config!
         @config = nil
       end

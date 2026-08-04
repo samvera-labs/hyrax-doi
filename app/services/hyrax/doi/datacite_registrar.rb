@@ -4,11 +4,25 @@ module Hyrax
     class DataCiteRegistrar < Hyrax::Identifier::Registrar
       STATES = %w[draft registered findable].freeze
 
-      # FIXME: make this configurable in a different way so tenants can have different configs in Hyku
-      class_attribute :prefix, :username, :password, :mode
+      attr_reader :credentials
 
-      def initialize(builder: Hyrax::Identifier::Builder.new(prefix: self.prefix))
-        super
+      # Credentials are per instance, never class-level: a Sidekiq process runs threads
+      # for several tenants at once, and process-wide state would let them overwrite each
+      # other mid-flight.
+      def initialize(builder: nil, credentials: nil)
+        @credentials = credentials || Hyrax::DOI.credentials_for('datacite')
+        super(builder: builder || Hyrax::Identifier::Builder.new(prefix: @credentials.prefix))
+      end
+
+      # Checks reachability first so an outage and a bad password produce different
+      # messages: an operator can act on the difference.
+      def ping
+        return PingResult.new(success: false, message: 'DataCite credentials are incomplete.') unless credentials.complete?
+
+        reachable = client.heartbeat
+        return reachable if reachable.failure?
+
+        client.verify_credentials
       end
 
       ##
@@ -53,8 +67,7 @@ module Hyrax
       end
 
       def doi_minting_enabled?
-        # TODO: Check feature flipper (needs to be per work type? per tenant for Hyku?)
-        true
+        Flipflop.enabled?(:doi_minting)
       end
 
       def public?(work)
@@ -62,7 +75,10 @@ module Hyrax
       end
 
       def client
-        @client ||= Hyrax::DOI::DataCiteClient.new(username: self.username, password: self.password, prefix: self.prefix, mode:)
+        @client ||= Hyrax::DOI::DataCiteClient.new(username: credentials.username,
+                                                   password: credentials.password,
+                                                   prefix: credentials.prefix,
+                                                   mode: credentials.mode)
       end
 
       # Do the heavy lifting of submitting the metadata, registering the url, and ensuring the correct status
@@ -85,8 +101,8 @@ module Hyrax
         Rails.application.routes.url_helpers.polymorphic_url(work)
       end
 
-      # Replaced by Hyrax::DOI::DataCiteSerializer, which builds DataCite JSON for the
-      # REST API directly. The bolognese XML crosswalk this used has been removed.
+      # Awaiting Hyrax::DOI::DataCiteSerializer, which builds DataCite JSON for the REST
+      # API directly.
       def work_to_datacite_xml(_work)
         raise NotImplementedError, 'DataCite serialization is not implemented yet'
       end
