@@ -64,7 +64,10 @@ module Hyrax
       end
 
       config.after_initialize do
-        Hyrax::CurationConcern.actor_factory.use Hyrax::Actors::DOIActor
+        # Subscribed rather than added as a transaction step: Hyrax documents its publisher
+        # as an extension point, while Transactions::Container is not one -- Hyrax's own
+        # redirects feature had to edit core to add a step there.
+        Hyrax.publisher.subscribe(Hyrax::DOI::PublisherListener.new)
 
         # Prepend our views in front of Hyrax but after the main app, so they have precedence
         # but can still be overridden

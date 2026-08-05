@@ -78,8 +78,7 @@ module Hyrax
         nil
       end
 
-      # Override to pass options to the registrar. Must stay free of secrets: these are
-      # serialized into job payloads.
+      # Override to pass options to the registrar.
       def doi_registrar_opts
         {}
       end

@@ -65,6 +65,14 @@ Work toward 1.0.0: a Valkyrie-native, flexible-metadata-aware rewrite. See the n
 
 ### Added
 
+- `Hyrax::DOI::PublisherListener`, keeping DataCite's copy of a work's metadata current.
+  Subscribed to `object.metadata.updated` **and `object.acl.updated`**: embargo and lease
+  release change permissions without saving metadata, so they publish only the latter, and
+  a work whose intent is *findable* would otherwise sit at `registered` forever after
+  release — exactly the case a depositor chose *findable* for.
+
+  It only ever updates. Editing a work with no DOI mints nothing, and an identifier with
+  `origin: external` is left alone, since it belongs to whoever issued it.
 - A `mint` action, so a work deposited without a DOI can be given one. Requires edit
   permission on the work, and returns the DOI with the state DataCite reported.
 - `app/views/hyrax/base/_show_action_mint_doi.html.erb`, the show-page button, contributed
@@ -183,6 +191,15 @@ Work toward 1.0.0: a Valkyrie-native, flexible-metadata-aware rewrite. See the n
 
 ### Removed
 
+- **`Hyrax::Actors::DOIActor` and the actor stack registration.** Hyrax's actor stack is
+  deprecated in favor of transactions, and the actor's own `update` re-saved the work to
+  force attribute persistence before enqueuing. A publisher listener needs neither.
+- **`Hyrax::DOI::RegisterDOIJob`, replaced by `SyncDOIJob`.** It went through
+  `Hyrax::Identifier::Dispatcher`, whose `assign_for` overwrites the identifier attribute,
+  so a work could hold only one identifier — and it bypasses the transaction, so Solr was
+  never reindexed. The new job takes a resource id rather than a serialized work: what to
+  send DataCite is whatever is true when the job runs, and the provider comes from the
+  identifier's own record, so a second provider needs no rewiring.
 - The legacy MDS API. `put_metadata`, `delete_metadata`, `get_metadata`, `get_url`,
   `register_url`, and `delete_draft_doi` are replaced by `put_doi`, `get_doi`, and
   `delete_doi` against `api.datacite.org`.

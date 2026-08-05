@@ -1,4 +1,12 @@
 # IMPLEMENTATION PROCESS DETAILS
+
+> **This guide describes the 0.3.x ActiveFedora API and no longer applies.** The steps
+> below reference code that has been removed: `DataCiteRegistrar.mode =` and its sibling
+> class attributes, `Hyrax::Actors::DOIActor` and the actor stack registration, and a
+> hand-written form helper the engine now wires itself. Updated instructions land with
+> 1.0.0 (see [CHANGELOG.md](../CHANGELOG.md)). For ActiveFedora applications, use the
+> `0.3-stable` branch.
+
 # Summary
 A step by step guide to accompany [README](https://github.com/samvera-labs/hyrax-doi) implementation, usage, and configuration with the [DataCite RA](https://datacite.org/) and [Hyrax v2.9.0](https://github.com/samvera/hyrax/tree/v2.9.0) application.
 

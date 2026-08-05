@@ -1,12 +1,10 @@
 # frozen_string_literal: true
 module Hyrax
   module DOI
-    # One row per identifier per resource.
-    #
-    # This exists rather than an attribute on the resource because
-    # Hyrax::Identifier::Dispatcher#assign_for overwrites the whole attribute, so a
-    # resource could hold only one identifier. A work may need several at once -- a DOI
-    # and a RAiD, say -- and each carries its own state and sync history.
+    # One row per identifier per resource, rather than one identifier held in an attribute
+    # on the resource: a work may carry several at once -- a DOI and a RAiD, say -- and
+    # each has its own state and sync history. The resource's `doi` attribute is a
+    # projection of the primary row, kept for indexing and display.
     #
     # See the migration template for why individual columns are shaped as they are.
     class PersistentIdentifier < ActiveRecord::Base
