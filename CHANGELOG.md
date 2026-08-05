@@ -12,6 +12,9 @@ Work toward 1.0.0: a Valkyrie-native, flexible-metadata-aware rewrite. See the n
 
 ### Changed
 
+- **`create_draft_doi` is a POST, not a GET**, and the controller renders JSON rather than
+  executable JavaScript. Reserving an identifier has a side effect at DataCite, so a
+  browser prefetch or a crawler must not be able to trigger it.
 - **The DataCite client speaks REST v2 only.** State is set by an explicit `event`
   (`register`, `publish`, `hide`) on one idempotent `PUT /dois/:id`, rather than emerging
   from the side effects of a metadata call, a url call, and a corrective delete. A work
@@ -51,6 +54,13 @@ Work toward 1.0.0: a Valkyrie-native, flexible-metadata-aware rewrite. See the n
 
 ### Added
 
+- A `mint` action, so a work deposited without a DOI can be given one. Requires edit
+  permission on the work, and returns the DOI with the state DataCite reported.
+- `MintButtonHelper#show_mint_doi_button?`, answering whether to offer minting on a show
+  page from what a presenter exposes.
+- The engine registers its own registrar, so installing the gem is enough. Hyrax ships an
+  empty registrar hash, and its generator only writes one into a host initializer — easy to
+  skip, and minting is then silently unavailable.
 - `Hyrax::DOI::MintingPolicy`, deciding whether a work should get a DOI. The registrar
   consults it rather than checking inline, so a repository can restrict minting to
   particular work types:

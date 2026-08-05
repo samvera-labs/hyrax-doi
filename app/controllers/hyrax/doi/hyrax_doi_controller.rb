@@ -2,97 +2,73 @@
 module Hyrax
   module DOI
     class HyraxDOIController < ApplicationController
-      before_action :check_authorization
+      before_action :check_deposit_authorization, only: %i[create_draft_doi autofill]
+      before_action :check_edit_authorization, only: :mint
 
+      # Reserves a DOI without submitting the deposit form, so a depositor can embed it in
+      # the file they are about to upload.
       def create_draft_doi
-        if Flipflop.enabled?(:doi_minting)
-          draft_doi = mint_draft_doi
+        return render_disabled unless Flipflop.enabled?(:doi_minting)
 
-          respond_to do |format|
-            format.js { render js: autofill_field(doi_attribute_name, draft_doi), status: :created }
-            format.json { render_json_response(response_type: :created, options: { data: draft_doi }) }
-          end
+        render json: { doi: doi_registrar.mint_draft_doi }, status: :created
+      rescue Hyrax::DOI::DataCiteClient::Error => e
+        render json: { error: e.message }, status: :bad_gateway
+      end
+
+      def mint
+        return render_disabled unless Flipflop.enabled?(:doi_minting)
+
+        result = doi_registrar.register!(object: work)
+        if result.success?
+          render json: { doi: result.identifier, state: result.state }, status: :ok
         else
-          respond_to do |format|
-            format.js { render plain: I18n.t("errors.doi_minting.disabled"), status: :internal_error }
-            format.json { render_json_response(response_type: :internal_error, message: I18n.t("errors.doi_minting.disabled")) }
-          end
+          render json: { error: result.error_message }, status: :unprocessable_entity
         end
       rescue Hyrax::DOI::DataCiteClient::Error => e
-        respond_to do |format|
-          format.js { render plain: e.message, status: :internal_server_error }
-          format.json { render_json_response(response_type: :internal_error, message: e.full_message) }
-        end
+        render json: { error: e.message }, status: :bad_gateway
       end
 
       def autofill
-        doi = params['doi']
-
-        respond_to do |format|
-          format.js { render js: autofill_js(doi), status: :ok }
-        end
+        render json: { attributes: hyrax_work_from_doi(params.require(:doi)) }, status: :ok
       rescue Hyrax::DOI::NotFoundError => e
-        respond_to do |format|
-          format.js { render plain: e.message, status: :internal_server_error }
-        end
+        render json: { error: e.message }, status: :not_found
       end
 
       private
 
-      def check_authorization
-        raise Hydra::AccessDenied unless current_ability.can_create_any_work?
+      # Reserving a draft DOI needs deposit rights, not rights over any particular work:
+      # there is no work yet when the deposit form asks for one.
+      def check_deposit_authorization
+        render json: { error: 'Not authorized.' }, status: :forbidden unless current_ability.can_create_any_work?
       end
 
-      def mint_draft_doi
-        doi_registrar.mint_draft_doi
+      def check_edit_authorization
+        render json: { error: 'Not authorized.' }, status: :forbidden unless current_ability.can?(:edit, work)
+      end
+
+      def work
+        return @work if defined?(@work)
+
+        @work = Hyrax.query_service.find_by(id: params[:id])
       end
 
       def doi_registrar
-        # TODO: generalize this
-        Hyrax::Identifier::Registrar.for(:datacite)
+        Hyrax::Identifier::Registrar.for(provider_for_doi.to_sym)
       end
 
-      def field_selector(attribute_name)
-        ".#{params[:curation_concern]}_#{attribute_name}"
+      def provider_for_doi
+        Hyrax::DOI.config.provider_for('doi') ||
+          raise(Hyrax::DOI::Error, 'No provider is configured for the doi scheme.')
       end
 
-      def doi_attribute_name
-        params[:attribute] || "doi"
+      def render_disabled
+        render json: { error: I18n.t('errors.doi_minting.disabled') }, status: :service_unavailable
       end
 
       # Awaiting Hyrax::DOI::DOIResolver, which resolves a DOI through doi.org content
       # negotiation.
       def hyrax_work_from_doi(_doi)
         raise NotImplementedError, 'DOI autofill is not implemented yet'
-      end
-
-      # TODO: Move this out to a partial that gets rendered?
-      def autofill_js(doi)
-        # TODO: Need to wipe old data or is this just supplemental?
-        js = hyrax_work_from_doi(doi).attributes.collect { |k, v| autofill_field(k, v) }.compact_blank.join("\n")
-        js << "document.location = '#metadata';"
-      end
-
-      # TODO: Move this out to a partial that gets rendered?
-      def autofill_field(attribute_name, value)
-        js = []
-        curation_concern = params[:curation_concern] || 'generic_work'
-        # TODO: add error handling in the JS so an error doesn't leave the autofilling incomplete
-        Array(value).each_with_index do |v, index|
-          # Is this the right way to do this?
-          # Need to be smarter to see if all repeated fields are filled before trying to create a new one by clicking?
-          js << "document.querySelectorAll('#{field_selector(attribute_name)} button.add')[0].click();" unless index.zero?
-          # Use the field ID directly - this is more reliable than complex selectors
-          js << "var field = document.getElementById('#{curation_concern}_#{attribute_name}'); if (field) { field.value = '#{helpers.escape_javascript(v)}'; }"
-        end
-        js.compact_blank.join("\n")
-      end
-
-      # Override of Hyrax method (See https://github.com/samvera/hyrax/pull/4495)
-      # render a json response for +response_type+
-      def render_json_response(response_type: :success, message: nil, options: {})
-        json_body = Hyrax::API.generate_response_body(response_type:, message:, options:)
-        render json: json_body, status: Hyrax::API.default_responses[response_type][:code]
       end
     end
   end

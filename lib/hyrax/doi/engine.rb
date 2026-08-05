@@ -19,6 +19,16 @@ module Hyrax
         Flipflop::FeatureLoader.current.append(self)
       end
 
+      # Registers itself so installing the gem is enough. Hyrax ships an empty registrar
+      # hash and its own generator only writes one into a host initializer, which is easy
+      # to skip and leaves minting silently unavailable.
+      initializer 'hyrax_doi.register_registrars' do
+        config.to_prepare do
+          Hyrax.config.identifier_registrars =
+            { datacite: Hyrax::DOI::DataCiteRegistrar }.merge(Hyrax.config.identifier_registrars)
+        end
+      end
+
       # Lets a non-flex application `include Hyrax::Schema(:doi)` and pick up
       # config/metadata/doi.yaml from this gem. Unshifted so the application can still
       # shadow it with its own doi.yaml -- first match wins.
