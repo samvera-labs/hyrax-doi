@@ -4,6 +4,20 @@ module Hyrax
     class DataCiteRegistrar < Hyrax::Identifier::Registrar
       STATES = %w[draft registered findable].freeze
 
+      # DataCite state transitions are one-way past draft: a registered or findable DOI is
+      # a public promise that the identifier resolves, so it can be hidden but never
+      # withdrawn or demoted. Given what DataCite currently reports for a work, these are
+      # the intents a depositor can no longer choose.
+      def self.state_unreachable?(state, from:)
+        return false if from.blank?
+
+        case state.presence
+        when nil then true
+        when 'draft' then from != 'draft'
+        else false
+        end
+      end
+
       attr_reader :credentials
 
       # Credentials are per instance, never class-level: a Sidekiq process runs threads

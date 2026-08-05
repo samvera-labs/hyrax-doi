@@ -1,0 +1,14 @@
+<%# Contributed to the show page's action row via Hyrax's show_actions_for. %>
+<% if show_mint_doi_button?(presenter) %>
+  <div class="hyrax-doi-mint" data-doi-mint>
+    <button type="button"
+            class="btn btn-secondary"
+            data-doi-mint-button
+            data-doi-url="<%= Hyrax::DOI::Engine.routes.url_helpers.mint_path(id: presenter.id) %>"
+            data-doi-working="<%= t('hyrax.doi.mint_button.working') %>"
+            data-doi-error="<%= t('hyrax.doi.form.draft.error') %>">
+      <%= t('hyrax.doi.mint_button.label') %>
+    </button>
+    <span class="form-text" data-doi-status aria-live="polite"></span>
+  </div>
+<% end %>

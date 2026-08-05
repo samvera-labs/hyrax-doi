@@ -19,6 +19,15 @@ module Hyrax
       UNAVAILABLE = ':unav'
       DEFAULT_RESOURCE_TYPE = 'Other'
 
+      # The work fields feeding DataCite's required set, for a caller that needs to name
+      # them before a save -- the deposit form warns about blanks. Resolved through the
+      # profile mapping, so a repository that feeds publicationYear from something other
+      # than date_created gets its own field named.
+      def self.required_work_fields
+        sources = DEFAULT_SOURCES.merge(profile_mapping)
+        REQUIRED.filter_map { |field| sources[field] }.uniq
+      end
+
       # `datacite_mapping` keys on m3 properties, inverted to DataCite field => work
       # field, so which field feeds which is profile data rather than code. Absent from
       # Hyrax's own profiles; adopters add it.

@@ -15,6 +15,17 @@ Work toward 1.0.0: a Valkyrie-native, flexible-metadata-aware rewrite. See the n
 - **`create_draft_doi` is a POST, not a GET**, and the controller renders JSON rather than
   executable JavaScript. Reserving an identifier has a side effect at DataCite, so a
   browser prefetch or a crawler must not be able to trigger it.
+- **The DOI tab's inline `<script>` is gone**, replaced by `hyrax/doi/doi_form.js` —
+  vanilla JS, event-delegated, reading `data-` attributes. The old handler used the
+  jquery-ujs `ajax:beforeSend` signature `(e, xhr, settings)` while the stack ships
+  rails-ujs, which passes a single event: `settings` was always undefined, so the DOI was
+  never appended to the autofill request.
+- **The missing-required-fields warning is data-driven.** It read four hardcoded selectors,
+  including `.x_creator`, which silently matches nothing in a repository with no `creator`
+  field — so the warning never fired there. The fields now come from the serializer.
+- **Which DOI intents are offered depends on what DataCite reports**, not on the intent
+  field. The old partial disabled options from `doi_status_when_public`, its own TODO noting
+  it should use real DataCite state; that state now lives on the PID record.
 - **The DataCite client speaks REST v2 only.** State is set by an explicit `event`
   (`register`, `publish`, `hide`) on one idempotent `PUT /dois/:id`, rather than emerging
   from the side effects of a metadata call, a url call, and a corrective delete. A work
@@ -56,11 +67,23 @@ Work toward 1.0.0: a Valkyrie-native, flexible-metadata-aware rewrite. See the n
 
 - A `mint` action, so a work deposited without a DOI can be given one. Requires edit
   permission on the work, and returns the DOI with the state DataCite reported.
+- `app/views/hyrax/base/_show_action_mint_doi.html.erb`, the show-page button, contributed
+  through Hyrax's `show_actions_for` helper so the gem overrides no view. That seam is new
+  in Hyrax; on an earlier version nothing renders the partial, and an application wanting
+  the button renders it directly.
+- `DataCiteRegistrar.state_unreachable?`, which the form uses to close off intents a DOI
+  can no longer reach. Past draft, DataCite transitions are one-way: a registered or
+  findable DOI is a public promise that the identifier resolves, so it can be hidden but
+  never withdrawn or returned to draft.
+- `DataCiteSerializer.required_work_fields`, naming the work fields that feed DataCite's
+  required set. Resolved through the profile mapping, so the form warns about the fields a
+  repository actually uses.
 - `MintButtonHelper#show_mint_doi_button?`, answering whether to offer minting on a show
   page from what a presenter exposes.
-- The engine registers its own registrar, so installing the gem is enough. Hyrax ships an
-  empty registrar hash, and its generator only writes one into a host initializer — easy to
-  skip, and minting is then silently unavailable.
+- The engine registers its own registrar and wires its own helpers, so installing the gem
+  is enough. Hyrax ships an empty registrar hash, and the install generator only writes the
+  registrar into a host initializer and the helpers into the host's `HyraxHelper` — easy to
+  skip, and both minting and the DOI tab are then silently unavailable.
 - `Hyrax::DOI::MintingPolicy`, deciding whether a work should get a DOI. The registrar
   consults it rather than checking inline, so a repository can restrict minting to
   particular work types:

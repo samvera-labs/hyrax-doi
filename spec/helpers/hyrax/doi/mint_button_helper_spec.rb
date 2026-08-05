@@ -63,4 +63,20 @@ RSpec.describe Hyrax::DOI::MintButtonHelper do
     plain = instance_double(Hyrax::WorkShowPresenter)
     expect(helper_object.show_mint_doi_button?(plain, ability: ability)).to be false
   end
+
+  describe '#show_actions_for' do
+    subject(:contributor) do
+      Class.new do
+        def show_actions_for(presenter:) # rubocop:disable Lint/UnusedMethodArgument
+          ['someone_elses_action']
+        end
+        prepend Hyrax::DOI::MintButtonHelper
+      end.new
+    end
+
+    it 'adds its action without displacing another engine\'s' do
+      expect(contributor.show_actions_for(presenter: presenter))
+        .to eq %w[someone_elses_action mint_doi]
+    end
+  end
 end

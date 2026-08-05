@@ -48,6 +48,21 @@ module Hyrax
         service.prepend(decorator) unless service.ancestors.include?(decorator)
       end
 
+      # Contributes the DOI tab and the mint action to Hyrax's helper seams. Wired here
+      # rather than left to the install generator: a host that skips the generator would
+      # otherwise get a working registrar with no UI reaching it.
+      config.to_prepare do
+        # Prepended, not included, so form_tabs_for and show_actions_for reach Hyrax's
+        # implementations through super. A plain helper include would replace each method
+        # rather than wrap it, dropping both Hyrax's tabs and any other engine's actions.
+        { Hyrax::WorkFormHelper => Hyrax::DOI::WorkFormHelper,
+          Hyrax::WorksHelper => Hyrax::DOI::MintButtonHelper }.each do |target, mod|
+          target.prepend(mod) unless target.ancestors.include?(mod)
+        end
+
+        ActionController::Base.helper(Hyrax::DOI::WorkShowHelper)
+      end
+
       config.after_initialize do
         Hyrax::CurationConcern.actor_factory.use Hyrax::Actors::DOIActor
 
