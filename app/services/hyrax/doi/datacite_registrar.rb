@@ -50,20 +50,8 @@ module Hyrax
 
       private
 
-      # A blank doi_status_when_public means the depositor asked for no DOI, so it is not
-      # an error -- register! returns the existing DOI untouched.
       def register?(work)
-        doi_enabled_work_type?(work) &&
-          doi_minting_enabled? &&
-          work.doi_status_when_public.in?(Hyrax::DOI::DataCiteRegistrar::STATES)
-      end
-
-      def doi_enabled_work_type?(work)
-        work.class.ancestors.include?(Hyrax::DOI::DOIBehavior) && work.class.ancestors.include?(Hyrax::DOI::DataCiteDOIBehavior)
-      end
-
-      def doi_minting_enabled?
-        Flipflop.enabled?(:doi_minting)
+        Hyrax::DOI.config.minting_policy.mintable?(work)
       end
 
       def public?(work)

@@ -29,6 +29,12 @@ module Hyrax
       # creator field has to derive creators from its typed-role contributors, which no
       # profile mapping expresses. Called with the work; nil means read the field.
       attr_accessor :creator_extractor, :publisher_extractor
+
+      attr_writer :minting_policy
+
+      def minting_policy
+        @minting_policy ||= Hyrax::DOI::MintingPolicy.new
+      end
     end
 
     class << self

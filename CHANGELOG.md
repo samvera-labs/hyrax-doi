@@ -51,6 +51,20 @@ Work toward 1.0.0: a Valkyrie-native, flexible-metadata-aware rewrite. See the n
 
 ### Added
 
+- `Hyrax::DOI::MintingPolicy`, deciding whether a work should get a DOI. The registrar
+  consults it rather than checking inline, so a repository can restrict minting to
+  particular work types:
+
+  ```ruby
+  Hyrax::DOI.configure do |config|
+    config.minting_policy = Hyrax::DOI::MintingPolicy.new(work_types: %w[Dataset Monograph])
+  end
+  ```
+
+  Defaults to any work type that names a registrar and whose depositor asked for a DOI.
+  Naming a registrar is what a scheme concern adds, so it is a stronger signal than
+  carrying the `doi_status_when_public` attribute, which a metadata profile could declare
+  on a work type with nothing to mint through.
 - `Hyrax::DOI::DataCiteSerializer`, building a DataCite REST v2 payload from a work. Which
   work field feeds which DataCite field is read from `datacite_mapping` on m3 profile
   properties, so it can be changed without a deploy:
