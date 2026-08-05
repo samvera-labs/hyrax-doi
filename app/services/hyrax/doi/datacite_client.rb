@@ -4,10 +4,17 @@ module Hyrax
     class DataCiteClient
       attr_reader :username, :password, :prefix, :mode
 
-      TEST_BASE_URL = "https://api.test.datacite.org/"
-      TEST_MDS_BASE_URL = "https://mds.test.datacite.org/"
-      PRODUCTION_BASE_URL = "https://api.datacite.org/"
-      PRODUCTION_MDS_BASE_URL = "https://mds.datacite.org/"
+      TEST_BASE_URL = 'https://api.test.datacite.org/'
+      PRODUCTION_BASE_URL = 'https://api.datacite.org/'
+
+      JSON_API_TYPE = 'application/vnd.api+json'
+
+      # DataCite moves a DOI between states by an explicit `event` rather than by side
+      # effects of metadata operations. Omitting it leaves the state alone, so a new DOI
+      # stays draft -- the only state a DOI can be deleted from.
+      EVENTS = { register: 'register', publish: 'publish', hide: 'hide' }.freeze
+
+      Record = Data.define(:doi, :state, :attributes)
 
       def initialize(username:, password:, prefix:, mode: :production)
         @username = username
@@ -34,134 +41,106 @@ module Hyrax
       def verify_credentials
         response = connection.get('dois', 'page[size]' => 1)
         case response.status
-        when 200
-          PingResult.new(success: true, message: 'DataCite accepted these credentials.')
-        when 401, 403
-          PingResult.new(success: false, message: 'DataCite rejected these credentials.')
-        else
-          PingResult.new(success: false, message: "DataCite returned #{response.status}.")
+        when 200 then PingResult.new(success: true, message: 'DataCite accepted these credentials.')
+        when 401, 403 then PingResult.new(success: false, message: 'DataCite rejected these credentials.')
+        else PingResult.new(success: false, message: "DataCite returned #{response.status}.")
         end
       rescue Faraday::Error => e
         PingResult.new(success: false, message: "Could not reach DataCite: #{e.message}")
       end
 
-      # Mint a draft DOI without metadata or a url
-      # If you already have a DOI and want to register it as a draft then go through the normal process (put_metadata/register_url)
+      # Reserves a DOI with no metadata and no url. Sending only the prefix lets DataCite
+      # assign the suffix.
       def create_draft_doi
-        # Use regular api instead of mds for metadata-less url-less draft doi creation
-        response = connection.post('dois', draft_doi_payload.to_json, "Content-Type" => "application/vnd.api+json")
+        response = post('dois', data: { type: 'dois', attributes: { prefix: prefix } })
         raise Error.new('Failed creating draft DOI', response) unless response.status == 201
 
-        JSON.parse(response.body)['data']['id']
+        parse(response).doi
       end
 
-      def delete_draft_doi(doi)
-        response = mds_connection.delete("doi/#{doi}")
-        raise Error.new('Failed deleting draft DOI', response) unless response.status == 200
+      # Creates or updates a DOI in one idempotent call.
+      def put_doi(doi, attributes:, event: nil)
+        payload = attributes.dup
+        payload[:event] = event if event.present?
 
-        doi
+        response = put("dois/#{doi}", data: { type: 'dois', attributes: payload })
+        raise Error.new("Failed submitting DOI #{doi}", response) unless response.status.in?([200, 201])
+
+        parse(response)
       end
 
-      def get_metadata(doi)
-        response = mds_connection.get("metadata/#{doi}")
-        raise Error.new('Failed getting DOI metadata', response) unless response.status == 200
+      # @return [Record, nil] nil when DataCite has no such DOI
+      def get_doi(doi)
+        response = connection.get("dois/#{doi}")
+        return nil if response.status == 404
+        raise Error.new("Failed fetching DOI #{doi}", response) unless response.status == 200
 
-        Nokogiri::XML(response.body).remove_namespaces!
+        parse(response)
       end
 
-      # This will mint a new draft DOI if the passed doi parameter is blank
-      # The passed datacite xml needs an identifier (just the prefix when minting new DOIs)
-      # Beware: This will convert registered DOIs into findable!
-      def put_metadata(doi, metadata)
-        doi = prefix if doi.blank?
-        response = mds_connection.put("metadata/#{doi}", metadata, { 'Content-Type': 'application/xml;charset=UTF-8' })
-        raise Error.new('Failed creating metadata for DOI', response) unless response.status == 201
+      # Only drafts can be deleted; registered and findable DOIs are permanent.
+      def delete_doi(doi)
+        response = connection.delete("dois/#{doi}")
+        raise Error.new("Failed deleting DOI #{doi}", response) unless response.status.in?([200, 204])
 
-        /^OK \((?<found_or_created_doi>.*)\)$/ =~ response.body
-        found_or_created_doi
-      end
-
-      # Beware: This will make findable DOIs become registered (by setting is_active to false)
-      # Otherwise this has no effect on the DOI's metadata (even when draft)
-      # Beware: Attempts to delete the metadata of an unknown DOI will actually create a blank draft DOI
-      def delete_metadata(doi)
-        response = mds_connection.delete("metadata/#{doi}")
-        raise Error.new('Failed deleting DOI metadata', response) unless response.status == 200
-
-        doi
-      end
-
-      def get_url(doi)
-        response = mds_connection.get("doi/#{doi}")
-        raise Error.new('Failed getting DOI url', response) unless response.status == 200
-
-        response.body
-      end
-
-      # Beware: This will convert draft DOIs to findable!
-      # Metadata needs to be registered for a DOI before a url can be registered
-      def register_url(doi, url)
-        payload = "doi=#{doi}\nurl=#{url}"
-        response = mds_connection.put("doi/#{doi}", payload, { 'Content-Type': 'text/plain;charset=UTF-8' })
-        raise Error.new('Failed registering url for DOI', response) unless response.status == 201
-
-        url
+        true
       end
 
       class Error < RuntimeError
-        ##
-        # @!attribute [r] status
-        #   @return [Integer]
-        attr_reader :status
+        attr_reader :status, :errors
 
-        ##
-        # @param msg      [String]
-        # @param response [Faraday::Response]
         def initialize(msg = '', response = nil)
           if response
             @status = response.status
-            msg += "\n#{@status}: #{response.reason_phrase}\n"
-            msg += response.body
+            @errors = extract_errors(response)
+            msg += " -- #{@status}"
+            msg += ": #{@errors.join('; ')}" if @errors.any?
           end
 
           super(msg)
+        end
+
+        private
+
+        # JSON:API returns errors as [{source:, title:}, ...]. Keeping source and title
+        # together is what makes the message name the offending field.
+        def extract_errors(response)
+          body = JSON.parse(response.body.presence || '{}')
+          Array(body['errors']).map do |error|
+            [error['source'], error['title'] || error['detail']].compact.join(' ')
+          end
+        rescue JSON::ParserError
+          []
         end
       end
 
       private
 
+      def post(path, body)
+        connection.post(path, body.to_json)
+      end
+
+      def put(path, body)
+        connection.put(path, body.to_json)
+      end
+
+      def parse(response)
+        data = JSON.parse(response.body.presence || '{}')['data'] || {}
+        attributes = data['attributes'] || {}
+        Record.new(doi: data['id'], state: attributes['state'], attributes: attributes)
+      end
+
+      # Memoized: a new connection per call rebuilds the middleware stack and forfeits
+      # keep-alive, and a work update can make several requests.
       def connection
-        Faraday.new(url: base_url) do |c|
-          c.try(:basic_auth) ? c.basic_auth(username, password) : c.request(:authorization, :basic, username, password)
+        @connection ||= Faraday.new(url: base_url, headers: { 'Content-Type' => JSON_API_TYPE }) do |c|
+          c.request(:authorization, :basic, username, password)
           c.adapter(Faraday.default_adapter)
         end
       end
 
-      def mds_connection
-        Faraday.new(url: mds_base_url) do |c|
-          c.try(:basic_auth) ? c.basic_auth(username, password) : c.request(:authorization, :basic, username, password)
-          c.adapter(Faraday.default_adapter)
-        end
-      end
-
-      def draft_doi_payload
-        {
-          "data": {
-            "type": "dois",
-            "attributes": {
-              "prefix": prefix
-            }
-          }
-        }
-      end
-
-      # Ensre that `mode` is not a string
       def base_url
         mode&.to_sym == :production ? PRODUCTION_BASE_URL : TEST_BASE_URL
-      end
-
-      def mds_base_url
-        mode&.to_sym == :production ? PRODUCTION_MDS_BASE_URL : TEST_MDS_BASE_URL
       end
     end
   end

@@ -12,6 +12,15 @@ Work toward 1.0.0: a Valkyrie-native, flexible-metadata-aware rewrite. See the n
 
 ### Changed
 
+- **The DataCite client speaks REST v2 only.** State is set by an explicit `event`
+  (`register`, `publish`, `hide`) on one idempotent `PUT /dois/:id`, rather than emerging
+  from the side effects of a metadata call, a url call, and a corrective delete. A work
+  whose intent is *findable* but which is not yet public is hidden rather than published,
+  so it resolves for anyone holding the DOI without being publicly indexed.
+- `DataCiteRegistrar#register!` returns a `RegistrationResult` carrying the state DataCite
+  reported, whether anything was sent, and any field-level errors. Missing required
+  metadata is reported by name before the request is made, rather than surfacing as a
+  DataCite rejection.
 - **`DataCiteRegistrar.prefix=`, `.username=`, `.password=`, and `.mode=` are gone.**
   Credentials are now held per registrar instance and resolved per call. Those were
   `class_attribute`s, which are process-wide: two Sidekiq threads serving different tenants
@@ -127,6 +136,9 @@ Work toward 1.0.0: a Valkyrie-native, flexible-metadata-aware rewrite. See the n
 
 ### Removed
 
+- The legacy MDS API. `put_metadata`, `delete_metadata`, `get_metadata`, `get_url`,
+  `register_url`, and `delete_draft_doi` are replaced by `put_doi`, `get_doi`, and
+  `delete_doi` against `api.datacite.org`.
 - The `bolognese` dependency, along with `Bolognese::Readers::HyraxWorkReader` and
   `Bolognese::Writers::HyraxWorkWriter`. DataCite REST v2 accepts JSON directly, so the XML
   crosswalk has no remaining purpose, and autofill moves to doi.org content negotiation.

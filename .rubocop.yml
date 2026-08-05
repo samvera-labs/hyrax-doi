@@ -19,13 +19,6 @@ Metrics/MethodLength:
   Exclude:
     - "app/controllers/hyrax/doi/hyrax_doi_controller.rb"
 
-# TEMPORARY: remove once the client is REST-only. The legacy MDS methods
-# (put_metadata, delete_metadata, get_metadata, get_url, register_url,
-# delete_draft_doi) account for the excess.
-Metrics/ClassLength:
-  Exclude:
-    - "app/services/hyrax/doi/datacite_client.rb"
-
 Layout/LineLength:
   Exclude:
     - "spec/support/datacite_api_stubs.rb"
