@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 require 'rails_helper'
+require 'hyrax/doi/spec/shared_specs'
 
 RSpec.describe Hyrax::DOI::DataCiteDOIBehavior do
   before do
@@ -26,9 +27,6 @@ RSpec.describe Hyrax::DOI::DataCiteDOIBehavior do
     expect(work.doi_status_when_public).to be_blank
   end
 
-  # The work records intent only. What DataCite currently reports is on the
-  # PersistentIdentifier record, so the two can legitimately disagree -- a work whose
-  # intent is findable stays registered at DataCite while it is private.
   it 'is intent, separate from the state the provider reports' do
     work.doi_status_when_public = 'findable'
     pid = Hyrax::DOI::PersistentIdentifier.new(scheme: 'doi', provider: 'datacite',
@@ -43,4 +41,8 @@ RSpec.describe Hyrax::DOI::DataCiteDOIBehavior do
     work.doi = ['10.5072/abc']
     expect(work.doi).to eq ['10.5072/abc']
   end
+
+  # The examples an adopter runs against their own work type. Exercised here so they
+  # cannot drift from the concerns they describe.
+  it_behaves_like 'a DOI-enabled model'
 end

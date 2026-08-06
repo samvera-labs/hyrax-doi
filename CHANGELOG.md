@@ -12,6 +12,11 @@ Work toward 1.0.0: a Valkyrie-native, flexible-metadata-aware rewrite. See the n
 
 ### Changed
 
+- **The SolrDocument reads `doi_ssim`, not `doi_ssi`.** Nothing has ever written `doi_ssi`,
+  so `solr_document.doi` returned nil for every work and the DOI never reached a show page.
+  It also exposes `doi_state` now, which the renderer needs to suppress a draft.
+- `doi_status` reads the state DataCite reported, falling back to the depositor's intent
+  when nothing is registered yet, rather than recomputing state from intent and visibility.
 - **`create_draft_doi` is a POST, not a GET**, and the controller renders JSON rather than
   executable JavaScript. Reserving an identifier has a side effect at DataCite, so a
   browser prefetch or a crawler must not be able to trigger it.
@@ -65,6 +70,11 @@ Work toward 1.0.0: a Valkyrie-native, flexible-metadata-aware rewrite. See the n
 
 ### Added
 
+- `Hyrax::Renderers::DOIAttributeRenderer`, which links a DOI to its resolver on the show
+  page and **withholds a draft**, since a draft is reserved but does not resolve — a linked
+  one would be a dead link. It lives in Hyrax's namespace, and is named `DOI` rather than
+  `Doi`, because `find_renderer_class` turns `render_as: doi` into a `Renderers.const_get`
+  and the engine's `DOI` acronym inflection governs what that name camelizes to.
 - `Hyrax::DOI::DOIResolver` and a working **Autofill from DOI** button, filling a deposit
   form from metadata already published for an existing DOI. This reads someone else's
   identifier to save retyping — it mints nothing, and a DOI recorded this way is
@@ -196,15 +206,29 @@ Work toward 1.0.0: a Valkyrie-native, flexible-metadata-aware rewrite. See the n
 
 ### Deprecated
 
-- Specs tagged `:active_fedora` are excluded from all three test apps. They are
-  ActiveFedora-era specs awaiting rewrite, and each will be rewritten or removed as its part
-  of the Valkyrie port lands. `spec/features/autofill_spec.rb` was removed with the autofill
-  rewrite: it was built on `GenericWork`, `Hyrax::GenericWorkForm`, and `HelperBehavior`,
-  and had been `pending "Autofill needs work"` mid-example since 0.3. Autofill is now
-  covered by resolver, controller, and view specs.
+- **The ActiveFedora-era specs are gone**, rewritten against Valkyrie or removed where a
+  Valkyrie spec already covered the same ground. Every one of them was excluded from every
+  run, so none had executed since the port began — and each referenced code this rewrite
+  removed (`GenericWork`, `Hyrax::GenericWorkForm`, `DataCiteRegistrar.prefix=`,
+  `Bolognese::Metadata`, `HelperBehavior`), so none would have passed if re-enabled.
+
+  One spec stays tagged: `add_to_work_type_generator_spec`, which drives the generator
+  against a host `GenericWork`. The generators are rewritten for Valkyrie along with it.
+
+  The shared examples that ship for adopters were rewritten too. `a DOI-enabled model` was
+  asserting ActiveModel validations and `work.to_solr`, neither of which a Valkyrie
+  resource has; it now checks the attribute and registrar contract, and the suite runs it
+  so it cannot drift again.
 
 ### Removed
 
+- **The `_attribute_rows.html.erb` override**, a copy of Hyrax 2.9's markup carried so that
+  one line could add a DOI row. Hyrax's own partial is now driven by each field's `view:`
+  block, so the copy was overriding profile-driven rendering with a hardcoded 2.9 field
+  list — a work's own metadata profile decided nothing. The DOI row now comes from
+  `config/metadata/doi.yaml`.
+- **`Hyrax::DOI::WorkShowHelper` and `render_doi?`.** The renderer decides whether a DOI is
+  shown, and `render_doi?` checked class ancestry, which a metadata profile does not touch.
 - **`Hyrax::Actors::DOIActor` and the actor stack registration.** Hyrax's actor stack is
   deprecated in favor of transactions, and the actor's own `update` re-saved the work to
   force attribute persistence before enqueuing. A publisher listener needs neither.
