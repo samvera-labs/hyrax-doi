@@ -1,17 +1,13 @@
 # frozen_string_literal: true
 module Hyrax
   module DOI
+    # The DOI tab renders the status radios itself, so like the DOI field this stays out of
+    # the generic field list while the form still needs to read it.
     module DataCiteDOIFormBehavior
       extend ActiveSupport::Concern
 
       included do
-        self.terms += [:doi_status_when_public]
-
         delegate :doi_status_when_public, to: :model
-      end
-
-      def secondary_terms
-        super - [:doi_status_when_public]
       end
     end
   end

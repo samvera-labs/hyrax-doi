@@ -4,8 +4,15 @@ module Hyrax
     module DOIPresenterBehavior
       extend ActiveSupport::Concern
 
+      delegate :doi_state, to: :solr_document
+
+      # Indexed multivalued because the Valkyrie attribute is, but a work has one DOI.
       def doi
-        solr_document.doi.present? ? "https://doi.org/#{solr_document.doi}" : nil
+        Array(solr_document.doi).first.presence
+      end
+
+      def doi_render_options
+        { render_as: :doi, html_dl: true, doi_state: doi_state }
       end
     end
   end

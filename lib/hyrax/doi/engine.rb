@@ -59,8 +59,6 @@ module Hyrax
           Hyrax::WorksHelper => Hyrax::DOI::MintButtonHelper }.each do |target, mod|
           target.prepend(mod) unless target.ancestors.include?(mod)
         end
-
-        ActionController::Base.helper(Hyrax::DOI::WorkShowHelper)
       end
 
       config.after_initialize do
