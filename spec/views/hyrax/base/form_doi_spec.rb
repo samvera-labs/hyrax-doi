@@ -36,6 +36,32 @@ RSpec.describe 'hyrax/base/_form_doi', type: :view do
     expect(rendered).to have_no_selector('[data-doi-draft-button]')
   end
 
+  describe 'the autofill button' do
+    it 'is offered even when a DOI is already present, since the work may be published elsewhere' do
+      model.doi = ['10.5072/abc']
+
+      render partial: 'hyrax/base/form_doi', locals: { f: builder }
+
+      expect(rendered).to have_selector('[data-doi-autofill-button]')
+    end
+
+    # The JS derives each field's wrapper selector from this, so a wrong param key would
+    # silently fill nothing.
+    it 'carries the param key the JS needs to find form fields' do
+      render partial: 'hyrax/base/form_doi', locals: { f: builder }
+
+      expect(Capybara.string(rendered).find('[data-doi-autofill-button]')['data-doi-param-key'])
+        .to eq 'monograph'
+    end
+
+    it 'carries a confirmation, since autofill overwrites what the depositor typed' do
+      render partial: 'hyrax/base/form_doi', locals: { f: builder }
+
+      expect(Capybara.string(rendered).find('[data-doi-autofill-button]')['data-doi-confirm'])
+        .to be_present
+    end
+  end
+
   it 'renders every intent, blank first' do
     render partial: 'hyrax/base/form_doi', locals: { f: builder }
 

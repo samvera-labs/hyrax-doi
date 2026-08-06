@@ -35,6 +35,10 @@ Gem::Specification.new do |spec|
   spec.add_dependency "flipflop", "~> 2.3"
   spec.add_dependency "faraday", "~> 2.0"
 
+  # Autofill resolves through doi.org, which redirects to each registration agency's own
+  # content-negotiation host. Faraday 2 moved redirect handling out of core.
+  spec.add_dependency "faraday-follow_redirects", "~> 0.3"
+
   spec.add_development_dependency 'ammeter'
   spec.add_development_dependency 'capybara'
   spec.add_development_dependency "bixby"

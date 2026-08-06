@@ -1,0 +1,45 @@
+{
+  "type": "journal-article",
+  "title": "Nanometre-scale thermometry in a living cell",
+  "author": [
+    {
+      "given": "G.",
+      "family": "Kucsko",
+      "sequence": "first",
+      "affiliation": [],
+      "role": [
+        {
+          "vocabulary": "crossref",
+          "role": "author"
+        }
+      ]
+    },
+    {
+      "given": "P. C.",
+      "family": "Maurer",
+      "sequence": "additional",
+      "affiliation": [],
+      "role": [
+        {
+          "vocabulary": "crossref",
+          "role": "author"
+        }
+      ]
+    }
+  ],
+  "publisher": "Springer Science and Business Media LLC",
+  "container-title": "Nature",
+  "issued": {
+    "date-parts": [
+      [
+        2013,
+        7,
+        31
+      ]
+    ]
+  },
+  "subject": [],
+  "language": "en",
+  "DOI": "10.1038/nature12373",
+  "URL": "http://dx.doi.org/10.1038/nature12373"
+}

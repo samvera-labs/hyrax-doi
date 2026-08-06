@@ -31,6 +31,24 @@
     <p class="form-text"><%= t('hyrax.doi.form.draft.help') %></p>
   <% end %>
 
+  <%# Offered whether or not a DOI is reserved: the depositor may be describing work that
+      was published elsewhere first. %>
+  <p>
+    <button type="button"
+            class="btn btn-secondary"
+            data-doi-autofill-button
+            data-doi-url="<%= Hyrax::DOI::Engine.routes.url_helpers.autofill_path %>"
+            data-doi-confirm="<%= t('hyrax.doi.form.autofill.confirm') %>"
+            data-doi-working="<%= t('hyrax.doi.form.autofill.working') %>"
+            data-doi-error="<%= t('hyrax.doi.form.autofill.error') %>"
+            data-doi-missing="<%= t('hyrax.doi.form.autofill.missing') %>"
+            data-doi-empty="<%= t('hyrax.doi.form.autofill.empty') %>"
+            data-doi-param-key="<%= f.object.model_name.param_key %>">
+      <%= t('hyrax.doi.form.autofill.label') %>
+    </button>
+    <span class="form-text" data-doi-autofill-status aria-live="polite"></span>
+  </p>
+
   <% if minting_enabled && supports_status %>
     <fieldset class="set-doi-status-when-public">
       <legend class="h5"><%= t('hyrax.doi.form.status.legend') %></legend>

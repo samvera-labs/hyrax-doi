@@ -19,6 +19,15 @@ en:
         missing_required_confirm: >-
           DataCite requires %{fields}, which this form leaves blank. Placeholder values
           will be sent instead. Continue?
+        autofill:
+          label: Autofill from DOI
+          working: Autofilling form...
+          confirm: >-
+            This replaces anything already filled in on this form. Continue?
+          error: Could not reach doi.org. Try again in a moment.
+          missing: Enter a DOI first.
+          empty: >-
+            No metadata could be read for that DOI. Check it, or fill the form in by hand.
         draft:
           label: Create draft DOI
           working: Reserving a DOI...
@@ -41,10 +50,7 @@ en:
         working: Minting...
     works:
       form:
-        autofill:
-          button:
-            disable_with: Autofilling form...
-            confirm: This operation is destructive and will replace any information already filled in on this form.
+        # Hyrax's form_tab_label_for looks up this exact path for every tab it renders.
         tab:
           doi: DOI
   errors:

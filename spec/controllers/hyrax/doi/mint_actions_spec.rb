@@ -101,4 +101,42 @@ RSpec.describe Hyrax::DOI::HyraxDOIController, type: :controller do
       expect(response.parsed_body).to include('doi' => '10.5072/minted', 'state' => 'findable')
     end
   end
+
+  describe 'GET #autofill' do
+    it 'returns the attributes a form can apply' do
+      stub_request(:get, 'https://doi.org/10.1234/found')
+        .to_return(status: 200,
+                   body: { 'title' => 'Found', 'issued' => { 'date-parts' => [[2020]] } }.to_json)
+
+      get :autofill, params: { doi: '10.1234/found' }, format: :json
+
+      expect(response).to have_http_status(:ok)
+      expect(response.parsed_body['attributes'])
+        .to include('title' => ['Found'], 'date_created' => ['2020'])
+    end
+
+    it 'reports a DOI that does not resolve' do
+      stub_request(:get, 'https://doi.org/10.1234/missing').to_return(status: 404)
+
+      get :autofill, params: { doi: '10.1234/missing' }, format: :json
+
+      expect(response).to have_http_status(:not_found)
+    end
+
+    it 'distinguishes a resolver outage from a missing DOI' do
+      stub_request(:get, 'https://doi.org/10.1234/down').to_return(status: 503)
+
+      get :autofill, params: { doi: '10.1234/down' }, format: :json
+
+      expect(response).to have_http_status(:bad_gateway)
+    end
+
+    it 'refuses a user who cannot deposit' do
+      allow(controller.current_ability).to receive(:can_create_any_work?).and_return(false)
+
+      get :autofill, params: { doi: '10.1234/found' }, format: :json
+
+      expect(response).to have_http_status(:forbidden)
+    end
+  end
 end

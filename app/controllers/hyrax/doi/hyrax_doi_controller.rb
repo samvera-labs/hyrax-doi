@@ -29,9 +29,12 @@ module Hyrax
       end
 
       def autofill
-        render json: { attributes: hyrax_work_from_doi(params.require(:doi)) }, status: :ok
+        render json: { attributes: Hyrax::DOI::DOIResolver.new.attributes_for(params.require(:doi)) },
+               status: :ok
       rescue Hyrax::DOI::NotFoundError => e
         render json: { error: e.message }, status: :not_found
+      rescue Hyrax::DOI::Error => e
+        render json: { error: e.message }, status: :bad_gateway
       end
 
       private
@@ -63,12 +66,6 @@ module Hyrax
 
       def render_disabled
         render json: { error: I18n.t('errors.doi_minting.disabled') }, status: :service_unavailable
-      end
-
-      # Awaiting Hyrax::DOI::DOIResolver, which resolves a DOI through doi.org content
-      # negotiation.
-      def hyrax_work_from_doi(_doi)
-        raise NotImplementedError, 'DOI autofill is not implemented yet'
       end
     end
   end

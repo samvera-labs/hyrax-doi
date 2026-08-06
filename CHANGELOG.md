@@ -65,6 +65,17 @@ Work toward 1.0.0: a Valkyrie-native, flexible-metadata-aware rewrite. See the n
 
 ### Added
 
+- `Hyrax::DOI::DOIResolver` and a working **Autofill from DOI** button, filling a deposit
+  form from metadata already published for an existing DOI. This reads someone else's
+  identifier to save retyping — it mints nothing, and a DOI recorded this way is
+  `origin: external`, which the sync listener never pushes metadata to.
+
+  Metadata comes from doi.org content negotiation as CSL JSON, so **any registration
+  agency resolves, not just DataCite** — a CrossRef DOI for a published article is the
+  common thing to paste. (DataCite's own media type returns 406 for a CrossRef DOI, which
+  is why CSL JSON is the transport.) Only the `issued` date is read: CrossRef also sends
+  `published`, `published-print`, and `published-online`, which disagree with each other.
+  A partial date stays partial rather than being padded into a false full date.
 - `Hyrax::DOI::PublisherListener`, keeping DataCite's copy of a work's metadata current.
   Subscribed to `object.metadata.updated` **and `object.acl.updated`**: embargo and lease
   release change permissions without saving metadata, so they publish only the latter, and
@@ -187,7 +198,10 @@ Work toward 1.0.0: a Valkyrie-native, flexible-metadata-aware rewrite. See the n
 
 - Specs tagged `:active_fedora` are excluded from all three test apps. They are
   ActiveFedora-era specs awaiting rewrite, and each will be rewritten or removed as its part
-  of the Valkyrie port lands.
+  of the Valkyrie port lands. `spec/features/autofill_spec.rb` was removed with the autofill
+  rewrite: it was built on `GenericWork`, `Hyrax::GenericWorkForm`, and `HelperBehavior`,
+  and had been `pending "Autofill needs work"` mid-example since 0.3. Autofill is now
+  covered by resolver, controller, and view specs.
 
 ### Removed
 
