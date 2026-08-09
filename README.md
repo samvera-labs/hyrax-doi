@@ -8,97 +8,114 @@ Docs: [![Contribution Guidelines](http://img.shields.io/badge/CONTRIBUTING-Guide
 
 Jump in: [![Slack Status](http://slack.samvera.org/badge.svg)](http://slack.samvera.org/)
 
-Hyrax-doi is a Hyrax plugin that provides tools for working with DOIs including model attributes, minting, and fetching descriptive metadata.
-
-> **The usage and configuration sections below describe the 0.3.x ActiveFedora API and are
-> out of date.** The gem is being rewritten for Valkyrie and Hyrax 5.3+ (see
-> [CHANGELOG.md](CHANGELOG.md)); the generator commands and `DataCiteRegistrar.mode =`
-> configuration shown here no longer work. Updated instructions land with 1.0.0. For
-> ActiveFedora applications, use the `0.3-stable` branch.
+Hyrax-doi mints DOIs for works in a Hyrax application, keeps the provider's copy of their
+metadata current, and fills a deposit form from a DOI someone else has already minted.
 
 ## Features
-### DOI Creation and Updating
-DOIs are created and updated when a work of a DOI-enabled work type is saved.  This happens in a background job using the [external identifier interface](https://github.com/samvera/hyrax/pull/4458) provided by Hyrax.
 
->Note: At this point only functionality for registering DOIs wtih DataCite is implemented but other registrars should be also be possible.
+### Minting is always something a person asks for
 
-#### Draft DOI Creation (DataCite)
-The deposit form has a button for creating a draft DOI without requiring submitting the form.  This is useful if you need to know the DOI and embed it in the uploaded file(s).
+A DOI is never created as a side effect of saving a work. There are three ways to ask:
 
-#### DOI Status Support (DataCite)
-The uploader is allowed to choose the DOI status (draft, registered, findable) they want for the work when it becomes public.  If findable is chosen the DOI will remain as registered until the work become public.
+- **Choose a status on the deposit form.** *Do not mint* is the default; *Draft*,
+  *Registered*, and *Findable* each mint when the work is saved.
+- **Press "Create draft DOI" on the deposit form.** This reserves a DOI without submitting,
+  so it can be written into the files being uploaded.
+- **Press "Mint DOI" on the work's show page**, for a work deposited without one. Requires
+  edit permission on that work.
 
-#### Form Validation (DataCite)
-Hyrax-doi will provide defaults or placeholders for fields which Hyrax doesn't require but which are mandatory for DataCite.  In this case the uploader will be notified of the missing fields and given the opportunity of filling them in before submittign or of continuing with the defaults.
+**Updates are automatic, but only for works that already have a DOI.** Editing such a work
+pushes its new metadata to the provider. Editing a work without one does nothing.
 
-### Form autofilling
-When submitting a work with an existing DOI (like a scholarly article), the uploader can fill in the DOI and click a button to autofill the deposit form with metadata from the DOI.  This is not limited to DataCite and works with DOIs from a variety of registrars (DataCite, CrossRef, JaLC, ISTIC, , etc.)
+### Intent and state are separate
 
-### Metadata Crosswalking
-DOI submission and form autofilling happens by crosswalking the work's metadata with DataCite's schema through the [bolognese gem](https://github.com/datacite/bolognese) which enables crosswalking with a number of metadata formats besides those required by DOI registars including RIS, BibTeX, Crosscite, and Schema.org.
+The status chosen on the form is the depositor's *intent*. What the provider currently
+reports is recorded separately, and the two legitimately differ: a work marked *findable*
+stays `registered` at DataCite while it is private, and becomes findable when the work
+does — including when an embargo expires.
+
+A draft DOI is reserved but does not resolve, so it is not shown on the show page.
+
+### Autofill from an existing DOI
+
+A depositor cataloguing something published elsewhere can paste its DOI and fill the form
+from the metadata its publisher registered. This reads metadata; it mints nothing, and the
+DOI is recorded as external so the gem never tries to update it.
+
+Metadata is read from doi.org by content negotiation, so **any registration agency
+resolves** — CrossRef, DataCite, JaLC, and the rest.
+
+### More than one identifier per work
+
+Identifiers are stored in their own table, one row per identifier, each with its own state
+and sync history. A work can hold a DOI and another identifier at the same time without
+either overwriting the other.
 
 ## Compatibility
-Hyrax-doi requires **Hyrax 5.3 or later** and is **Valkyrie-only**. Hyrax 5.3 is the first
-release containing the flexible metadata stack, and the gem supports both
-`HYRAX_FLEXIBLE=false` and `HYRAX_FLEXIBLE=true`.
 
-ActiveFedora is not supported as of 1.0.0. For ActiveFedora applications, use the
-`0.3-stable` branch.
+Requires **Hyrax 5.3 or later** and is **Valkyrie-only**. Hyrax 5.3 is the first release
+containing the flexible metadata stack, and the gem supports both `HYRAX_FLEXIBLE=false`
+and `HYRAX_FLEXIBLE=true`.
 
-It is tested against Hyrax's own test applications in three configurations — koppie,
-allinson, and sirenia — covering both flex modes and both Postgres and Fedora metadata
-backends. See [CONTRIBUTING.md](CONTRIBUTING.md).
+ActiveFedora is not supported as of 1.0.0; use the `0.3-stable` branch for those
+applications. An application migrating to Valkyrie is supported, provided its works are
+Valkyrie resources.
+
+Tested against Hyrax's own test applications in four configurations — koppie, allinson,
+sirenia, and freyja — covering both flex modes, both Postgres and Fedora metadata
+backends, and an application with Wings loaded. See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Installation
-Add this line to your application's Gemfile:
+
+Add the gem:
 
 ```ruby
 gem 'hyrax-doi'
 ```
 
-And then execute:
+Then:
+
 ```bash
-$ bundle
-```
-
-Then run the install generator
-```
-rails g hyrax:doi:install
-```
-Use the `--datacite` flag if working with DataCite DOIs:
-```
+bundle install
 rails g hyrax:doi:install --datacite
+rails db:migrate
 ```
 
-## Usage
+The generator adds an initializer, the identifier table's migration, the DOI attributes to
+your `SolrDocument`, and the engine's routes. Then enable DOIs on each work type that
+should have them:
 
-### Enable DOI functionality for a work type
-Run the generator to add DOI support to a given work type:
-```
-rails g hyrax:doi:add_to_work_type MyWorkType
-```
-Add the `--datacite` flag if creating DataCite DOIs:
-```
-rails g hyrax:doi:add_to_work_type MyWorkType --datacite
+```bash
+rails g hyrax:doi:add_to_work_type Monograph
 ```
 
-### Configuration
-After the install generator is run, Hyrax-doi can be configured in the `config/initializers/hyrax-doi.rb` initializer.
+Set your DataCite credentials in the environment:
 
-If your application does not already set `host` in `default_url_options`, you will need to configure it for creating full urls to work show pages to be registered with DOIs.
-
-DataCite credentials can either be set in environment variables (DATACITE_PREFIX, DATACITE_USERNAME, and DATACITE_PASSWORD) or set in the initializer.  Hyrax-doi defaults to using DataCite's test environment but can be switched to the production environment by setting the mode:
+```bash
+DATACITE_PREFIX=10.5072
+DATACITE_USERNAME=...
+DATACITE_PASSWORD=...
+DATACITE_MODE=test        # or production; defaults to test
 ```
-Hyrax::DOI::DataCiteRegistrar.mode = :production
-```
 
-### Using with Hyku
-Hyrax-doi is currently implemented for a single-tenant Hyrax application with configuration shared application wide.  Work to support per tenant configuration is under way and will live in its own engine or be contributed directly to Hyku.
+That is a working installation: the DOI tab appears on the deposit form for the work types
+you enabled. Minting is governed by the `doi_minting` feature flag, which is on by default
+and can be switched off per tenant from the Hyrax admin dashboard.
+
+If your application does not already set `host` in `default_url_options`, set it — the URL
+registered with each DOI is built from it.
+
+## Configuration
+
+Everything above works with no configuration. For per-tenant credentials, restricting which
+work types may mint, deriving DataCite's required fields from your own metadata, or storing
+the DOI in an attribute other than `doi`, see
+[docs/CONFIGURATION.md](docs/CONFIGURATION.md).
 
 ## Development
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for setting up a development environment, running
-specs against the three test apps, and linting.
+specs against the four test apps, and linting.
 
 For community guidelines — code of conduct, commit conventions, and the pull request
 process — see [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md).
