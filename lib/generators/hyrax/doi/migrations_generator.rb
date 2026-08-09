@@ -20,6 +20,15 @@ module Hyrax
         migration_template 'db/migrate/create_hyrax_doi_persistent_identifiers.rb.erb',
                            'db/migrate/create_hyrax_doi_persistent_identifiers.rb'
       end
+
+      private
+
+      # Read by the migration template. ActiveRecord::Generators::Migration supplies the
+      # numbering but not this, so a template stamping a Rails version needs it defined.
+      # Private, or Thor would treat it as another step to run.
+      def migration_version
+        "[#{ActiveRecord::VERSION::MAJOR}.#{ActiveRecord::VERSION::MINOR}]"
+      end
     end
   end
 end

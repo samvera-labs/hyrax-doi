@@ -12,6 +12,18 @@ Work toward 1.0.0: a Valkyrie-native, flexible-metadata-aware rewrite. See the n
 
 ### Changed
 
+- **Both generators work on a Valkyrie application.** `hyrax:doi:install` wrote four
+  registrar settings removed in this rewrite, so a freshly installed app raised on boot,
+  and it injected a helper module the engine has wired itself since the DOI tab landed.
+  `hyrax:doi:add_to_work_type` anchored its insertions on `include ::Hyrax::WorkBehavior`
+  and `Hyrax::Forms::WorkForm`, neither of which a Valkyrie work type contains — and since
+  `insert_into_file` only warns on a missing anchor, it reported success while changing
+  nothing. It no longer touches presenters, because a Valkyrie work type has none.
+- **`hyrax:doi:install` now installs the migration**, rather than leaving a separate step an
+  adopter could miss and then hit as a missing-table error on first mint.
+- **`hyrax:doi:migrations` runs at all.** Its template interpolated `migration_version`,
+  which Rails does not supply to a plain generator, so it raised `NameError` instead of
+  writing a migration. It had no spec; it does now.
 - **The SolrDocument reads `doi_ssim`, not `doi_ssi`.** Nothing has ever written `doi_ssi`,
   so `solr_document.doi` returned nil for every work and the DOI never reached a show page.
   It also exposes `doi_state` now, which the renderer needs to suppress a draft.

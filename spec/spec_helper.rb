@@ -21,14 +21,10 @@ end
 #
 # See http://rubydoc.info/gems/rspec-core/RSpec/Core/Configuration
 RSpec.configure do |config|
-  # This gem is Valkyrie-only as of 1.0.0, so anything needing an ActiveFedora work is
-  # excluded on every target -- including freyja, which deliberately runs with Wings loaded
-  # to prove the gem works in an application migrating off ActiveFedora. Hyrax's own suite
-  # excludes these only when Wings is disabled.
-  #
-  # One spec remains tagged: add_to_work_type_generator_spec, which drives the generator
-  # against a host GenericWork. The generators are rewritten for Valkyrie together with
-  # that spec.
+  # Nothing carries this tag now. The filter stays so that a spec needing an ActiveFedora
+  # work is excluded on every target rather than only where Wings is disabled, which is
+  # how Hyrax's own suite handles it -- this gem is Valkyrie-only as of 1.0.0, including on
+  # the freyja target, which deliberately runs with Wings loaded.
   config.filter_run_excluding(:active_fedora)
 
   # rspec-expectations config goes here. You can use an alternate
