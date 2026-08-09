@@ -13,7 +13,7 @@ Gem::Specification.new do |spec|
   spec.homepage    = ""
   spec.summary     = "Hyrax plugin for working with DOIs."
   spec.description = "Tools for working with DOIs in Hyrax including model attributes, minting, and fetching descriptive metadata."
-  spec.license     = "MIT"
+  spec.license     = "Apache-2.0"
 
   # Prevent pushing this gem to RubyGems.org. To allow pushes either set the 'allowed_push_host'
   # to allow pushing to a single host or delete this section to allow pushing to any host.
@@ -24,7 +24,7 @@ Gem::Specification.new do |spec|
       "public gem pushes."
   end
 
-  spec.files = Dir["{app,config,db,lib}/**/*", "MIT-LICENSE", "Rakefile", "README.md"]
+  spec.files = Dir["{app,config,db,lib}/**/*", "LICENSE", "Rakefile", "README.md", "CHANGELOG.md"]
 
   spec.required_ruby_version = '>= 3.2'
 
