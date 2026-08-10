@@ -85,8 +85,21 @@ rails db:migrate
 ```
 
 The generator adds an initializer, the identifier table's migration, the DOI attributes to
-your `SolrDocument`, and the engine's routes. Then enable DOIs on each work type that
-should have them:
+your `SolrDocument`, and the engine's routes.
+
+If the generator reports that it could not mount the engine, add the mount by hand — the
+DOI tab's buttons and the show page's mint button all post to these routes, so without it
+they answer 404:
+
+```ruby
+# config/routes.rb, before any catch-all route
+mount Hyrax::DOI::Engine, at: '/doi', as: 'hyrax_doi'
+```
+
+The mount point is yours to choose; the views build their URLs from it. It must be named
+`hyrax_doi`.
+
+Then enable DOIs on each work type that should have them:
 
 ```bash
 rails g hyrax:doi:add_to_work_type Monograph

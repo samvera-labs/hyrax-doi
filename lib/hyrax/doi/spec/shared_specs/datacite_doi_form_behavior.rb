@@ -16,6 +16,12 @@ RSpec.shared_examples "a DataCite DOI-enabled form" do
     expect(form.model.doi_status_when_public).to eq 'registered'
   end
 
+  it 'returns the resource from sync, having set the intent' do
+    form.validate('doi_status_when_public' => 'registered')
+
+    expect(form.sync).to be_a Valkyrie::Resource
+  end
+
   it 'keeps the field out of the generic term lists' do
     expect(subject.primary_terms).not_to include(:doi_status_when_public)
     expect(subject.secondary_terms).not_to include(:doi_status_when_public)

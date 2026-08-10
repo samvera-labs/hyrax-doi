@@ -18,6 +18,12 @@ RSpec.shared_examples "a DOI-enabled form" do
     expect(Array(form.model.doi_value)).to eq ['10.5072/submitted']
   end
 
+  it 'returns the resource from sync' do
+    form.validate('doi' => ['10.5072/submitted'])
+
+    expect(form.sync).to be_a Valkyrie::Resource
+  end
+
   it 'keeps the field out of the generic term lists' do
     expect(subject.primary_terms).not_to include(:doi)
     expect(subject.secondary_terms).not_to include(:doi)

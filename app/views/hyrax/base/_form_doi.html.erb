@@ -17,6 +17,10 @@
             'none'
           end %>
 
+<%# Route helpers here go through the mounted proxy (hyrax_doi.*) rather than
+    Engine.routes.url_helpers, which builds paths against the engine's own route set and so
+    ignores where the host mounted it. %>
+
 <%# Included here rather than left to the host's application.js and .css, so the tab works
     on install. The stylesheet drives the mode disclosure; the script only powers the two
     buttons that call out to DataCite and doi.org. %>
@@ -81,7 +85,7 @@
             <button type="button"
                     class="btn btn-outline-secondary btn-sm"
                     data-doi-autofill-button
-                    data-doi-url="<%= Hyrax::DOI::Engine.routes.url_helpers.autofill_path %>"
+                    data-doi-url="<%= hyrax_doi.autofill_path %>"
                     data-doi-confirm="<%= t('hyrax.doi.form.autofill.confirm') %>"
                     data-doi-working="<%= t('hyrax.doi.form.autofill.working') %>"
                     data-doi-error="<%= t('hyrax.doi.form.autofill.error') %>"
@@ -145,7 +149,7 @@
                     <button type="button"
                             class="btn btn-outline-secondary btn-sm"
                             data-doi-draft-button
-                            data-doi-url="<%= Hyrax::DOI::Engine.routes.url_helpers.create_draft_doi_path %>"
+                            data-doi-url="<%= hyrax_doi.create_draft_doi_path %>"
                             data-doi-working="<%= t('hyrax.doi.form.draft.working') %>"
                             data-doi-error="<%= t('hyrax.doi.form.draft.error') %>">
                       <%= t('hyrax.doi.form.draft.label') %>

@@ -13,8 +13,9 @@ module Hyrax
       end
 
       def sync(*args)
-        super
+        resource = super
         model.doi_status_when_public = doi_status_when_public.presence
+        resource
       end
 
       private

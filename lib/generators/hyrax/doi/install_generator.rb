@@ -47,13 +47,33 @@ module Hyrax
         end
       end
 
+      MOUNT = "  mount Hyrax::DOI::Engine, at: '/doi', as: 'hyrax_doi'\n"
+
+      # The tab's buttons and the mint button all post to the engine's routes, so an
+      # application without this mount gets a working tab whose buttons 404. inject_into_file
+      # only warns when its anchor is absent, so a missing anchor has to be detected here
+      # rather than reported as success.
       def mount_engine_routes
-        inject_into_file 'config/routes.rb', after: /mount Hyrax::Engine, at: '\S*'\n/ do
-          "  mount Hyrax::DOI::Engine, at: '/doi', as: 'hyrax_doi'\n"
-        end
+        routes = app_path('config', 'routes.rb')
+        return say_status :skip, 'engine already mounted in config/routes.rb', :blue if
+          File.read(routes).include?('Hyrax::DOI::Engine')
+
+        return if inject_after(routes, /^\s*mount Hyrax::Engine, at: .*\n/)
+        return if inject_after(routes, /^\s*Rails\.application\.routes\.draw do\n/)
+
+        say_status :error, 'could not mount the engine; add this to config/routes.rb:', :red
+        say MOUNT
       end
 
       private
+
+      # @return [Boolean] whether the anchor was found and the mount written
+      def inject_after(routes, anchor)
+        return false unless File.read(routes).match?(anchor)
+
+        inject_into_file routes, MOUNT, after: anchor
+        true
+      end
 
       # destination_root is the engine's own root when the generator is invoked from within
       # the engine -- running the suite, or a developer trying it out -- so fall back to the

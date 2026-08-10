@@ -110,6 +110,13 @@ RSpec.describe 'hyrax/base/_form_doi', type: :view do
       expect(rendered).to have_selector('[data-doi-autofill-button]')
     end
 
+    it 'points at the path the host actually mounted' do
+      render partial: 'hyrax/base/form_doi', locals: { f: builder }
+
+      url = Capybara.string(rendered).find('[data-doi-autofill-button]')['data-doi-url']
+      expect(url).to eq view.hyrax_doi.autofill_path
+    end
+
     # The JS derives each field's wrapper selector from this, so a wrong param key would
     # silently fill nothing.
     it 'carries the param key the JS needs to find form fields' do

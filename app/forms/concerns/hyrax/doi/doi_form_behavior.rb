@@ -26,9 +26,13 @@ module Hyrax
       # A module method, not one defined in `included do`: DataCiteDOIFormBehavior defines
       # its own sync, and two definitions on the same class would replace each other rather
       # than chain through super.
+      # Returns what super returned -- the resource. Hyrax's save step calls
+      # `unsaved = change_set.sync` and then reads `unsaved.embargo`, so returning the value
+      # an attribute writer hands back fails the save on a String.
       def sync(*args)
-        super
+        resource = super
         model.doi_value = Array.wrap(doi).compact_blank
+        resource
       end
 
       def validate(params)

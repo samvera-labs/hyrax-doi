@@ -4,7 +4,7 @@
     <button type="button"
             class="btn btn-secondary"
             data-doi-mint-button
-            data-doi-url="<%= Hyrax::DOI::Engine.routes.url_helpers.mint_path(id: presenter.id) %>"
+            data-doi-url="<%= hyrax_doi.mint_path(id: presenter.id) %>"
             data-doi-working="<%= t('hyrax.doi.mint_button.working') %>"
             data-doi-error="<%= t('hyrax.doi.form.draft.error') %>">
       <%= t('hyrax.doi.mint_button.label') %>

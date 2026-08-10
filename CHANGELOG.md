@@ -12,6 +12,16 @@ Work toward 1.0.0: a Valkyrie-native, flexible-metadata-aware rewrite. See the n
 
 ### Changed
 
+- **The tab's buttons reach the routes the application serves.** The views built their URLs
+  with `Engine.routes.url_helpers`, which resolves against the engine's own route set and so
+  ignores where the host mounted it — the autofill, reserve-a-DOI, and mint buttons all
+  posted to paths nothing served. They now use the mounted `hyrax_doi` proxy, so any mount
+  point works. The suite mounts the engine for every spec type rather than only feature
+  specs, which is why no view spec could catch this.
+- **The install generator reports a mount it could not add.** `inject_into_file` only warns
+  on a missing anchor, so an application whose `config/routes.rb` did not match got a working
+  DOI tab whose buttons 404. It now falls back to the routes block, and prints the line to
+  add when neither anchor is found.
 - **A DOI entered on the deposit form is saved, and a minted one is recorded.** The form
   concerns delegated readers to the work but declared no writable property, so
   `ResourceForm` discarded `doi` and `doi_status_when_public` on submit; nothing created a
@@ -24,7 +34,8 @@ Work toward 1.0.0: a Valkyrie-native, flexible-metadata-aware rewrite. See the n
   mint nothing, previously sent both. The submitted mode now decides which values apply — and
   never clears a DOI already recorded on the work.
 - **`a DOI-enabled form` and `a DataCite DOI-enabled form` assert round-tripping**, not
-  delegation. Asserting delegation is what let the missing writer stay green.
+  delegation, and assert that `sync` returns the resource Hyrax's save step expects.
+  Asserting delegation is what let the missing writer stay green.
 - **A mint request for an unknown work answers 404 in JSON** rather than raising
   `Valkyrie::Persistence::ObjectNotFoundError` into a 500 with an HTML body, which the
   client — reading every response as JSON — could not report.
