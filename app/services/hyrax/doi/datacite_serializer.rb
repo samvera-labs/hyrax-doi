@@ -119,7 +119,7 @@ module Hyrax
         source = source_for(datacite_field)
         return [] if source.blank?
 
-        Array.wrap(work.try(source)).reject(&:blank?)
+        Array.wrap(work.try(source)).compact_blank
       end
 
       def extractor_for(field)

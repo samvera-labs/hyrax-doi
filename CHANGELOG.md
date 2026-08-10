@@ -19,9 +19,10 @@ Work toward 1.0.0: a Valkyrie-native, flexible-metadata-aware rewrite. See the n
   `PersistentIdentifier` record is the source of truth and callers pass an array, which
   `Valkyrie::Types::Strict::String` rejects; the first value is written instead of the sync
   failing.
-- **Each CI shard gets its own Docker project.** Compose names its project after the file,
-  so four shards of one app shared a set of volumes and raced to create directories inside
-  them — the containers never started, so no specs ran.
+- **CI starts only the `web` service, and each shard gets its own Docker project.** `web`
+  and `worker` share two volumes and both create the same directories in them at boot, so
+  starting the pair raced and one died with `mkdir ...: file exists` — the container never
+  came up, so no specs ran. Specs enqueue with the `:test` adapter and need no worker.
 - **Both generators work on a Valkyrie application.** `hyrax:doi:install` wrote four
   registrar settings removed in this rewrite, so a freshly installed app raised on boot,
   and it injected a helper module the engine has wired itself since the DOI tab landed.

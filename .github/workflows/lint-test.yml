@@ -52,9 +52,8 @@ jobs:
         ci_test_app: [koppie, allinson, sirenia, freyja]
         ci_node_total: [4]
         ci_node_index: [0, 1, 2, 3]
-    # Compose names its project after the file, so every shard of an app would otherwise
-    # share one set of volumes and race to create directories inside them. Namespacing per
-    # shard gives each its own containers, network, and volumes.
+    # Compose names its project after the file, so shards of one app would otherwise share
+    # a set of volumes.
     env:
       COMPOSE_PROJECT_NAME: hyrax-doi-${{ matrix.ci_test_app }}-${{ matrix.ci_node_index }}
     steps:
@@ -77,7 +76,7 @@ jobs:
           echo $HYRAX_SHA
       - name: Start containers
         run: |
-          GITHUB_SHA=latest docker compose -f docker-compose-${{ matrix.ci_test_app }}.yml up -d --quiet-pull --pull missing --no-build
+          GITHUB_SHA=latest docker compose -f docker-compose-${{ matrix.ci_test_app }}.yml up -d --quiet-pull --pull missing --no-build web
       - name: RSpec
         env:
           CI_NODE_TOTAL: ${{ matrix.ci_node_total }}
