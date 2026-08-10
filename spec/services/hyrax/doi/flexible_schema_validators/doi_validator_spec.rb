@@ -2,7 +2,7 @@
 require 'rails_helper'
 
 RSpec.describe Hyrax::DOI::FlexibleSchemaValidators::DOIValidator do
-  subject(:validator) { described_class.new(profile: profile, errors: errors, warnings: warnings) }
+  subject(:validator) { described_class.new(profile:, errors:, warnings:) }
 
   let(:errors) { [] }
   let(:warnings) { [] }

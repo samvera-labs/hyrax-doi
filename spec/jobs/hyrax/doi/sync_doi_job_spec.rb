@@ -8,9 +8,9 @@ RSpec.describe Hyrax::DOI::SyncDOIJob, type: :job do
   def record_for(provider:, origin: 'minted')
     Hyrax::DOI::PersistentIdentifier.create!(resource_id: work.id.to_s,
                                              resource_type: work.class.name,
-                                             scheme: 'doi', provider: provider,
+                                             scheme: 'doi', provider:,
                                              value: "10.5072/#{provider}", state: 'registered',
-                                             origin: origin, primary: true)
+                                             origin:, primary: true)
   end
 
   it 'enqueues on the ingest queue' do

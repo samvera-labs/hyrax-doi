@@ -47,14 +47,14 @@ RSpec.describe Hyrax::DOI::PersistentIdentifier do
     let(:resource_id) { 'abc123' }
 
     it 'does not overwrite one scheme with another' do
-      doi = described_class.create!(resource_id: resource_id, scheme: 'doi', provider: 'datacite',
+      doi = described_class.create!(resource_id:, scheme: 'doi', provider: 'datacite',
                                     value: '10.5072/xyz', origin: 'minted')
-      raid = described_class.create!(resource_id: resource_id, scheme: 'raid', provider: 'datacite',
+      raid = described_class.create!(resource_id:, scheme: 'raid', provider: 'datacite',
                                      value: '10.5072/raid-1', origin: 'minted')
 
       expect(described_class.for_resource(resource_id)).to contain_exactly(doi, raid)
-      expect(described_class.primary_for(resource_id: resource_id, scheme: 'doi')).to eq doi
-      expect(described_class.primary_for(resource_id: resource_id, scheme: 'raid')).to eq raid
+      expect(described_class.primary_for(resource_id:, scheme: 'doi')).to eq doi
+      expect(described_class.primary_for(resource_id:, scheme: 'raid')).to eq raid
     end
   end
 

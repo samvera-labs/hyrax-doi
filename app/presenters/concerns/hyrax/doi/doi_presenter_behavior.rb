@@ -12,7 +12,7 @@ module Hyrax
       end
 
       def doi_render_options
-        { render_as: :doi, html_dl: true, doi_state: doi_state }
+        { render_as: :doi, html_dl: true, doi_state: }
       end
     end
   end

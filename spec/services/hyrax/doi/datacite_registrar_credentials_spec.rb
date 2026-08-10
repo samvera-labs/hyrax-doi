@@ -10,14 +10,14 @@ RSpec.describe Hyrax::DOI::DataCiteRegistrar, 'credentials' do
   after { Hyrax::DOI.reset_config! }
 
   it 'takes credentials at construction' do
-    registrar = described_class.new(credentials: credentials)
+    registrar = described_class.new(credentials:)
     expect(registrar.credentials.prefix).to eq '10.5072'
   end
 
   it 'resolves them from the configured store when not given' do
     store = Class.new(Hyrax::DOI::CredentialStore) do
       def fetch(provider:)
-        Hyrax::DOI::Credentials.new(provider: provider, prefix: '10.7777',
+        Hyrax::DOI::Credentials.new(provider:, prefix: '10.7777',
                                     username: 'u', password: 'p')
       end
     end
@@ -27,7 +27,7 @@ RSpec.describe Hyrax::DOI::DataCiteRegistrar, 'credentials' do
   end
 
   it 'builds its identifier builder from the resolved prefix' do
-    registrar = described_class.new(credentials: credentials)
+    registrar = described_class.new(credentials:)
     expect(registrar.builder.prefix).to eq '10.5072'
   end
 
@@ -49,12 +49,12 @@ RSpec.describe Hyrax::DOI::DataCiteRegistrar, 'credentials' do
       stub_reachable
       stub_request(:get, authenticated).to_return(status: 200, body: '{"data":[]}')
 
-      expect(described_class.new(credentials: credentials).ping).to be_success
+      expect(described_class.new(credentials:).ping).to be_success
     end
 
     it 'reports a failure when DataCite is unreachable' do
       stub_request(:get, heartbeat).to_timeout
-      result = described_class.new(credentials: credentials).ping
+      result = described_class.new(credentials:).ping
 
       expect(result).not_to be_success
       expect(result.message).to be_present
@@ -66,18 +66,18 @@ RSpec.describe Hyrax::DOI::DataCiteRegistrar, 'credentials' do
       stub_reachable
       stub_request(:get, authenticated).to_return(status: 401, body: '{}')
 
-      result = described_class.new(credentials: credentials).ping
+      result = described_class.new(credentials:).ping
       expect(result).not_to be_success
       expect(result.message).to match(/credential|reject|authoriz/i)
     end
 
     it 'distinguishes rejected credentials from an unreachable service' do
       stub_request(:get, heartbeat).to_timeout
-      unreachable = described_class.new(credentials: credentials).ping
+      unreachable = described_class.new(credentials:).ping
 
       stub_reachable
       stub_request(:get, authenticated).to_return(status: 401, body: '{}')
-      rejected = described_class.new(credentials: credentials).ping
+      rejected = described_class.new(credentials:).ping
 
       expect(unreachable.message).not_to eq rejected.message
     end

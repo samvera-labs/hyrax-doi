@@ -26,7 +26,7 @@ module Hyrax
       # invoke, not generate: the latter shells out to bin/rails, which is absent when the
       # generator runs anywhere but an application root.
       def install_migrations
-        invoke 'hyrax:doi:migrations', [], destination_root: destination_root
+        invoke 'hyrax:doi:migrations', [], destination_root:
       end
 
       def inject_into_solr_document

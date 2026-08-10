@@ -80,13 +80,13 @@ RSpec.describe Hyrax::DOI::PublisherListener do
     end
 
     it 'enqueues a sync when permissions change' do
-      listener.on_object_acl_updated(acl: acl, result: :success)
+      listener.on_object_acl_updated(acl:, result: :success)
 
       expect(Hyrax::DOI::SyncDOIJob).to have_received(:perform_later).with(work.id.to_s)
     end
 
     it 'ignores a failed ACL save' do
-      listener.on_object_acl_updated(acl: acl, result: :failure)
+      listener.on_object_acl_updated(acl:, result: :failure)
 
       expect(Hyrax::DOI::SyncDOIJob).not_to have_received(:perform_later)
     end

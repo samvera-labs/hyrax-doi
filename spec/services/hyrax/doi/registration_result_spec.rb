@@ -33,6 +33,6 @@ RSpec.describe Hyrax::DOI::RegistrationResult do
 
   it 'keeps the raw provider response for logging' do
     response = { 'errors' => [{ 'title' => 'boom' }] }
-    expect(described_class.new(response: response).response).to eq response
+    expect(described_class.new(response:).response).to eq response
   end
 end

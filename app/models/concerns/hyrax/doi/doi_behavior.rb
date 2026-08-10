@@ -43,8 +43,15 @@ module Hyrax
         Array.wrap(try(self.class.doi_attribute))
       end
 
+      # Callers pass an array, since the PersistentIdentifier record is the source of truth
+      # and a resource may hold several identifiers. Where the host declared the attribute
+      # to hold one value and reject an array, write the first value rather than letting
+      # the type error fail the sync.
       def doi_value=(value)
-        public_send("#{self.class.doi_attribute}=", value)
+        writer = "#{self.class.doi_attribute}="
+        public_send(writer, value)
+      rescue Dry::Types::CoercionError
+        public_send(writer, Array.wrap(value).first)
       end
 
       def persistent_identifiers

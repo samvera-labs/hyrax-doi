@@ -7,7 +7,7 @@ RSpec.configure do |config|
     base = Hyrax::DOI::DataCiteClient::TEST_BASE_URL
 
     def datacite_doi_body(doi, state)
-      { data: { id: doi, type: 'dois', attributes: { doi: doi, state: state } } }.to_json
+      { data: { id: doi, type: 'dois', attributes: { doi:, state: } } }.to_json
     end
 
     # Anything not stubbed below is a DOI DataCite does not have.
@@ -22,7 +22,7 @@ RSpec.configure do |config|
 
     # Minting a draft: only the prefix is sent, and DataCite assigns the suffix.
     stub_request(:post, URI.join(base, 'dois'))
-      .with(body: { data: { type: 'dois', attributes: { prefix: prefix } } }.to_json)
+      .with(body: { data: { type: 'dois', attributes: { prefix: } } }.to_json)
       .to_return(status: 201, body: datacite_doi_body("#{prefix}/draft-doi", 'draft'))
 
     # Submitting metadata. The state returned reflects the event sent, since that is what

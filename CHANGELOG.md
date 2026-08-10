@@ -12,6 +12,16 @@ Work toward 1.0.0: a Valkyrie-native, flexible-metadata-aware rewrite. See the n
 
 ### Changed
 
+- **A mint request for an unknown work answers 404 in JSON** rather than raising
+  `Valkyrie::Persistence::ObjectNotFoundError` into a 500 with an HTML body, which the
+  client — reading every response as JSON — could not report.
+- **`doi_value=` tolerates an attribute that holds one value.** The
+  `PersistentIdentifier` record is the source of truth and callers pass an array, which
+  `Valkyrie::Types::Strict::String` rejects; the first value is written instead of the sync
+  failing.
+- **Each CI shard gets its own Docker project.** Compose names its project after the file,
+  so four shards of one app shared a set of volumes and raced to create directories inside
+  them — the containers never started, so no specs ran.
 - **Both generators work on a Valkyrie application.** `hyrax:doi:install` wrote four
   registrar settings removed in this rewrite, so a freshly installed app raised on boot,
   and it injected a helper module the engine has wired itself since the DOI tab landed.

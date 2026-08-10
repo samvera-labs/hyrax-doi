@@ -18,7 +18,7 @@ RSpec.describe Hyrax::DOI::WorkFormHelper do
       let(:work) { Struct.new(:doi).new(nil) }
 
       it 'puts the DOI tab first' do
-        expect(helper_object.form_tabs_for(form: form))
+        expect(helper_object.form_tabs_for(form:))
           .to eq %w[doi metadata files relationships]
       end
     end
@@ -27,7 +27,7 @@ RSpec.describe Hyrax::DOI::WorkFormHelper do
       let(:work) { Object.new }
 
       it 'leaves the tabs alone' do
-        expect(helper_object.form_tabs_for(form: form))
+        expect(helper_object.form_tabs_for(form:))
           .to eq %w[metadata files relationships]
       end
     end
@@ -44,7 +44,7 @@ RSpec.describe Hyrax::DOI::WorkFormHelper do
 
       it 'still offers the tab' do
         expect(work_class.instance_methods).not_to include(:doi)
-        expect(helper_object.form_tabs_for(form: form)).to include('doi')
+        expect(helper_object.form_tabs_for(form:)).to include('doi')
       end
     end
   end
@@ -67,7 +67,7 @@ RSpec.describe Hyrax::DOI::WorkFormHelper do
       fields = helper_object.doi_required_fields(form)
 
       expect(fields).to include(hash_including(selector: '.monograph_title', label: 'Title'))
-      expect(fields.map { |f| f[:selector] }).not_to include('.monograph_creator')
+      expect(fields.pluck(:selector)).not_to include('.monograph_creator')
     end
   end
 end

@@ -52,7 +52,7 @@ module Hyrax
       # Reserves a DOI with no metadata and no url. Sending only the prefix lets DataCite
       # assign the suffix.
       def create_draft_doi
-        response = post('dois', data: { type: 'dois', attributes: { prefix: prefix } })
+        response = post('dois', data: { type: 'dois', attributes: { prefix: } })
         raise Error.new('Failed creating draft DOI', response) unless response.status == 201
 
         parse(response).doi
@@ -127,7 +127,7 @@ module Hyrax
       def parse(response)
         data = JSON.parse(response.body.presence || '{}')['data'] || {}
         attributes = data['attributes'] || {}
-        Record.new(doi: data['id'], state: attributes['state'], attributes: attributes)
+        Record.new(doi: data['id'], state: attributes['state'], attributes:)
       end
 
       # Memoized: a new connection per call rebuilds the middleware stack and forfeits

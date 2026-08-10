@@ -46,9 +46,9 @@ module Hyrax
         return Result.new(created: false, message: 'Profile already declares doi.') if already_installed?(current)
 
         schema = Hyrax::FlexibleSchema.new(profile: merge_into(current))
-        return Result.new(schema: schema, created: false, message: schema.errors.full_messages.to_sentence) unless schema.save
+        return Result.new(schema:, created: false, message: schema.errors.full_messages.to_sentence) unless schema.save
 
-        Result.new(schema: schema, created: true,
+        Result.new(schema:, created: true,
                    message: "Created profile version #{schema.version} with doi properties.")
       end
 

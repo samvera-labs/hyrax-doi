@@ -16,7 +16,7 @@ RSpec.describe Hyrax::DOI::DataCiteRegistrar, 'registering' do
       .and_return('https://repo.example.edu/works/abc')
   end
 
-  subject(:registrar) { described_class.new(credentials: credentials) }
+  subject(:registrar) { described_class.new(credentials:) }
 
   let(:credentials) do
     Hyrax::DOI::Credentials.new(provider: 'datacite', prefix: '10.5072',
@@ -41,7 +41,7 @@ RSpec.describe Hyrax::DOI::DataCiteRegistrar, 'registering' do
   def stub_put(state: 'draft')
     stub_request(:put, "#{base}/dois/10.5072/abc")
       .to_return(status: 200,
-                 body: { data: { id: '10.5072/abc', attributes: { state: state } } }.to_json)
+                 body: { data: { id: '10.5072/abc', attributes: { state: } } }.to_json)
   end
 
   def event_sent

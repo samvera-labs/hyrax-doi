@@ -46,7 +46,7 @@ RSpec.describe Hyrax::DOI::CredentialStore do
     it 'can be replaced by a host application' do
       custom = Class.new(Hyrax::DOI::CredentialStore) do
         def fetch(provider:)
-          Hyrax::DOI::Credentials.new(provider: provider, prefix: '10.9999',
+          Hyrax::DOI::Credentials.new(provider:, prefix: '10.9999',
                                       username: 'u', password: 'p')
         end
       end
@@ -61,7 +61,7 @@ RSpec.describe Hyrax::DOI::CredentialStore do
     it 'gives concurrent threads their own credentials' do
       per_thread = Class.new(Hyrax::DOI::CredentialStore) do
         def fetch(provider:)
-          Hyrax::DOI::Credentials.new(provider: provider, prefix: Thread.current[:doi_prefix],
+          Hyrax::DOI::Credentials.new(provider:, prefix: Thread.current[:doi_prefix],
                                       username: 'u', password: 'p')
         end
       end
@@ -85,7 +85,7 @@ RSpec.describe Hyrax::DOI::CredentialStore do
     subject(:schema) { Hyrax::DOI::CredentialStore.field_schema_for('datacite') }
 
     it 'names the fields DataCite needs' do
-      expect(schema.map { |field| field[:name] }).to eq %i[prefix username password mode]
+      expect(schema.pluck(:name)).to eq %i[prefix username password mode]
     end
 
     it 'marks the password as secret so a form can mask it' do

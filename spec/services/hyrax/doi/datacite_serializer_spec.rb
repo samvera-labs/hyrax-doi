@@ -25,7 +25,7 @@ RSpec.describe Hyrax::DOI::DataCiteSerializer do
 
   let(:url) { 'https://repo.example.edu/concern/serialized_works/abc123' }
 
-  subject(:payload) { described_class.new(work, url: url).to_attributes }
+  subject(:payload) { described_class.new(work, url:).to_attributes }
 
   after { Hyrax::DOI.reset_config! }
 
@@ -119,14 +119,14 @@ RSpec.describe Hyrax::DOI::DataCiteSerializer do
     let(:work) { SerializedWork.new(title: ['Only a title']) }
 
     it 'reports which fields a registered or findable DOI would still need' do
-      missing = described_class.new(work, url: url).missing_required
+      missing = described_class.new(work, url:).missing_required
       expect(missing).to include('publisher')
     end
 
     it 'reports nothing missing for a complete work' do
       complete = SerializedWork.new(title: ['T'], creator: ['C'], publisher: ['P'],
                                     date_created: ['2026'], resource_type: ['Dataset'])
-      expect(described_class.new(complete, url: url).missing_required).to be_empty
+      expect(described_class.new(complete, url:).missing_required).to be_empty
     end
   end
 end

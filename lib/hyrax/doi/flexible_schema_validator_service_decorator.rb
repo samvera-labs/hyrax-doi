@@ -12,7 +12,7 @@ module Hyrax
       def validate!
         super
         Hyrax::DOI::FlexibleSchemaValidators::DOIValidator.new(
-          profile: profile, errors: errors, warnings: warnings
+          profile:, errors:, warnings:
         ).validate!
       end
     end

@@ -49,14 +49,14 @@ module Hyrax
 
       def to_attributes
         {
-          titles: titles,
-          creators: creators,
-          publisher: publisher,
+          titles:,
+          creators:,
+          publisher:,
           publicationYear: publication_year,
           types: { resourceTypeGeneral: resource_type_general },
-          descriptions: descriptions,
-          subjects: subjects,
-          url: url
+          descriptions:,
+          subjects:,
+          url:
         }.compact_blank
       end
 

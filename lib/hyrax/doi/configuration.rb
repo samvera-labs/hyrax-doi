@@ -49,7 +49,7 @@ module Hyrax
       # Resolved per call rather than cached, so a request or job that has switched
       # tenants gets that tenant's credentials.
       def credentials_for(provider)
-        config.credential_store.fetch(provider: provider)
+        config.credential_store.fetch(provider:)
       end
 
       def reset_config!

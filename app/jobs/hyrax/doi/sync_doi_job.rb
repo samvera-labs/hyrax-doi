@@ -10,7 +10,7 @@ module Hyrax
       #
       # @param resource_id [String]
       def perform(resource_id)
-        record = Hyrax::DOI::PersistentIdentifier.primary_for(resource_id: resource_id,
+        record = Hyrax::DOI::PersistentIdentifier.primary_for(resource_id:,
                                                               scheme: 'doi')
         return unless record&.minted?
 

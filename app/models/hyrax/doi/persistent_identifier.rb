@@ -7,7 +7,10 @@ module Hyrax
     # projection of the primary row, kept for indexing and display.
     #
     # See the migration template for why individual columns are shaped as they are.
-    class PersistentIdentifier < ActiveRecord::Base
+    #
+    # ActiveRecord::Base, not ApplicationRecord: that class belongs to the host application
+    # and a gem cannot count on it existing, let alone on inheriting its connection.
+    class PersistentIdentifier < ActiveRecord::Base # rubocop:disable Rails/ApplicationRecord
       self.table_name = 'hyrax_doi_persistent_identifiers'
 
       MINTED = 'minted'
@@ -42,7 +45,7 @@ module Hyrax
       ##
       # @param state [String, nil] provider vocabulary, stored verbatim
       def record_sync(state: nil, error: nil)
-        assign_attributes(state: state) if state
+        assign_attributes(state:) if state
         if error
           update(last_error: error)
         else

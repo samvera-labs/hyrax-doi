@@ -42,6 +42,22 @@ RSpec.describe 'declaring doi when the host already has it' do
     expect(work.doi).to eq '10.5072/abc'
   end
 
+  # sync_doi_projection! always writes an array. Valkyrie::Types::String quietly accepts
+  # one, but Strict::String raises Dry::Types::ConstraintError, which would fail every sync
+  # for a repository that declared its DOI field that way.
+  it 'writes a single value to an attribute that will not take an array' do
+    stub_const('StrictDOIWork', Class.new(Hyrax::Work) do
+      def self.name = 'StrictDOIWork'
+      attribute :doi, Valkyrie::Types::Strict::String
+      include Hyrax::DOI::DOIBehavior
+    end)
+
+    work = StrictDOIWork.new
+    expect { work.doi_value = ['10.5072/abc'] }.not_to raise_error
+    expect(work.doi).to eq '10.5072/abc'
+    expect(work.doi_value).to eq ['10.5072/abc']
+  end
+
   it 'tolerates doi_status_when_public being predeclared' do
     expect do
       stub_const('PredeclaredStatusWork', Class.new(Hyrax::Work) do

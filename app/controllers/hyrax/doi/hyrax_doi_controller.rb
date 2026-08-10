@@ -45,7 +45,11 @@ module Hyrax
         render json: { error: 'Not authorized.' }, status: :forbidden unless current_ability.can_create_any_work?
       end
 
+      # Answers before the permission check: there is nothing to have permission over, and
+      # the client reads every response as JSON.
       def check_edit_authorization
+        return render json: { error: "No work found for #{params[:id]}." }, status: :not_found if work.blank?
+
         render json: { error: 'Not authorized.' }, status: :forbidden unless current_ability.can?(:edit, work)
       end
 
@@ -53,6 +57,8 @@ module Hyrax
         return @work if defined?(@work)
 
         @work = Hyrax.query_service.find_by(id: params[:id])
+      rescue Valkyrie::Persistence::ObjectNotFoundError
+        @work = nil
       end
 
       def doi_registrar

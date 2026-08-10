@@ -35,7 +35,7 @@ RSpec.describe Hyrax::DOI::DataCiteClient, 'REST v2' do
                 .with { |req| JSON.parse(req.body).dig('data', 'attributes').exclude?('event') }
                 .to_return(status: 200, body: { data: { id: '10.5072/abc', attributes: { state: 'draft' } } }.to_json)
 
-      client.put_doi('10.5072/abc', attributes: attributes)
+      client.put_doi('10.5072/abc', attributes:)
       expect(request).to have_been_requested
     end
 
@@ -45,7 +45,7 @@ RSpec.describe Hyrax::DOI::DataCiteClient, 'REST v2' do
                   .with { |req| JSON.parse(req.body).dig('data', 'attributes', 'event') == event }
                   .to_return(status: 200, body: { data: { id: '10.5072/abc', attributes: { state: 'findable' } } }.to_json)
 
-        client.put_doi('10.5072/abc', attributes: attributes, event: event)
+        client.put_doi('10.5072/abc', attributes:, event:)
         expect(request).to have_been_requested
       end
     end
@@ -54,7 +54,7 @@ RSpec.describe Hyrax::DOI::DataCiteClient, 'REST v2' do
       stub_request(:put, "#{base}/dois/10.5072/abc")
         .to_return(status: 200, body: { data: { id: '10.5072/abc', attributes: { state: 'registered' } } }.to_json)
 
-      expect(client.put_doi('10.5072/abc', attributes: attributes, event: 'publish').state).to eq 'registered'
+      expect(client.put_doi('10.5072/abc', attributes:, event: 'publish').state).to eq 'registered'
     end
 
     it 'surfaces field-level validation errors' do
@@ -63,7 +63,7 @@ RSpec.describe Hyrax::DOI::DataCiteClient, 'REST v2' do
                    body: { errors: [{ source: 'creators', title: 'cannot be blank' },
                                     { source: 'publisher', title: 'cannot be blank' }] }.to_json)
 
-      expect { client.put_doi('10.5072/abc', attributes: attributes) }
+      expect { client.put_doi('10.5072/abc', attributes:) }
         .to raise_error(Hyrax::DOI::DataCiteClient::Error, /creators.*publisher/m)
     end
   end

@@ -13,7 +13,7 @@ RSpec.describe Hyrax::DOI::HyraxDOIController, type: :controller do
   before do
     store = Class.new(Hyrax::DOI::CredentialStore) do
       def fetch(provider:)
-        Hyrax::DOI::Credentials.new(provider: provider, prefix: '10.5072',
+        Hyrax::DOI::Credentials.new(provider:, prefix: '10.5072',
                                     username: 'u', password: 'p', mode: 'test')
       end
     end
@@ -76,6 +76,15 @@ RSpec.describe Hyrax::DOI::HyraxDOIController, type: :controller do
 
       post :mint, params: { id: work.id }, format: :json
       expect(response).to have_http_status(:forbidden)
+    end
+
+    # The client reads every response as JSON, so an unknown id has to answer in JSON
+    # rather than raise into Rails' HTML error page.
+    it 'reports an unknown work as JSON, not a 500' do
+      post :mint, params: { id: 'no-such-work' }, format: :json
+
+      expect(response).to have_http_status(:not_found)
+      expect(response.parsed_body['error']).to be_present
     end
 
     it 'reports the registrar\'s failure rather than raising' do

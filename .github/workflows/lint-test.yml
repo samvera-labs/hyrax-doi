@@ -52,6 +52,11 @@ jobs:
         ci_test_app: [koppie, allinson, sirenia, freyja]
         ci_node_total: [4]
         ci_node_index: [0, 1, 2, 3]
+    # Compose names its project after the file, so every shard of an app would otherwise
+    # share one set of volumes and race to create directories inside them. Namespacing per
+    # shard gives each its own containers, network, and volumes.
+    env:
+      COMPOSE_PROJECT_NAME: hyrax-doi-${{ matrix.ci_test_app }}-${{ matrix.ci_node_index }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4

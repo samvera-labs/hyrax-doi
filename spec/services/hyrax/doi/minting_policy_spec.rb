@@ -105,7 +105,7 @@ RSpec.describe Hyrax::DOI::MintingPolicy do
       end
       work.doi = ['10.5072/abc']
 
-      result = Hyrax::DOI::DataCiteRegistrar.new(credentials: credentials).register!(object: work)
+      result = Hyrax::DOI::DataCiteRegistrar.new(credentials:).register!(object: work)
 
       expect(result).not_to be_changed
       expect(a_request(:any, /api\.test\.datacite\.org/)).not_to have_been_made
