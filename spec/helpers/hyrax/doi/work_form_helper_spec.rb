@@ -50,24 +50,45 @@ RSpec.describe Hyrax::DOI::WorkFormHelper do
   end
 
   describe '#doi_required_fields' do
-    let(:work) { Struct.new(:doi, :title, :publisher).new(nil, nil, nil) }
+    # A real Valkyrie resource, so the helper cannot rely on a method no work type has.
+    let(:work_class) do
+      Class.new(Hyrax::Work) do
+        def self.name = 'RequiredFieldsWork'
+        attribute :publisher, Valkyrie::Types::Array.of(Valkyrie::Types::String)
+        include Hyrax::DOI::DOIBehavior
+      end
+    end
+    let(:work) { work_class.new }
     let(:form) do
       instance_double(Hyrax::Forms::ResourceForm,
                       model: work,
-                      model_class: work_class,
                       model_name: ActiveModel::Name.new(nil, nil, 'Monograph'))
     end
-    let(:work_class) do
-      Class.new do
-        def self.human_attribute_name(field) = field.to_s.titleize
-      end
-    end
 
-    it 'names only fields the work actually has' do
+    before { stub_const('RequiredFieldsWork', work_class) }
+
+    it 'names the required fields the work has' do
       fields = helper_object.doi_required_fields(form)
 
-      expect(fields).to include(hash_including(selector: '.monograph_title', label: 'Title'))
-      expect(fields.pluck(:selector)).not_to include('.monograph_creator')
+      expect(fields.pluck(:selector)).to include('.monograph_title', '.monograph_publisher')
+    end
+
+    # Derived rather than hardcoded: which attributes a work carries differs between flex
+    # modes, so naming a specific absent field would assert the mode, not the filtering.
+    it 'omits required fields the work does not have' do
+      absent = Hyrax::DOI::DataCiteSerializer.required_work_fields.reject { |f| work.respond_to?(f) }
+      fields = helper_object.doi_required_fields(form)
+
+      expect(fields.pluck(:selector)).to match_array(
+        (Hyrax::DOI::DataCiteSerializer.required_work_fields - absent).map { |f| ".monograph_#{f}" }
+      )
+    end
+
+    it 'labels each field without ActiveModel' do
+      labels = helper_object.doi_required_fields(form).pluck(:label)
+
+      expect(labels).to all(be_present)
+      expect(labels).to include('Publisher')
     end
   end
 end

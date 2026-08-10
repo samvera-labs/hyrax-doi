@@ -12,6 +12,19 @@ Work toward 1.0.0: a Valkyrie-native, flexible-metadata-aware rewrite. See the n
 
 ### Changed
 
+- **A DOI entered on the deposit form is saved, and a minted one is recorded.** The form
+  concerns delegated readers to the work but declared no writable property, so
+  `ResourceForm` discarded `doi` and `doi_status_when_public` on submit; nothing created a
+  `PersistentIdentifier` row, so `doi_state` was always nil, the sync job — which returns
+  early unless a minted record exists — never ran, and a reserved draft DOI existed only at
+  DataCite. Minting now writes a record through `Hyrax::DOI::IdentifierRecorder`, which also
+  keeps the work's DOI attribute in step for indexing and display.
+- **The DOI tab's three modes no longer submit each other's values.** A hidden panel still
+  posts its inputs, so a depositor who typed a DOI and then chose to mint a new one, or to
+  mint nothing, previously sent both. The submitted mode now decides which values apply — and
+  never clears a DOI already recorded on the work.
+- **`a DOI-enabled form` and `a DataCite DOI-enabled form` assert round-tripping**, not
+  delegation. Asserting delegation is what let the missing writer stay green.
 - **A mint request for an unknown work answers 404 in JSON** rather than raising
   `Valkyrie::Persistence::ObjectNotFoundError` into a 500 with an HTML body, which the
   client — reading every response as JSON — could not report.
@@ -43,6 +56,12 @@ Work toward 1.0.0: a Valkyrie-native, flexible-metadata-aware rewrite. See the n
 - **`create_draft_doi` is a POST, not a GET**, and the controller renders JSON rather than
   executable JavaScript. Reserving an identifier has a side effect at DataCite, so a
   browser prefetch or a crawler must not be able to trigger it.
+- **The DOI tab is organized around one choice.** It presented four controls in a flat list —
+  two adjacently placed buttons both mentioning DOIs, and status options named only `Draft` /
+  `Registered` / `Findable` — with nothing saying which combination a depositor wanted. It now
+  offers three mutually exclusive situations (mint nothing, record a DOI the work already has,
+  mint a new one) and reveals only the chosen one's controls, in CSS rather than JavaScript.
+  Each minting option says what it does and whether it can be undone.
 - **The DOI tab's inline `<script>` is gone**, replaced by `hyrax/doi/doi_form.js` —
   vanilla JS, event-delegated, reading `data-` attributes. The old handler used the
   jquery-ujs `ajax:beforeSend` signature `(e, xhr, settings)` while the stack ships

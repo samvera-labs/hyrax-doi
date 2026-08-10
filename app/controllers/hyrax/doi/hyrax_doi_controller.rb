@@ -10,7 +10,11 @@ module Hyrax
       def create_draft_doi
         return render_disabled unless Flipflop.enabled?(:doi_minting)
 
-        render json: { doi: doi_registrar.mint_draft_doi }, status: :created
+        doi = doi_registrar.mint_draft_doi
+        # Recorded before any work exists to hold it, so an abandoned form leaves a row the
+        # orphan sweep can find rather than a DOI known only to DataCite.
+        identifier_recorder.record_reservation(value: doi)
+        render json: { doi: }, status: :created
       rescue Hyrax::DOI::DataCiteClient::Error => e
         render json: { error: e.message }, status: :bad_gateway
       end
@@ -19,11 +23,10 @@ module Hyrax
         return render_disabled unless Flipflop.enabled?(:doi_minting)
 
         result = doi_registrar.register!(object: work)
-        if result.success?
-          render json: { doi: result.identifier, state: result.state }, status: :ok
-        else
-          render json: { error: result.error_message }, status: :unprocessable_entity
-        end
+        return render json: { error: result.error_message }, status: :unprocessable_entity unless result.success?
+
+        record_minted(result)
+        render json: { doi: result.identifier, state: result.state }, status: :ok
       rescue Hyrax::DOI::DataCiteClient::Error => e
         render json: { error: e.message }, status: :bad_gateway
       end
@@ -63,6 +66,17 @@ module Hyrax
 
       def doi_registrar
         Hyrax::Identifier::Registrar.for(provider_for_doi.to_sym)
+      end
+
+      def identifier_recorder
+        Hyrax::DOI::IdentifierRecorder.new(scheme: 'doi', provider: provider_for_doi)
+      end
+
+      # The recorder projects the DOI onto the work in memory; saving is what makes it
+      # visible to indexing and the show page.
+      def record_minted(result)
+        identifier_recorder.record_minted(resource: work, value: result.identifier, state: result.state)
+        Hyrax.persister.save(resource: work) if work.respond_to?(:doi_value=)
       end
 
       def provider_for_doi

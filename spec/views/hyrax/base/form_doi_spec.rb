@@ -5,15 +5,12 @@ RSpec.describe 'hyrax/base/_form_doi', type: :view do
   let(:work) { Struct.new(:doi, :doi_status_when_public, :doi_state, keyword_init: true) }
   let(:model) { work.new(doi: [], doi_status_when_public: nil, doi_state: nil) }
   let(:form) { Hyrax::DOI::FormDouble.new(model) }
-  # SimpleForm's builder, not Rails': the partial calls f.input, which only it provides.
   let(:builder) { SimpleForm::FormBuilder.new('monograph', form, view, {}) }
 
   before do
     stub_const('Hyrax::DOI::FormDouble', Class.new(SimpleDelegator) do
       def model = __getobj__
       def model_name = ActiveModel::Name.new(nil, nil, 'Monograph')
-      def model_class = self.class
-      def self.human_attribute_name(field) = field.to_s.titleize
       def to_model = self
       def persisted? = false
     end)
@@ -26,6 +23,74 @@ RSpec.describe 'hyrax/base/_form_doi', type: :view do
     render partial: 'hyrax/base/form_doi', locals: { f: builder }
 
     expect(rendered).to have_selector('[data-doi-draft-button]')
+  end
+
+  describe 'choosing what to do about a DOI' do
+    it 'offers the three situations as one choice' do
+      render partial: 'hyrax/base/form_doi', locals: { f: builder }
+
+      values = Capybara.string(rendered).all('.doi-mode__radio', visible: :all).map { |r| r['value'] }
+      expect(values).to eq %w[none existing mint]
+    end
+
+    it 'preselects doing nothing' do
+      render partial: 'hyrax/base/form_doi', locals: { f: builder }
+
+      checked = Capybara.string(rendered)
+                        .all('.doi-mode__radio', visible: :all)
+                        .select { |r| r['checked'] }
+                        .map { |r| r['value'] }
+      expect(checked).to eq ['none']
+    end
+
+    it 'selects the minting mode for a work whose status is already chosen' do
+      model.doi_status_when_public = 'findable'
+
+      render partial: 'hyrax/base/form_doi', locals: { f: builder }
+
+      checked = Capybara.string(rendered)
+                        .all('.doi-mode__radio', visible: :all)
+                        .select { |r| r['checked'] }
+                        .map { |r| r['value'] }
+      expect(checked).to eq ['mint']
+    end
+
+    it 'selects the existing-DOI mode for a work that has one but no status' do
+      model.doi = ['10.5072/abc']
+
+      render partial: 'hyrax/base/form_doi', locals: { f: builder }
+
+      checked = Capybara.string(rendered)
+                        .all('.doi-mode__radio', visible: :all)
+                        .select { |r| r['checked'] }
+                        .map { |r| r['value'] }
+      expect(checked).to eq ['existing']
+    end
+
+    it 'clears the status unless a status radio is checked' do
+      render partial: 'hyrax/base/form_doi', locals: { f: builder }
+
+      hidden = Capybara.string(rendered)
+                       .all("input[type='hidden'][name*='doi_status_when_public']", visible: :all)
+      expect(hidden.map { |h| h['value'] }).to eq ['']
+    end
+
+    it 'says what each status does, and whether it can be undone' do
+      render partial: 'hyrax/base/form_doi', locals: { f: builder }
+
+      expect(rendered).to have_text(/does not resolve yet/i)
+      expect(rendered).to have_text(/resolves permanently/i)
+      expect(rendered).to have_text(/reversible/i)
+      expect(rendered).to have_text(/permanent/i)
+    end
+
+    # The stylesheet drives the disclosure, so the tab must not depend on the host having
+    # required the gem's JavaScript.
+    it 'brings its own stylesheet' do
+      render partial: 'hyrax/base/form_doi', locals: { f: builder }
+
+      expect(rendered).to have_selector("link[href*='doi_form']", visible: :all)
+    end
   end
 
   it 'withholds the draft button once the work has a DOI' do
@@ -62,13 +127,13 @@ RSpec.describe 'hyrax/base/_form_doi', type: :view do
     end
   end
 
-  it 'renders every intent, blank first' do
+  it 'offers the three states a DOI can be minted into' do
     render partial: 'hyrax/base/form_doi', locals: { f: builder }
 
     values = Capybara.string(rendered)
-                     .all('[data-doi-status-radio]')
+                     .all('[data-doi-status-radio]', visible: :all)
                      .map { |radio| radio['value'] }
-    expect(values).to eq ['', 'draft', 'registered', 'findable']
+    expect(values).to eq %w[draft registered findable]
   end
 
   it 'closes off intents DataCite can no longer reach' do
@@ -77,9 +142,8 @@ RSpec.describe 'hyrax/base/_form_doi', type: :view do
     render partial: 'hyrax/base/form_doi', locals: { f: builder }
 
     page = Capybara.string(rendered)
-    expect(page.find('#monograph_doi_status_when_public_none')).to be_disabled
-    expect(page.find('#monograph_doi_status_when_public_draft')).to be_disabled
-    expect(page.find('#monograph_doi_status_when_public_registered')).not_to be_disabled
+    expect(page.find('#monograph_doi_status_when_public_draft', visible: :all)).to be_disabled
+    expect(page.find('#monograph_doi_status_when_public_registered', visible: :all)).not_to be_disabled
   end
 
   it 'hides the minting controls when the feature is off' do

@@ -3,20 +3,11 @@ require 'rails_helper'
 require 'hyrax/doi/spec/shared_specs'
 
 RSpec.describe 'DOI form behaviors' do
-  let(:work_class) do
-    Class.new(Hyrax::Work) do
-      def self.name = 'FormBehaviorWork'
-      include Hyrax::DOI::DOIBehavior
-      include Hyrax::DOI::DataCiteDOIBehavior
-    end
-  end
-  let(:work) { work_class.new(title: ['Moomin']) }
-
-  before { stub_const('FormBehaviorWork', work_class) }
+  let(:work) { DOIWork.new(title: ['Moomin']) }
 
   describe Hyrax::DOI::DOIFormBehavior do
     let(:form_class) do
-      Class.new(Hyrax::Forms::ResourceForm(FormBehaviorWork)) do
+      Class.new(Hyrax::Forms::ResourceForm(DOIWork)) do
         include Hyrax::DOI::DOIFormBehavior
       end
     end
@@ -27,7 +18,7 @@ RSpec.describe 'DOI form behaviors' do
 
   describe Hyrax::DOI::DataCiteDOIFormBehavior do
     let(:form_class) do
-      Class.new(Hyrax::Forms::ResourceForm(FormBehaviorWork)) do
+      Class.new(Hyrax::Forms::ResourceForm(DOIWork)) do
         include Hyrax::DOI::DOIFormBehavior
         include Hyrax::DOI::DataCiteDOIFormBehavior
       end

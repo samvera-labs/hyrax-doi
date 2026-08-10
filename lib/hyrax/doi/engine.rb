@@ -14,6 +14,14 @@ module Hyrax
         end
       end
 
+      # An engine cannot add to the host's application.js or application.css, so name the
+      # gem's assets as their own entry points. Without this they ship but are never served,
+      # which is why the DOI tab's buttons did nothing in an application that had not
+      # required them by hand.
+      initializer 'hyrax_doi.assets.precompile' do |app|
+        app.config.assets.precompile += %w[hyrax/doi/doi_form.js hyrax/doi/doi_form.css]
+      end
+
       # Allow flipflop to load config/features.rb from the Hyrax gem:
       initializer 'configure' do
         Flipflop::FeatureLoader.current.append(self)

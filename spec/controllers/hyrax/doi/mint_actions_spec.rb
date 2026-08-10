@@ -62,6 +62,20 @@ RSpec.describe Hyrax::DOI::HyraxDOIController, type: :controller do
       post :create_draft_doi, format: :json
       expect(response).to have_http_status(:forbidden)
     end
+
+    # Without a local record the reserved DOI exists only at DataCite, so an abandoned form
+    # leaves an orphan nothing can find again.
+    it 'records the reservation so it is not an orphan' do
+      stub_request(:post, "#{base}/dois")
+        .to_return(status: 201, body: { data: { id: '10.5072/new-draft' } }.to_json)
+
+      post :create_draft_doi, format: :json
+
+      record = Hyrax::DOI::PersistentIdentifier.find_by(value: '10.5072/new-draft')
+      expect(record).to be_present
+      expect(record.state).to eq 'draft'
+      expect(record.resource_id).to be_nil
+    end
   end
 
   describe 'POST #mint' do
@@ -108,6 +122,55 @@ RSpec.describe Hyrax::DOI::HyraxDOIController, type: :controller do
 
       expect(response).to have_http_status(:ok)
       expect(response.parsed_body).to include('doi' => '10.5072/minted', 'state' => 'findable')
+    end
+
+    it 'records the DOI against the work so later edits can sync it' do
+      allow(controller.current_ability).to receive(:can?).with(:edit, anything).and_return(true)
+      result = Hyrax::DOI::RegistrationResult.new(identifier: '10.5072/minted',
+                                                  state: 'findable', changed: true)
+      allow_any_instance_of(Hyrax::DOI::DataCiteRegistrar).to receive(:register!).and_return(result)
+
+      post :mint, params: { id: work.id }, format: :json
+
+      record = Hyrax::DOI::PersistentIdentifier.primary_for(resource_id: work.id.to_s, scheme: 'doi')
+      expect(record&.value).to eq '10.5072/minted'
+      expect(record).to be_minted
+      expect(record.state).to eq 'findable'
+    end
+
+    it 'stores the DOI on the work itself, so it indexes and displays' do
+      allow(controller.current_ability).to receive(:can?).with(:edit, anything).and_return(true)
+      result = Hyrax::DOI::RegistrationResult.new(identifier: '10.5072/minted',
+                                                  state: 'findable', changed: true)
+      allow_any_instance_of(Hyrax::DOI::DataCiteRegistrar).to receive(:register!).and_return(result)
+      doi_work = Hyrax.persister.save(resource: DOIWork.new(title: ['Holds a DOI']))
+
+      post :mint, params: { id: doi_work.id }, format: :json
+
+      expect(Array(Hyrax.query_service.find_by(id: doi_work.id).doi)).to eq ['10.5072/minted']
+    end
+
+    # A repository may enable minting for a work type the gem's concern was never added to.
+    it 'still answers for a work that has no DOI attribute to project onto' do
+      allow(controller.current_ability).to receive(:can?).with(:edit, anything).and_return(true)
+      result = Hyrax::DOI::RegistrationResult.new(identifier: '10.5072/minted',
+                                                  state: 'findable', changed: true)
+      allow_any_instance_of(Hyrax::DOI::DataCiteRegistrar).to receive(:register!).and_return(result)
+
+      post :mint, params: { id: work.id }, format: :json
+
+      expect(response).to have_http_status(:ok)
+      expect(Hyrax::DOI::PersistentIdentifier.for_resource(work.id.to_s)).not_to be_empty
+    end
+
+    it 'does not record anything when the registrar failed' do
+      allow(controller.current_ability).to receive(:can?).with(:edit, anything).and_return(true)
+      result = Hyrax::DOI::RegistrationResult.new(errors: ['DataCite requires publisher'])
+      allow_any_instance_of(Hyrax::DOI::DataCiteRegistrar).to receive(:register!).and_return(result)
+
+      post :mint, params: { id: work.id }, format: :json
+
+      expect(Hyrax::DOI::PersistentIdentifier.for_resource(work.id.to_s)).to be_empty
     end
   end
 

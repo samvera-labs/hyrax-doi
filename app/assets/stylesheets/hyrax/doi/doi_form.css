@@ -1,0 +1,221 @@
+/*
+ * DOI tab. Each mode's panel is revealed by its own radio, so which controls are visible
+ * needs no JavaScript -- the tab still works where scripts are blocked or the host has not
+ * required the gem's JS. The radio has to be a sibling of the panel for ~ to reach it, so
+ * markup puts it before the label rather than inside one.
+ */
+/* Bootstrap floats legends and gives them full width, which breaks the spacing below. */
+.doi-legend {
+  float: none;
+  width: auto;
+  margin: 24px 0 12px;
+  font-size: inherit;
+  font-weight: 700;
+}
+
+.doi-modes {
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.doi-mode {
+  border-bottom: 1px solid #e9ecef;
+}
+
+.doi-mode:last-child {
+  border-bottom: none;
+}
+
+.doi-mode__radio {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.doi-mode__label {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 16px 18px;
+  margin: 0;
+  cursor: pointer;
+  font-weight: 400;
+}
+
+/* Drawn rather than native, since the input itself is hidden to allow the ~ selector. */
+.doi-mode__marker {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  margin-top: 3px;
+  border: 1px solid #6c757d;
+  border-radius: 50%;
+  background: #fff;
+}
+
+.doi-mode__radio:checked + .doi-mode__label {
+  background: #f8f9fb;
+  box-shadow: inset 3px 0 0 #1264a3;
+}
+
+.doi-mode__radio:checked + .doi-mode__label .doi-mode__marker {
+  border: 5px solid #1264a3;
+}
+
+.doi-mode__radio:focus-visible + .doi-mode__label {
+  outline: 2px solid #1264a3;
+  outline-offset: -2px;
+}
+
+.doi-mode__title {
+  display: block;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.doi-mode__help {
+  display: block;
+  font-size: 14px;
+  line-height: 1.45;
+  color: #6c757d;
+}
+
+.doi-mode__panel {
+  display: none;
+  padding: 0 18px 20px 46px;
+  background: #f8f9fb;
+}
+
+.doi-mode__radio:checked ~ .doi-mode__panel {
+  display: block;
+}
+
+/* Shows the DOI is a URL without making the depositor type the resolver. */
+.doi-input-group {
+  display: flex;
+  align-items: stretch;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  background: #fff;
+  overflow: hidden;
+  max-width: 520px;
+}
+
+.doi-input-group__prefix {
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+  background: #f1f3f5;
+  border-right: 1px solid #ced4da;
+  font-size: 14px;
+  color: #6c757d;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+.doi-input-group input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  padding: 9px 12px;
+  font-size: 16px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  background: transparent;
+}
+
+/* Matches .doi-reserve__help, so every supporting note in the tab reads the same way. */
+.doi-hint {
+  margin: 6px 0 0;
+  font-size: 13px;
+  line-height: 1.45;
+  color: #6c757d;
+}
+
+.doi-statuses {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 8px 0 0;
+}
+
+.doi-status {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 11px 13px;
+  margin: 0;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  background: #fff;
+  cursor: pointer;
+  font-weight: 400;
+}
+
+.doi-status__heading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.doi-status__help {
+  display: block;
+  font-size: 13.5px;
+  line-height: 1.45;
+  color: #6c757d;
+}
+
+/* Whether a DOI can be taken back is the thing a depositor most needs to see. */
+.doi-badge {
+  display: inline-block;
+  padding: 1px 7px;
+  border-radius: 10px;
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.doi-badge--reversible {
+  background: #e8f0f7;
+  color: #1264a3;
+}
+
+.doi-badge--permanent {
+  background: #fdf0dc;
+  color: #7a5605;
+}
+
+.doi-permanent-note {
+  margin: 14px 0 0;
+  padding: 10px 12px;
+  border-left: 3px solid #b58105;
+  background: #fff8e6;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: #4d3c07;
+}
+
+.doi-reserve {
+  margin: 18px 0 0;
+  padding: 14px 0 0;
+  border-top: 1px solid #e3e6ea;
+}
+
+.doi-reserve__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.doi-reserve__help {
+  margin: 0;
+  flex: 1 1 260px;
+  font-size: 13px;
+  line-height: 1.45;
+  color: #6c757d;
+}

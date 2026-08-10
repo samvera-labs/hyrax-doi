@@ -4,71 +4,161 @@
 <%# What DataCite reports, not what the depositor asked for. A DOI already past draft
     cannot go back, so those options are closed off. %>
 <% current_state = f.object.model.try(:doi_state) %>
+<% param_key = f.object.model_name.param_key %>
+<% chosen_status = f.object.try(:doi_status_when_public).presence %>
+
+<%# Which mode is selected is derived, not stored: a status means minting, a DOI with no
+    status means recording an existing one, neither means no DOI. %>
+<% mode = if chosen_status && minting_enabled && supports_status
+            'mint'
+          elsif doi_value.present?
+            'existing'
+          else
+            'none'
+          end %>
+
+<%# Included here rather than left to the host's application.js and .css, so the tab works
+    on install. The stylesheet drives the mode disclosure; the script only powers the two
+    buttons that call out to DataCite and doi.org. %>
+<%= stylesheet_link_tag 'hyrax/doi/doi_form', media: 'all' %>
+<%= javascript_include_tag 'hyrax/doi/doi_form' %>
 
 <div data-doi-tab
      data-doi-required-fields="<%= doi_required_fields(f.object).to_json %>"
      data-doi-missing-warning="<%= t('hyrax.doi.form.missing_required_confirm') %>">
-  <%# Stored multivalued for indexing, but a work has one DOI, so it renders as one field. %>
-  <%= f.input :doi,
-              input_html: { value: doi_value,
-                            name: "#{f.object.model_name.param_key}[doi][]",
-                            data: { 'doi-input': true },
-                            class: 'form-control',
-                            style: 'max-width: 40em' } %>
+  <p class="form-text"><%= t('hyrax.doi.form.intro') %></p>
+  <p class="form-text"><%= t('hyrax.doi.form.saved_note') %></p>
 
-  <% if minting_enabled && doi_value.blank? %>
-    <p>
-      <button type="button"
-              class="btn btn-secondary"
-              data-doi-draft-button
-              data-doi-url="<%= Hyrax::DOI::Engine.routes.url_helpers.create_draft_doi_path %>"
-              data-doi-working="<%= t('hyrax.doi.form.draft.working') %>"
-              data-doi-error="<%= t('hyrax.doi.form.draft.error') %>">
-        <%= t('hyrax.doi.form.draft.label') %>
-      </button>
-      <span class="form-text" data-doi-status aria-live="polite"></span>
-    </p>
-    <p class="form-text"><%= t('hyrax.doi.form.draft.help') %></p>
-  <% end %>
+  <fieldset class="border-0 p-0 m-0">
+    <legend class="doi-legend"><%= t('hyrax.doi.form.legend') %></legend>
 
-  <%# Offered whether or not a DOI is reserved: the depositor may be describing work that
-      was published elsewhere first. %>
-  <p>
-    <button type="button"
-            class="btn btn-secondary"
-            data-doi-autofill-button
-            data-doi-url="<%= Hyrax::DOI::Engine.routes.url_helpers.autofill_path %>"
-            data-doi-confirm="<%= t('hyrax.doi.form.autofill.confirm') %>"
-            data-doi-working="<%= t('hyrax.doi.form.autofill.working') %>"
-            data-doi-error="<%= t('hyrax.doi.form.autofill.error') %>"
-            data-doi-missing="<%= t('hyrax.doi.form.autofill.missing') %>"
-            data-doi-empty="<%= t('hyrax.doi.form.autofill.empty') %>"
-            data-doi-param-key="<%= f.object.model_name.param_key %>">
-      <%= t('hyrax.doi.form.autofill.label') %>
-    </button>
-    <span class="form-text" data-doi-autofill-status aria-live="polite"></span>
-  </p>
+    <%# Blank unless a status radio is checked. The mode radios are presentation only -- they
+        are not the persisted attribute -- and a hidden panel still submits its inputs, so
+        without this a depositor returning to "do not mint" would keep whatever status was
+        selected before and the work would mint anyway. %>
+    <% if minting_enabled && supports_status %>
+      <%= f.hidden_field :doi_status_when_public, value: '', id: nil %>
+    <% end %>
 
-  <% if minting_enabled && supports_status %>
-    <fieldset class="set-doi-status-when-public">
-      <legend class="h5"><%= t('hyrax.doi.form.status.legend') %></legend>
-      <p class="form-text"><%= t('hyrax.doi.form.status.help') %></p>
+    <div class="doi-modes">
+      <div class="doi-mode">
+        <%= radio_button_tag 'doi_mode', 'none', mode == 'none',
+                             class: 'doi-mode__radio', id: 'doi_mode_none' %>
+        <%= label_tag 'doi_mode_none', class: 'doi-mode__label' do %>
+          <span class="doi-mode__marker" aria-hidden="true"></span>
+          <span>
+            <span class="doi-mode__title"><%= t('hyrax.doi.form.modes.none.title') %></span>
+            <span class="doi-mode__help"><%= t('hyrax.doi.form.modes.none.help') %></span>
+          </span>
+        <% end %>
+      </div>
 
-      <%# Blank leads: it is the default, and it means no DOI is minted. %>
-      <% ([''] + Hyrax::DOI::DataCiteRegistrar::STATES).each do |state| %>
-        <div class="form-check">
-          <%= f.radio_button :doi_status_when_public, state,
-                             class: 'form-check-input',
-                             data: { 'doi-status-radio': true },
-                             disabled: Hyrax::DOI::DataCiteRegistrar.state_unreachable?(state, from: current_state),
-                             id: "#{f.object.model_name.param_key}_doi_status_when_public_#{state.presence || 'none'}" %>
-          <%= f.label :doi_status_when_public,
-                      t("hyrax.doi.form.status.options.#{state.presence || 'none'}"),
-                      value: state,
-                      class: 'form-check-label font-weight-normal',
-                      for: "#{f.object.model_name.param_key}_doi_status_when_public_#{state.presence || 'none'}" %>
+      <div class="doi-mode">
+        <%= radio_button_tag 'doi_mode', 'existing', mode == 'existing',
+                             class: 'doi-mode__radio', id: 'doi_mode_existing' %>
+        <%= label_tag 'doi_mode_existing', class: 'doi-mode__label' do %>
+          <span class="doi-mode__marker" aria-hidden="true"></span>
+          <span>
+            <span class="doi-mode__title"><%= t('hyrax.doi.form.modes.existing.title') %></span>
+            <span class="doi-mode__help"><%= t('hyrax.doi.form.modes.existing.help') %></span>
+          </span>
+        <% end %>
+
+        <div class="doi-mode__panel">
+          <%= label_tag "#{param_key}_doi", t('hyrax.doi.form.existing.field_label'),
+                        class: 'font-weight-bold d-block' %>
+          <div class="doi-input-group">
+            <span class="doi-input-group__prefix">https://doi.org/</span>
+            <%# Stored multivalued for indexing, but a work has one DOI. %>
+            <%= text_field_tag "#{param_key}[doi][]", doi_value,
+                               id: "#{param_key}_doi",
+                               placeholder: '10.1038/nature12373',
+                               data: { 'doi-input': true } %>
+          </div>
+          <p class="doi-hint"><%= t('hyrax.doi.form.existing.field_hint') %></p>
+
+          <p>
+            <button type="button"
+                    class="btn btn-outline-secondary btn-sm"
+                    data-doi-autofill-button
+                    data-doi-url="<%= Hyrax::DOI::Engine.routes.url_helpers.autofill_path %>"
+                    data-doi-confirm="<%= t('hyrax.doi.form.autofill.confirm') %>"
+                    data-doi-working="<%= t('hyrax.doi.form.autofill.working') %>"
+                    data-doi-error="<%= t('hyrax.doi.form.autofill.error') %>"
+                    data-doi-missing="<%= t('hyrax.doi.form.autofill.missing') %>"
+                    data-doi-empty="<%= t('hyrax.doi.form.autofill.empty') %>"
+                    data-doi-param-key="<%= param_key %>">
+              <%= t('hyrax.doi.form.autofill.label') %>
+            </button>
+            <span class="form-text" data-doi-autofill-status aria-live="polite"></span>
+          </p>
+        </div>
+      </div>
+
+      <% if minting_enabled && supports_status %>
+        <div class="doi-mode">
+          <%= radio_button_tag 'doi_mode', 'mint', mode == 'mint',
+                               class: 'doi-mode__radio', id: 'doi_mode_mint' %>
+          <%= label_tag 'doi_mode_mint', class: 'doi-mode__label' do %>
+            <span class="doi-mode__marker" aria-hidden="true"></span>
+            <span>
+              <span class="doi-mode__title"><%= t('hyrax.doi.form.modes.mint.title') %></span>
+              <span class="doi-mode__help"><%= t('hyrax.doi.form.modes.mint.help') %></span>
+            </span>
+          <% end %>
+
+          <div class="doi-mode__panel">
+            <fieldset class="border-0 p-0 m-0 set-doi-status-when-public">
+              <% if current_state.present? %>
+                <p class="form-text"><%= t('hyrax.doi.form.status.minted_notice') %></p>
+              <% end %>
+
+              <div class="doi-statuses">
+                <% Hyrax::DOI::DataCiteRegistrar::STATES.each do |state| %>
+                  <% badge = state == 'draft' ? 'reversible' : 'permanent' %>
+                  <%= label_tag "#{param_key}_doi_status_when_public_#{state}", class: 'doi-status' do %>
+                    <%= f.radio_button :doi_status_when_public, state,
+                                       class: 'flex-shrink-0 mt-1',
+                                       data: { 'doi-status-radio': true },
+                                       disabled: Hyrax::DOI::DataCiteRegistrar.state_unreachable?(state, from: current_state),
+                                       id: "#{param_key}_doi_status_when_public_#{state}" %>
+                    <span>
+                      <span class="doi-status__heading">
+                        <%= t("hyrax.doi.form.status.options.#{state}") %>
+                        <span class="doi-badge doi-badge--<%= badge %>">
+                          <%= t("hyrax.doi.form.status.badges.#{badge}") %>
+                        </span>
+                      </span>
+                      <span class="doi-status__help"><%= t("hyrax.doi.form.status.help.#{state}") %></span>
+                    </span>
+                  <% end %>
+                <% end %>
+              </div>
+
+              <p class="doi-permanent-note">
+                <%= t('hyrax.doi.form.status.permanent_note_html').html_safe %>
+              </p>
+
+              <% if doi_value.blank? %>
+                <div class="doi-reserve">
+                  <div class="doi-reserve__row">
+                    <button type="button"
+                            class="btn btn-outline-secondary btn-sm"
+                            data-doi-draft-button
+                            data-doi-url="<%= Hyrax::DOI::Engine.routes.url_helpers.create_draft_doi_path %>"
+                            data-doi-working="<%= t('hyrax.doi.form.draft.working') %>"
+                            data-doi-error="<%= t('hyrax.doi.form.draft.error') %>">
+                      <%= t('hyrax.doi.form.draft.label') %>
+                    </button>
+                    <p class="doi-reserve__help"><%= t('hyrax.doi.form.draft.help_html').html_safe %></p>
+                  </div>
+                  <span class="form-text" data-doi-status aria-live="polite"></span>
+                </div>
+              <% end %>
+            </fieldset>
+          </div>
         </div>
       <% end %>
-    </fieldset>
-  <% end %>
+    </div>
+  </fieldset>
 </div>

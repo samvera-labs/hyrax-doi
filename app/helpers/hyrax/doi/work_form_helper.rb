@@ -23,14 +23,18 @@ module Hyrax
         Hyrax::DOI::DataCiteSerializer.required_work_fields.filter_map do |field|
           next unless form.model.respond_to?(field)
 
-          { selector: ".#{param_key}_#{field}", label: label_for_doi_field(form, field) }
+          { selector: ".#{param_key}_#{field}", label: label_for_doi_field(field) }
         end
       end
 
       private
 
-      def label_for_doi_field(form, field)
-        form.model_class.human_attribute_name(field)
+      # Mirrors how Hyrax::Renderers::AttributeRenderer labels a field: an i18n lookup
+      # falling back to the humanized name. A Valkyrie resource is not an ActiveModel, so
+      # human_attribute_name is not available.
+      def label_for_doi_field(field)
+        I18n.t("blacklight.search.fields.show.#{field}",
+               default: [:"blacklight.search.fields.#{field}", field.to_s.humanize])
       end
     end
   end

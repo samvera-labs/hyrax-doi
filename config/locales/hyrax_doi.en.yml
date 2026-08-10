@@ -16,41 +16,77 @@ en:
               The `doi` property's `available_on.class` names no class declared in this
               profile, so no work type will receive it.
       form:
+        intro: >-
+          A DOI is a permanent link to this work. Use this tab either to record a DOI this
+          work was already given elsewhere, or to mint a new one.
+        saved_note: Nothing is minted or recorded until this work is saved.
+        legend: DOI for this work
         missing_required_confirm: >-
           DataCite requires %{fields}, which this form leaves blank. Placeholder values
           will be sent instead. Continue?
+
+        modes:
+          none:
+            title: Do not mint a DOI
+            help: >-
+              The default. You can record or mint one at any time after this work is
+              deposited.
+          existing:
+            title: This work already has a DOI
+            help: >-
+              It was published elsewhere first. Enter that DOI and we can fill in the rest
+              of this form from the metadata its publisher registered.
+          mint:
+            title: Mint a new DOI for this work
+            help: This repository registers the DOI with DataCite on your behalf.
+
+        existing:
+          field_label: Existing DOI
+          field_hint: >-
+            Enter just the part after the resolver, for example 10.1038/nature12373.
+
         autofill:
-          label: Autofill from DOI
-          working: Autofilling form...
+          label: Fill in this form from that DOI
+          working: Looking up that DOI...
           confirm: >-
             This replaces anything already filled in on this form. Continue?
           error: Could not reach doi.org. Try again in a moment.
-          missing: Enter a DOI first.
+          missing: Enter a DOI above first.
           empty: >-
             No metadata could be read for that DOI. Check it, or fill the form in by hand.
-        draft:
-          label: Create draft DOI
-          working: Reserving a DOI...
-          error: Could not reach DataCite. Try again in a moment.
-          help: >-
-            Reserves a DOI now, before this work is saved, so it can be added to the files
-            you are about to upload. A draft DOI does not resolve and is not public.
+
         status:
-          legend: DOI status when the work is public
-          help: >-
-            Choose what should happen when this work becomes public. Draft DOIs stay
-            private; registered DOIs resolve; findable DOIs also appear in DataCite search.
+          minted_notice: >-
+            This work already has a DOI, so options it can no longer return to are
+            unavailable.
+          permanent_note_html: >-
+            Registered and findable DOIs are permanent — they cannot be withdrawn once this
+            work is public. Choose <strong>Draft</strong> if you are unsure.
+          badges:
+            reversible: Reversible
+            permanent: Permanent
           options:
-            none: Do not mint a DOI
             draft: Draft
             registered: Registered
             findable: Findable
+          help:
+            draft: Reserved for later. Does not resolve yet and can still be deleted.
+            registered: >-
+              Resolves permanently once this work is public. Not listed in DataCite search.
+            findable: Resolves and appears in DataCite search once this work is public.
+
+        draft:
+          label: Reserve a DOI now
+          working: Reserving a DOI...
+          error: Could not reach DataCite. Try again in a moment.
+          help_html: >-
+            Optional. Only if you must know the DOI <em>before</em> this work is saved — to
+            print it inside the file you are about to upload, for instance.
       mint_button:
         label: Mint DOI
         working: Minting...
     works:
       form:
-        # Hyrax's form_tab_label_for looks up this exact path for every tab it renders.
         tab:
           doi: DOI
   errors:
