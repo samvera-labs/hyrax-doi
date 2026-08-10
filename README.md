@@ -1,5 +1,5 @@
 # Hyrax::DOI
-Code: [![CircleCI](https://circleci.com/gh/samvera-labs/hyrax-doi.svg?style=svg)](https://circleci.com/gh/samvera-labs/hyrax-doi)
+Code: [![Lint and Test](https://github.com/samvera-labs/hyrax-doi/actions/workflows/lint-test.yml/badge.svg)](https://github.com/samvera-labs/hyrax-doi/actions/workflows/lint-test.yml)
 [![Code Climate](https://codeclimate.com/github/samvera-labs/hyrax-doi/badges/gpa.svg)](https://codeclimate.com/github/samvera-labs/hyrax-doi)
 
 
