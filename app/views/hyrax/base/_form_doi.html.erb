@@ -156,6 +156,31 @@
                     </button>
                     <p class="doi-reserve__help"><%= t('hyrax.doi.form.draft.help_html').html_safe %></p>
                   </div>
+
+                  <%# Submitted as well as shown: a reservation left out of the form is created
+                      at DataCite and then abandoned when the work saves without it. %>
+                  <div class="doi-reserved" data-doi-reserved hidden>
+                    <%= label_tag "#{param_key}_doi_reserved",
+                                  t('hyrax.doi.form.draft.reserved_label'),
+                                  class: 'font-weight-bold d-block' %>
+                    <div class="doi-reserved__row">
+                      <div class="doi-input-group">
+                        <span class="doi-input-group__prefix">https://doi.org/</span>
+                        <%= text_field_tag "#{param_key}[doi][]", nil,
+                                           id: "#{param_key}_doi_reserved",
+                                           readonly: true,
+                                           data: { 'doi-reserved-input': true } %>
+                      </div>
+                      <button type="button"
+                              class="btn btn-outline-secondary btn-sm"
+                              data-doi-copy-button
+                              data-doi-copied="<%= t('hyrax.doi.form.draft.copied') %>">
+                        <%= t('hyrax.doi.form.draft.copy') %>
+                      </button>
+                    </div>
+                    <p class="doi-hint"><%= t('hyrax.doi.form.draft.reserved_hint') %></p>
+                  </div>
+
                   <span class="form-text" data-doi-status aria-live="polite"></span>
                 </div>
               <% end %>

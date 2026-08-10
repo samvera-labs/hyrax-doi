@@ -12,6 +12,12 @@ Work toward 1.0.0: a Valkyrie-native, flexible-metadata-aware rewrite. See the n
 
 ### Changed
 
+- **A reserved DOI is shown and saved.** "Reserve a DOI now" wrote the identifier into the
+  existing-DOI input, which sits in a different mode panel — so the depositor saw only a
+  disabled button, and because the mint mode discards that panel's value, the reservation was
+  created at DataCite and then dropped on save. It now has its own readonly field beside the
+  button, revealed when the DOI arrives and submitted with the work, with a copy button —
+  reserving a DOI early exists so it can be pasted into a document before upload.
 - **The tab's buttons reach the routes the application serves.** The views built their URLs
   with `Engine.routes.url_helpers`, which resolves against the engine's own route set and so
   ignores where the host mounted it — the autofill, reserve-a-DOI, and mint buttons all

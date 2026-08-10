@@ -79,6 +79,12 @@ en:
           label: Reserve a DOI now
           working: Reserving a DOI...
           error: Could not reach DataCite. Try again in a moment.
+          reserved_label: Reserved DOI
+          reserved_hint: >-
+            Reserved for this work. It does not resolve yet, and is saved with the work when
+            you submit this form.
+          copy: Copy
+          copied: Copied
           help_html: >-
             Optional. Only if you must know the DOI <em>before</em> this work is saved — to
             print it inside the file you are about to upload, for instance.

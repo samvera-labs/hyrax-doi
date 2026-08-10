@@ -25,6 +25,36 @@ RSpec.describe 'hyrax/base/_form_doi', type: :view do
     expect(rendered).to have_selector('[data-doi-draft-button]')
   end
 
+  describe 'a reserved DOI' do
+    it 'has somewhere of its own to appear, beside the button' do
+      render partial: 'hyrax/base/form_doi', locals: { f: builder }
+
+      reserved = Capybara.string(rendered).find('[data-doi-reserved]', visible: :all)
+      expect(reserved).to have_selector('[data-doi-reserved-input]', visible: :all)
+      expect(reserved.find(:xpath, 'ancestor::*[@class="doi-reserve"]')).to be_present
+    end
+
+    it 'stays hidden until one is reserved' do
+      render partial: 'hyrax/base/form_doi', locals: { f: builder }
+
+      expect(rendered).to have_no_selector('[data-doi-reserved]')
+      expect(rendered).to have_selector('[data-doi-reserved]', visible: :hidden)
+    end
+
+    it 'offers a copy button, since the DOI is reserved in order to be pasted elsewhere' do
+      render partial: 'hyrax/base/form_doi', locals: { f: builder }
+
+      expect(rendered).to have_selector('[data-doi-copy-button]', visible: :all)
+    end
+
+    it 'submits as the work-s DOI, so saving keeps it' do
+      render partial: 'hyrax/base/form_doi', locals: { f: builder }
+
+      field = Capybara.string(rendered).find('[data-doi-reserved-input]', visible: :all)
+      expect(field['name']).to eq 'monograph[doi][]'
+    end
+  end
+
   describe 'choosing what to do about a DOI' do
     it 'offers the three situations as one choice' do
       render partial: 'hyrax/base/form_doi', locals: { f: builder }

@@ -212,6 +212,17 @@
   gap: 12px;
 }
 
+.doi-reserved {
+  margin: 14px 0 0;
+}
+
+.doi-reserved__row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
 .doi-reserve__help {
   margin: 0;
   flex: 1 1 260px;

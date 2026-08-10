@@ -67,16 +67,48 @@
                 setStatus(container, result.body.error, true);
                 return;
             }
-            if (input) {
-                input.value = result.body.doi;
-                setStatus(container, '', false);
-            } else {
-                setStatus(container, result.body.doi, false);
-            }
+            // The reserved-DOI field lives beside the button; the existing-DOI input is in a
+            // panel the depositor is not looking at, so filling that one silently loses the
+            // identifier. Reveal the field and say the DOI either way.
+            var reserved = container.querySelector('[data-doi-reserved]');
+            var target = container.querySelector('[data-doi-reserved-input]') || input;
+
+            if (target) target.value = result.body.doi;
+            if (reserved) reserved.hidden = false;
+            setStatus(container, result.body.doi, false);
         }).catch(function() {
             button.disabled = false;
             setStatus(container, button.getAttribute('data-doi-error'), true);
         });
+    });
+
+    // Copies the reserved DOI, which is the reason a depositor reserves one before saving --
+    // it goes into a document they are about to upload. navigator.clipboard is unavailable
+    // outside a secure context, so fall back to selecting the text for a manual copy.
+    document.addEventListener('click', function(event) {
+        var button = event.target.closest('[data-doi-copy-button]');
+        if (!button) return;
+        event.preventDefault();
+
+        var container = button.closest('[data-doi-reserved]');
+        if (!container) return;
+        var field = container.querySelector('[data-doi-reserved-input]');
+        if (!field || !field.value) return;
+
+        function confirmCopied() {
+            var label = button.textContent;
+            button.textContent = button.getAttribute('data-doi-copied');
+            window.setTimeout(function() { button.textContent = label; }, 2000);
+        }
+
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(field.value).then(confirmCopied, function() {
+                field.select();
+            });
+        } else {
+            field.select();
+            confirmCopied();
+        }
     });
 
     // Fills the form from an existing DOI's published metadata. This overwrites whatever
