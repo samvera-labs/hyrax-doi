@@ -29,12 +29,63 @@ RSpec.describe Hyrax::DOI::SyncDOIJob, type: :job do
     expect(registrar).to have_received(:register!).with(object: an_object_having_attributes(id: work.id))
   end
 
-  it 'does nothing for a work with no identifier' do
+  it 'does nothing for a work with no identifier that asked for none' do
     allow(Hyrax::Identifier::Registrar).to receive(:for)
 
     described_class.perform_now(work.id.to_s)
 
     expect(Hyrax::Identifier::Registrar).not_to have_received(:for)
+  end
+
+  describe 'a work whose depositor asked for a DOI it does not have' do
+    let(:work) do
+      Hyrax.persister.save(
+        resource: DOIWork.new(title: ['Wants one'], doi_status_when_public: 'draft')
+      )
+    end
+    let(:result) do
+      Hyrax::DOI::RegistrationResult.new(identifier: '10.5072/fresh', state: 'draft',
+                                         changed: true)
+    end
+
+    before do
+      allow(Hyrax::Identifier::Registrar).to receive(:for)
+        .with(:datacite)
+        .and_return(instance_double(Hyrax::DOI::DataCiteRegistrar, register!: result))
+    end
+
+    it 'mints through the provider configured for the doi scheme' do
+      described_class.perform_now(work.id.to_s)
+
+      expect(Hyrax::Identifier::Registrar).to have_received(:for).with(:datacite)
+    end
+
+    it 'records the identifier it minted' do
+      described_class.perform_now(work.id.to_s)
+
+      record = Hyrax::DOI::PersistentIdentifier.find_by(value: '10.5072/fresh')
+      expect(record).to be_present
+      expect(record.resource_id).to eq work.id.to_s
+      expect(record.state).to eq 'draft'
+      expect(record).to be_minted
+    end
+
+    it 'stores the DOI on the work, so it indexes and displays' do
+      described_class.perform_now(work.id.to_s)
+
+      expect(Array(Hyrax.query_service.find_by(id: work.id).doi)).to eq ['10.5072/fresh']
+    end
+
+    it 'records nothing when the registrar failed' do
+      failure = Hyrax::DOI::RegistrationResult.new(errors: ['DataCite requires publisher'])
+      allow(Hyrax::Identifier::Registrar).to receive(:for)
+        .with(:datacite)
+        .and_return(instance_double(Hyrax::DOI::DataCiteRegistrar, register!: failure))
+
+      described_class.perform_now(work.id.to_s)
+
+      expect(Hyrax::DOI::PersistentIdentifier.for_resource(work.id.to_s)).to be_empty
+    end
   end
 
   it 'does nothing for an identifier we did not mint' do

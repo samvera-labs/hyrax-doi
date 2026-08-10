@@ -17,6 +17,7 @@ module Hyrax
       included do
         property :doi, virtual: true, default: ->(*) { Array.wrap(model.try(:doi_value)) }
         property :doi_mode, virtual: true
+        property :doi_reserved, virtual: true
       end
 
       # Reform populates virtual properties from params but never writes them back, so the
@@ -49,10 +50,18 @@ module Hyrax
       # ActionController::Parameters unpermitted, and to_h raises on those. Keys go through
       # helpers because Parameters is indifferent while a plain hash is not.
       def reconcile_doi_mode(params)
+        reserved = doi_param(params, :doi_reserved)
         mode = doi_param(params, :doi_mode)
         return params unless mode.in?(MODES)
 
-        params[doi_param_key(params, :doi)] = Array.wrap(model.try(:doi_value)).compact_blank unless mode == 'existing'
+        # A reserved DOI already exists at the provider, so it is kept whatever mode is
+        # submitted -- discarding it would abandon a real identifier.
+        replacement = if reserved.present?
+                        [reserved]
+                      else
+                        Array.wrap(model.try(:doi_value)).compact_blank
+                      end
+        params[doi_param_key(params, :doi)] = replacement unless mode == 'existing'
         params
       end
 

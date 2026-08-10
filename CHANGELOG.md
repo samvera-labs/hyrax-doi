@@ -12,6 +12,16 @@ Work toward 1.0.0: a Valkyrie-native, flexible-metadata-aware rewrite. See the n
 
 ### Changed
 
+- **Choosing a minting status actually mints.** Selecting Draft, Registered, or Findable
+  recorded the intent and nothing acted on it: the listener only enqueued a sync for a work
+  that already had an identifier record, and `SyncDOIJob` returned early without one, so no
+  DOI was ever created and nothing wrote a result back. Saving a work with a status now mints
+  through the configured provider and records the identifier. A work type the minting policy
+  excludes still mints nothing, and an ordinary edit of a work that asked for no DOI still
+  creates none.
+- **A reserved DOI submits under its own parameter.** It shared `doi[]` with the existing-DOI
+  field, so the reconciliation that drops a value left behind in an unselected panel could not
+  tell the two apart and discarded a DOI that already existed at DataCite.
 - **Reserving a DOI records draft as the work's intent.** A reserved identifier with a blank
   intent left the work holding a real DOI while claiming to want none: `doi_status` reported
   nothing, so the renderer could not tell a draft from a resolvable DOI and would have linked

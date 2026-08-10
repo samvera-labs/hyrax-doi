@@ -43,8 +43,32 @@ RSpec.describe Hyrax::DOI::PublisherListener do
       end
     end
 
-    context 'when the work has no DOI' do
+    context 'when the work has no DOI and asked for none' do
       it 'does nothing, so editing a work never mints one by accident' do
+        listener.on_object_metadata_updated(object: work)
+
+        expect(Hyrax::DOI::SyncDOIJob).not_to have_received(:perform_later)
+      end
+    end
+
+    context 'when the work asked for a DOI it does not have yet' do
+      let(:work) do
+        Hyrax.persister.save(
+          resource: DOIWork.new(title: ['Wants one'], doi_status_when_public: 'draft')
+        )
+      end
+
+      it 'enqueues a sync so the DOI is minted' do
+        listener.on_object_metadata_updated(object: work)
+
+        expect(Hyrax::DOI::SyncDOIJob).to have_received(:perform_later).with(work.id.to_s)
+      end
+
+      it 'does nothing when the policy excludes the work type' do
+        Hyrax::DOI.configure do |config|
+          config.minting_policy = Hyrax::DOI::MintingPolicy.new(work_types: ['SomethingElse'])
+        end
+
         listener.on_object_metadata_updated(object: work)
 
         expect(Hyrax::DOI::SyncDOIJob).not_to have_received(:perform_later)

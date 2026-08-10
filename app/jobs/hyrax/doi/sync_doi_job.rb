@@ -1,7 +1,8 @@
 # frozen_string_literal: true
 module Hyrax
   module DOI
-    # Pushes a work's current metadata to the provider holding its DOI.
+    # Pushes a work's current metadata to the provider holding its DOI, and mints one for a
+    # work whose depositor asked for a DOI it does not have yet.
     class SyncDOIJob < ApplicationJob
       queue_as Hyrax.config.ingest_queue_name
 
@@ -10,18 +11,36 @@ module Hyrax
       #
       # @param resource_id [String]
       def perform(resource_id)
-        record = Hyrax::DOI::PersistentIdentifier.primary_for(resource_id:,
-                                                              scheme: 'doi')
-        return unless record&.minted?
+        record = Hyrax::DOI::PersistentIdentifier.primary_for(resource_id:, scheme: 'doi')
+        return if record.present? && !record.minted?
 
         work = Hyrax.query_service.find_by(id: resource_id)
-        # Keyed on the record's own provider, so a work minted through a second provider
-        # syncs back to that one rather than the configured default.
-        Hyrax::Identifier::Registrar.for(record.provider.to_sym).register!(object: work)
+        return if record.nil? && !Hyrax::DOI.config.minting_policy.mintable?(work)
+
+        # Keyed on the record's own provider where one exists, so a work minted through a
+        # second provider syncs back to that one rather than the configured default.
+        provider = record&.provider || Hyrax::DOI.config.provider_for('doi')
+        result = Hyrax::Identifier::Registrar.for(provider.to_sym).register!(object: work)
+        record_result(work, provider, result)
       rescue Valkyrie::Persistence::ObjectNotFoundError
         # The work was deleted between enqueue and run. The identifier outlives it by
         # design -- a DOI is a permanent promise -- so this is not a failure.
         nil
+      end
+
+      private
+
+      # Writes back what the provider reported, so a first mint is recorded rather than
+      # existing only at DataCite -- otherwise the next save mints a second one and nothing
+      # local can find the first.
+      def record_result(work, provider, result)
+        return if result.blank? || result.identifier.blank?
+        return unless result.success?
+
+        Hyrax::DOI::IdentifierRecorder
+          .new(scheme: 'doi', provider:)
+          .record_minted(resource: work, value: result.identifier, state: result.state)
+        Hyrax.persister.save(resource: work) if work.respond_to?(:doi_value=)
       end
     end
   end

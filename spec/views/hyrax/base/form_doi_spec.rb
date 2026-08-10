@@ -63,11 +63,11 @@ RSpec.describe 'hyrax/base/_form_doi', type: :view do
       expect(rendered).to have_selector('[data-doi-copy-button]', visible: :all)
     end
 
-    it 'submits as the work-s DOI, so saving keeps it' do
+    it 'submits under its own parameter, so saving keeps it' do
       render partial: 'hyrax/base/form_doi', locals: { f: builder }
 
       field = Capybara.string(rendered).find('[data-doi-reserved-input]', visible: :all)
-      expect(field['name']).to eq 'monograph[doi][]'
+      expect(field['name']).to eq 'monograph[doi_reserved]'
     end
   end
 

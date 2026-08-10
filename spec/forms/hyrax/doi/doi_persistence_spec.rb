@@ -53,6 +53,21 @@ RSpec.describe 'recording a DOI from the deposit form' do
       expect(form.doi_status_when_public).to be_blank
     end
 
+    it 'keeps a reserved DOI whatever mode was submitted' do
+      form.validate('doi_mode' => 'mint',
+                    'doi_reserved' => '10.5072/reserved-just-now',
+                    'doi_status_when_public' => 'draft')
+
+      expect(Array(form.doi)).to eq ['10.5072/reserved-just-now']
+      expect(form.doi_status_when_public).to eq 'draft'
+    end
+
+    it 'keeps a reserved DOI even when the depositor then chose to mint nothing' do
+      form.validate('doi_mode' => 'none', 'doi_reserved' => '10.5072/reserved-then-changed')
+
+      expect(Array(form.doi)).to eq ['10.5072/reserved-then-changed']
+    end
+
     it 'discards a typed DOI when minting a new one instead' do
       form.validate('doi_mode' => 'mint',
                     'doi' => ['10.5072/leftover'],

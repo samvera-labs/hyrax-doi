@@ -166,7 +166,11 @@
                     <div class="doi-reserved__row">
                       <div class="doi-input-group">
                         <span class="doi-input-group__prefix">https://doi.org/</span>
-                        <%= text_field_tag "#{param_key}[doi][]", nil,
+                        <%# Its own parameter, not doi[]: a value in the existing-DOI panel is
+                            a leftover once the depositor picks another mode, but a reserved
+                            DOI is real wherever it was entered, so the two cannot share a
+                            key and be told apart. %>
+                        <%= text_field_tag "#{param_key}[doi_reserved]", nil,
                                            id: "#{param_key}_doi_reserved",
                                            readonly: true,
                                            data: { 'doi-reserved-input': true } %>

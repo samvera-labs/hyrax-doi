@@ -22,17 +22,26 @@ module Hyrax
 
       private
 
-      # Guarded on an identifier we minted: editing a work with no DOI must never create
-      # one, and an externally supplied DOI belongs to whoever issued it.
+      # Two reasons to sync: the work holds an identifier we minted and its metadata may have
+      # changed, or the depositor asked for a DOI it does not have yet. An externally supplied
+      # DOI belongs to whoever issued it, so it is never pushed.
       def sync(object)
         return if object.blank?
 
         record = Hyrax::DOI::PersistentIdentifier.primary_for(resource_id: object.id.to_s,
                                                               scheme: 'doi') ||
                  claim_reservation(object)
-        return unless record&.minted?
+        return unless record&.minted? || awaiting_first_mint?(object, record)
 
         Hyrax::DOI::SyncDOIJob.perform_later(object.id.to_s)
+      end
+
+      # Choosing a status on the deposit form is the depositor asking for a DOI, so saving has
+      # to act on it -- this is the explicit request, not minting as a side effect of an
+      # ordinary edit. Asks the policy, so a work type the operator excluded still mints
+      # nothing.
+      def awaiting_first_mint?(object, record)
+        record.nil? && Hyrax::DOI.config.minting_policy.mintable?(object)
       end
 
       # A DOI reserved from the deposit form is recorded before the work exists, so its row
