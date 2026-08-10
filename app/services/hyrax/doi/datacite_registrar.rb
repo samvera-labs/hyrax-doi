@@ -64,8 +64,13 @@ module Hyrax
 
       private
 
+      # Creating a DOI asks the policy for permission; describing one the work already holds
+      # only asks whether we may touch it. See MintingPolicy#updatable?.
       def register?(work)
-        Hyrax::DOI.config.minting_policy.mintable?(work)
+        policy = Hyrax::DOI.config.minting_policy
+        return policy.updatable?(work) if Array(work.try(:doi_value) || work.try(:doi)).first.present?
+
+        policy.mintable?(work)
       end
 
       def public?(work)

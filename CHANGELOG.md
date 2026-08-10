@@ -12,6 +12,16 @@ Work toward 1.0.0: a Valkyrie-native, flexible-metadata-aware rewrite. See the n
 
 ### Changed
 
+- **A reserved DOI gets its work's metadata.** Reserving one creates it at DataCite with
+  nothing but a prefix. The identifier record is written before the work exists, so it carried
+  no `resource_id` and nothing linked the two: no sync ever ran, and the orphan sweep would
+  have seen a reservation that was in fact used. The first save holding that DOI now claims
+  the record, and describing a DOI a work already holds no longer requires a minting intent —
+  `Hyrax::DOI::MintingPolicy#updatable?` governs updates, `mintable?` still governs creation,
+  so a work type excluded from minting is still never touched.
+- **`Hyrax::DOI.config` is reset between examples.** Any spec that configured a restrictive
+  minting policy or a stub credential store leaked into every example after it, so failures
+  depended on run order.
 - **A reserved DOI is shown and saved.** "Reserve a DOI now" wrote the identifier into the
   existing-DOI input, which sits in a different mode panel — so the depositor saw only a
   disabled button, and because the mint mode discards that panel's value, the reservation was

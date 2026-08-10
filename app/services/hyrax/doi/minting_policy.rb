@@ -15,7 +15,16 @@ module Hyrax
       attr_reader :work_types, :default_state
 
       def mintable?(work)
-        registrar?(work) && minting_enabled? && eligible_type?(work) && requested?(work)
+        updatable?(work) && requested?(work)
+      end
+
+      ##
+      # Whether a DOI this work already holds may be pushed to the provider. Everything
+      # mintable? asks except the depositor's intent, which governs creation: a reserved DOI
+      # carries no metadata until its work is described, and a repository that excluded this
+      # work type from minting still must not have its identifiers touched.
+      def updatable?(work)
+        registrar?(work) && minting_enabled? && eligible_type?(work)
       end
 
       private

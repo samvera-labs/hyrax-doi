@@ -28,10 +28,30 @@ module Hyrax
         return if object.blank?
 
         record = Hyrax::DOI::PersistentIdentifier.primary_for(resource_id: object.id.to_s,
-                                                              scheme: 'doi')
+                                                              scheme: 'doi') ||
+                 claim_reservation(object)
         return unless record&.minted?
 
         Hyrax::DOI::SyncDOIJob.perform_later(object.id.to_s)
+      end
+
+      # A DOI reserved from the deposit form is recorded before the work exists, so its row
+      # carries no resource_id. The first save holding that DOI is what links the two --
+      # without it nothing connects the work to its identifier, so no metadata is ever
+      # pushed and the orphan sweep sees a reservation that was in fact used.
+      #
+      # @return [Hyrax::DOI::PersistentIdentifier, nil]
+      def claim_reservation(object)
+        value = Array.wrap(object.try(:doi_value)).compact_blank.first
+        return if value.blank?
+
+        record = Hyrax::DOI::PersistentIdentifier.unattached
+                                                 .with_scheme('doi')
+                                                 .find_by(value:)
+        return if record.blank?
+
+        record.update!(resource_id: object.id.to_s, resource_type: object.class.name)
+        record
       end
     end
   end

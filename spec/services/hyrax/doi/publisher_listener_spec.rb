@@ -51,6 +51,44 @@ RSpec.describe Hyrax::DOI::PublisherListener do
       end
     end
 
+    context 'when the work saved with a DOI reserved before it existed' do
+      let(:work) do
+        Hyrax.persister.save(resource: DOIWork.new(title: ['Reserved'], doi: ['10.5072/reserved']))
+      end
+
+      before do
+        Hyrax::DOI::PersistentIdentifier.create!(resource_id: nil, resource_type: nil,
+                                                 scheme: 'doi', provider: 'datacite',
+                                                 value: '10.5072/reserved', state: 'draft',
+                                                 origin: 'minted', primary: true)
+      end
+
+      it 'claims the reservation for the work' do
+        listener.on_object_metadata_updated(object: work)
+
+        record = Hyrax::DOI::PersistentIdentifier.find_by(value: '10.5072/reserved')
+        expect(record.resource_id).to eq work.id.to_s
+        expect(record.resource_type).to eq work.class.name
+      end
+
+      it 'enqueues a sync, so DataCite gets the work-s metadata' do
+        listener.on_object_metadata_updated(object: work)
+
+        expect(Hyrax::DOI::SyncDOIJob).to have_received(:perform_later).with(work.id.to_s)
+      end
+
+      it 'does not claim a reservation for a work holding a different DOI' do
+        other = Hyrax.persister.save(
+          resource: DOIWork.new(title: ['Unrelated'], doi: ['10.5072/unrelated'])
+        )
+
+        listener.on_object_metadata_updated(object: other)
+
+        expect(Hyrax::DOI::PersistentIdentifier.find_by(value: '10.5072/reserved').resource_id)
+          .to be_nil
+      end
+    end
+
     context 'when the DOI came from somewhere else' do
       before do
         Hyrax::DOI::PersistentIdentifier.create!(resource_id: work.id.to_s,

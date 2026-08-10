@@ -74,6 +74,10 @@ RSpec.configure do |config|
   # https://relishapp.com/rspec/rspec-rails/docs
   config.infer_spec_type_from_file_location!
 
+  # Hyrax::DOI.config is process-wide, so an example that configures a restrictive minting
+  # policy or a stub credential store would otherwise leak into every example after it.
+  config.after { Hyrax::DOI.reset_config! }
+
   # Filter lines from Rails gems in backtraces.
   config.filter_rails_from_backtrace!
   # arbitrary gems may also be filtered via:

@@ -50,6 +50,33 @@ RSpec.describe Hyrax::DOI::DataCiteRegistrar, 'registering' do
     JSON.parse(body.to_s.presence || '{}').dig('data', 'attributes', 'event')
   end
 
+  describe 'updating a DOI the work already holds' do
+    let(:status) { nil }
+
+    it 'sends the work-s metadata even with no minting intent' do
+      stub_put
+      registrar.register!(object: work)
+
+      expect(WebMock).to have_requested(:put, "#{base}/dois/10.5072/abc")
+    end
+
+    it 'sends no event, so a reserved draft stays a draft' do
+      stub_put
+      registrar.register!(object: work)
+
+      expect(event_sent).to be_nil
+    end
+
+    it 'still mints nothing for a work with no DOI at all' do
+      no_doi = RegisteredWork.new(id: 'xyz', title: ['No DOI'], doi_status_when_public: nil)
+
+      result = registrar.register!(object: no_doi)
+
+      expect(result.identifier).to be_nil
+      expect(WebMock).not_to have_requested(:post, "#{base}/dois")
+    end
+  end
+
   describe 'the event sent for each intent' do
     it 'sends no event for draft, leaving the DOI unpublished' do
       stub_put
@@ -116,10 +143,14 @@ RSpec.describe Hyrax::DOI::DataCiteRegistrar, 'registering' do
     end
   end
 
-  describe 'when nothing needs doing' do
+  describe 'when the work type is excluded from minting' do
     let(:status) { nil }
 
     it 'returns the existing DOI without calling DataCite' do
+      Hyrax::DOI.configure do |config|
+        config.minting_policy = Hyrax::DOI::MintingPolicy.new(work_types: ['SomethingElse'])
+      end
+
       result = registrar.register!(object: work)
 
       expect(result.identifier).to eq '10.5072/abc'
