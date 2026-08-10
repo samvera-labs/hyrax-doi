@@ -1,4 +1,7 @@
-class CreateHyraxDoiPersistentIdentifiers < ActiveRecord::Migration<%= migration_version %>
+# DOI, not Doi: the engine registers `inflect.acronym 'DOI'`, so Rails camelizes this
+# migration's filename to CreateHyraxDOIPersistentIdentifiers and will not find any other
+# spelling.
+class CreateHyraxDOIPersistentIdentifiers < ActiveRecord::Migration<%= migration_version %>
   def change
     create_table :hyrax_doi_persistent_identifiers do |t|
       # Valkyrie resource id, as a string rather than a foreign key: Valkyrie

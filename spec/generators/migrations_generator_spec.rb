@@ -24,7 +24,18 @@ RSpec.describe Hyrax::DOI::MigrationsGenerator, type: :generator do
     run_generator
 
     expect(File.read(migration))
-      .to match(/class CreateHyraxDoiPersistentIdentifiers < ActiveRecord::Migration\[\d+\.\d+\]/)
+      .to match(/class CreateHyraxDOIPersistentIdentifiers < ActiveRecord::Migration\[\d+\.\d+\]/)
+  end
+
+  # Rails loads a migration by camelizing its filename, and the engine's DOI acronym makes
+  # that CreateHyraxDOIPersistentIdentifiers. Any other spelling raises NameError on
+  # db:migrate rather than at generate time.
+  it 'names the class what Rails will look for' do
+    run_generator
+
+    expect(File.read(migration))
+      .to include('class CreateHyraxDOIPersistentIdentifiers')
+    expect(File.basename(migration).camelize).to include('CreateHyraxDOIPersistentIdentifiers')
   end
 
   it 'creates the table the gem records identifiers in' do
