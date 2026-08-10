@@ -179,6 +179,16 @@
                       </button>
                     </div>
                     <p class="doi-hint"><%= t('hyrax.doi.form.draft.reserved_hint') %></p>
+
+                    <%# A work holding a reserved identifier while its intent says do not mint
+                        has no state anywhere, so nothing can tell the DOI is a draft that must
+                        not be linked. Disabled until the reservation succeeds, because a
+                        hidden container still submits its inputs while a disabled one does
+                        not; a status radio the depositor picks later wins, being later in the
+                        form. %>
+                    <%= hidden_field_tag "#{param_key}[doi_status_when_public]", 'draft',
+                                         id: nil, disabled: true,
+                                         data: { 'doi-reserved-intent': true } %>
                   </div>
 
                   <span class="form-text" data-doi-status aria-live="polite"></span>

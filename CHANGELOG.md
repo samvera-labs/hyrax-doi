@@ -12,6 +12,11 @@ Work toward 1.0.0: a Valkyrie-native, flexible-metadata-aware rewrite. See the n
 
 ### Changed
 
+- **Reserving a DOI records draft as the work's intent.** A reserved identifier with a blank
+  intent left the work holding a real DOI while claiming to want none: `doi_status` reported
+  nothing, so the renderer could not tell a draft from a resolvable DOI and would have linked
+  one that does not resolve, and the show-page mint button — which requires an intent — was
+  hidden, leaving no route to promote it.
 - **A reserved DOI gets its work's metadata.** Reserving one creates it at DataCite with
   nothing but a prefix. The identifier record is written before the work exists, so it carried
   no `resource_id` and nothing linked the two: no sync ever ran, and the orphan sweep would

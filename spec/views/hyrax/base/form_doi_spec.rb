@@ -41,6 +41,22 @@ RSpec.describe 'hyrax/base/_form_doi', type: :view do
       expect(rendered).to have_selector('[data-doi-reserved]', visible: :hidden)
     end
 
+    it 'submits draft as the intent, so the work agrees it has a reserved DOI' do
+      render partial: 'hyrax/base/form_doi', locals: { f: builder }
+
+      field = Capybara.string(rendered)
+                      .find('[data-doi-reserved] [data-doi-reserved-intent]', visible: :all)
+      expect(field['value']).to eq 'draft'
+      expect(field['name']).to eq 'monograph[doi_status_when_public]'
+    end
+
+    it 'submits no intent until a DOI is actually reserved' do
+      render partial: 'hyrax/base/form_doi', locals: { f: builder }
+
+      expect(Capybara.string(rendered).find('[data-doi-reserved-intent]', visible: :all))
+        .to be_disabled
+    end
+
     it 'offers a copy button, since the DOI is reserved in order to be pasted elsewhere' do
       render partial: 'hyrax/base/form_doi', locals: { f: builder }
 
@@ -97,12 +113,15 @@ RSpec.describe 'hyrax/base/_form_doi', type: :view do
       expect(checked).to eq ['existing']
     end
 
+    # The reserved-DOI block carries a disabled 'draft' field of its own, which submits
+    # nothing until a reservation succeeds, so only the blanking field is in play here.
     it 'clears the status unless a status radio is checked' do
       render partial: 'hyrax/base/form_doi', locals: { f: builder }
 
-      hidden = Capybara.string(rendered)
-                       .all("input[type='hidden'][name*='doi_status_when_public']", visible: :all)
-      expect(hidden.map { |h| h['value'] }).to eq ['']
+      submitted = Capybara.string(rendered)
+                          .all("input[type='hidden'][name*='doi_status_when_public']", visible: :all)
+                          .reject(&:disabled?)
+      expect(submitted.map { |h| h['value'] }).to eq ['']
     end
 
     it 'says what each status does, and whether it can be undone' do

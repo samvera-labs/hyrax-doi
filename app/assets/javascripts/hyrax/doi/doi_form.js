@@ -74,7 +74,11 @@
             var target = container.querySelector('[data-doi-reserved-input]') || input;
 
             if (target) target.value = result.body.doi;
-            if (reserved) reserved.hidden = false;
+            if (reserved) {
+                reserved.hidden = false;
+                var intent = reserved.querySelector('[data-doi-reserved-intent]');
+                if (intent) intent.disabled = false;
+            }
             setStatus(container, result.body.doi, false);
         }).catch(function() {
             button.disabled = false;
