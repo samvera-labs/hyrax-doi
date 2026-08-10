@@ -74,10 +74,15 @@ Work toward 1.0.0: a Valkyrie-native, flexible-metadata-aware rewrite. See the n
   the provider currently reports lives on the `PersistentIdentifier` record, reachable as
   `doi_state`. The two legitimately differ: a work intended to be findable stays
   registered while it is private.
-- **Minimum Hyrax is now 5.3.0.** The flexible metadata stack (`Hyrax::Flexibility`,
-  `Hyrax::M3SchemaLoader`, `Hyrax::FlexibleSchema`, the `HYRAX_FLEXIBLE` config, and the
-  `allinson` test app) first ships in 5.3.0 and is absent from every earlier 5.x release.
-  Supporting both flex modes is a requirement, so there is no earlier version to support.
+- **Hyrax 5.3.0 or later is required in practice**, since the flexible metadata stack
+  (`Hyrax::Flexibility`, `Hyrax::M3SchemaLoader`, `Hyrax::FlexibleSchema`, the
+  `HYRAX_FLEXIBLE` config, and the `allinson` test app) first ships there and is absent from
+  every earlier 5.x release.
+
+  The gemspec nevertheless declares `hyrax >= 5.2`. The 5.3.0 version bump lives on the
+  release commit, which was never merged back to `main`, so `main` carries the flexible
+  stack while still declaring 5.2.0. A floor of 5.3 makes the gem unresolvable for any
+  application tracking `main` — Hyku among them.
 - Test harness now runs against Hyrax's own test apps: `koppie` (Postgres metadata, flex
   off), `allinson` (Postgres metadata, flex on), `sirenia` (Fedora metadata/storage), and
   `freyja` (dassie with `VALKYRIE_TRANSITION=true`, the only target with Wings loaded). CI

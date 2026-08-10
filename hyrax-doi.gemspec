@@ -30,8 +30,11 @@ Gem::Specification.new do |spec|
 
   spec.add_dependency "rails", "> 6.1", "< 8.0"
 
-  # 5.3 is the first release containing the flexible metadata stack.
-  spec.add_dependency "hyrax", ">= 5.3", "< 7.0"
+  # 5.3.0 is the first release with the flexible metadata stack this gem needs. The floor is
+  # 5.2 anyway: the version bump lives on the release commit, which was never merged back,
+  # so Hyrax's main branch carries the flexible stack while still declaring 5.2.0. A 5.3
+  # floor locks out every application tracking main, Hyku among them.
+  spec.add_dependency "hyrax", ">= 5.2", "< 7.0"
   spec.add_dependency "flipflop", "~> 2.3"
   spec.add_dependency "faraday", "~> 2.0"
 

@@ -53,9 +53,12 @@ either overwriting the other.
 
 ## Compatibility
 
-Requires **Hyrax 5.3 or later** and is **Valkyrie-only**. Hyrax 5.3 is the first release
-containing the flexible metadata stack, and the gem supports both `HYRAX_FLEXIBLE=false`
-and `HYRAX_FLEXIBLE=true`.
+Requires the **flexible metadata stack**, which first ships in **Hyrax 5.3.0**, and is
+**Valkyrie-only**. The gem supports both `HYRAX_FLEXIBLE=false` and `HYRAX_FLEXIBLE=true`.
+
+The declared floor is `hyrax >= 5.2` rather than 5.3: the 5.3.0 version bump was never
+merged back to Hyrax's `main`, so an application tracking `main` reports 5.2.0 while running
+the flexible stack. On a released Hyrax, use 5.3.0 or later.
 
 ActiveFedora is not supported as of 1.0.0; use the `0.3-stable` branch for those
 applications. An application migrating to Valkyrie is supported, provided its works are
