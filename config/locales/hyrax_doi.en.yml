@@ -22,8 +22,8 @@ en:
         saved_note: Nothing is minted or recorded until this work is saved.
         legend: DOI for this work
         missing_required_confirm: >-
-          DataCite requires %{fields}, which this form leaves blank. Placeholder values
-          will be sent instead. Continue?
+          DataCite requires %{fields} for a registered or findable DOI, and this form leaves
+          them blank. No DOI will be created until they are filled in. Save anyway?
 
         modes:
           none:

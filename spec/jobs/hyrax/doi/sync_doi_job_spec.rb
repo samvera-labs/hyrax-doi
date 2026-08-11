@@ -76,6 +76,24 @@ RSpec.describe Hyrax::DOI::SyncDOIJob, type: :job do
       expect(Array(Hyrax.query_service.find_by(id: work.id).doi)).to eq ['10.5072/fresh']
     end
 
+    it 'mints once however many times it runs' do
+      described_class.perform_now(work.id.to_s)
+      described_class.perform_now(work.id.to_s)
+
+      expect(Hyrax::DOI::PersistentIdentifier.where(value: '10.5072/fresh').count).to eq 1
+    end
+
+    it 'mints nothing for a work that already holds a DOI' do
+      held = Hyrax.persister.save(
+        resource: DOIWork.new(title: ['Has one'], doi: ['10.5072/already'],
+                              doi_status_when_public: 'draft')
+      )
+
+      described_class.perform_now(held.id.to_s)
+
+      expect(Hyrax::DOI::PersistentIdentifier.find_by(value: '10.5072/fresh')).to be_nil
+    end
+
     it 'records nothing when the registrar failed' do
       failure = Hyrax::DOI::RegistrationResult.new(errors: ['DataCite requires publisher'])
       allow(Hyrax::Identifier::Registrar).to receive(:for)

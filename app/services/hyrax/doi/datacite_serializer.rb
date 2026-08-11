@@ -16,9 +16,6 @@ module Hyrax
         'subjects' => :keyword
       }.freeze
 
-      UNAVAILABLE = ':unav'
-      DEFAULT_RESOURCE_TYPE = 'Other'
-
       # The work fields feeding DataCite's required set, for a caller that needs to name
       # them before a save -- the deposit form warns about blanks. Resolved through the
       # profile mapping, so a repository that feeds publicationYear from something other
@@ -53,7 +50,7 @@ module Hyrax
           creators:,
           publisher:,
           publicationYear: publication_year,
-          types: { resourceTypeGeneral: resource_type_general },
+          types: { resourceTypeGeneral: resource_type_general }.compact_blank,
           descriptions:,
           subjects:,
           url:
@@ -78,10 +75,7 @@ module Hyrax
         extracted = extractor_for(:creator)&.call(work)
         return Array.wrap(extracted) if extracted.present?
 
-        names = values_for('creators')
-        return [{ name: UNAVAILABLE }] if names.empty?
-
-        names.map { |name| { name: name.to_s } }
+        values_for('creators').map { |name| { name: name.to_s } }
       end
 
       def publisher
@@ -89,18 +83,19 @@ module Hyrax
         return extracted if extracted.present?
 
         name = values_for('publisher').first
-        name.present? ? { name: name.to_s } : { name: UNAVAILABLE }
+        { name: name.to_s } if name.present?
       end
 
-      # DataCite wants a year, and the source may be a full date or an EDTF string.
+      # The source may be a full date or an EDTF string, so the year is extracted rather than
+      # parsed. Nil when there is none: guessing a publication year would put a wrong date on
+      # a permanent public record.
       def publication_year
-        raw = values_for('publicationYear').first
-        year = raw.to_s[/\d{4}/]
-        (year || Time.zone.today.year).to_i
+        year = values_for('publicationYear').first.to_s[/\d{4}/]
+        year&.to_i
       end
 
       def resource_type_general
-        values_for('resourceTypeGeneral').first.presence || DEFAULT_RESOURCE_TYPE
+        values_for('resourceTypeGeneral').first.presence
       end
 
       def descriptions
@@ -126,12 +121,14 @@ module Hyrax
         Hyrax::DOI.config.public_send("#{field}_extractor")
       end
 
+      # Reads what the payload will actually carry, not the raw field: an extractor may supply
+      # creators or a publisher the work has no field for, and that counts as present.
       def required_value_present?(field)
         case field
-        when 'creators' then creators.none? { |creator| creator[:name] == UNAVAILABLE }
-        when 'publisher' then publisher[:name] != UNAVAILABLE
-        when 'publicationYear' then values_for('publicationYear').any?
-        when 'resourceTypeGeneral' then values_for('resourceTypeGeneral').any?
+        when 'creators' then creators.present?
+        when 'publisher' then publisher.present?
+        when 'publicationYear' then publication_year.present?
+        when 'resourceTypeGeneral' then resource_type_general.present?
         else values_for(field).any?
         end
       end

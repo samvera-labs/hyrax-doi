@@ -15,7 +15,7 @@ module Hyrax
         return if record.present? && !record.minted?
 
         work = Hyrax.query_service.find_by(id: resource_id)
-        return if record.nil? && !Hyrax::DOI.config.minting_policy.mintable?(work)
+        return if record.nil? && !mintable_and_unminted?(work)
 
         # Keyed on the record's own provider where one exists, so a work minted through a
         # second provider syncs back to that one rather than the configured default.
@@ -29,6 +29,15 @@ module Hyrax
       end
 
       private
+
+      # Minting creates a permanent identifier, so running twice must not produce two. The
+      # work's own DOI is checked as well as the identifier record: a duplicate enqueue, a
+      # retry, or two workers taking the same job would each otherwise see no record and mint.
+      def mintable_and_unminted?(work)
+        return false if Array.wrap(work.try(:doi_value)).compact_blank.any?
+
+        Hyrax::DOI.config.minting_policy.mintable?(work)
+      end
 
       # Writes back what the provider reported, so a first mint is recorded rather than
       # existing only at DataCite -- otherwise the next save mints a second one and nothing

@@ -72,13 +72,31 @@ RSpec.describe Hyrax::DOI::DataCiteSerializer do
     end
   end
 
-  # ':unav' is DataCite's own sentinel for an unavailable value, and creators is required,
-  # so omitting it is not an option.
-  describe 'when the work has no creator' do
-    let(:work) { SerializedWork.new(title: ['No Creator']) }
+  # A registered or findable DOI is a permanent public record, so a blank required field is
+  # reported for the depositor to fill rather than papered over with a sentinel or a guess --
+  # the identifier cannot be withdrawn once it exists.
+  describe 'when required fields are blank' do
+    let(:work) { SerializedWork.new(title: ['Nothing Else']) }
 
-    it 'falls back to the unavailable sentinel rather than omitting creators' do
-      expect(payload[:creators]).to eq [{ name: ':unav' }]
+    it 'omits creators rather than sending a placeholder name' do
+      expect(payload[:creators]).to be_blank
+    end
+
+    it 'omits the publisher rather than sending a placeholder name' do
+      expect(payload[:publisher]).to be_blank
+    end
+
+    it 'omits the publication year rather than guessing the current one' do
+      expect(payload[:publicationYear]).to be_blank
+    end
+
+    it 'omits the resource type rather than defaulting it' do
+      expect(payload.dig(:types, :resourceTypeGeneral)).to be_blank
+    end
+
+    it 'names every blank required field' do
+      expect(described_class.new(work, url: 'https://example.org/x').missing_required)
+        .to include('creators', 'publisher', 'publicationYear', 'resourceTypeGeneral')
     end
   end
 

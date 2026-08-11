@@ -12,6 +12,17 @@ Work toward 1.0.0: a Valkyrie-native, flexible-metadata-aware rewrite. See the n
 
 ### Changed
 
+- **No placeholder metadata is ever registered.** The serializer substituted DataCite's
+  `:unav` sentinel for a blank creator or publisher, the current year for a missing
+  publication year, and `Other` for a missing resource type — then `missing_required` reported
+  those same fields as absent and the registrar refused to mint, so the placeholders were
+  generated and discarded while the deposit form promised they would be sent. A registered or
+  findable DOI cannot be withdrawn, so blank required fields are now reported for the depositor
+  to fill and the form says minting will not happen until they are.
+- **A sync job mints at most one DOI.** `SyncDOIJob` decided whether to mint from the absence
+  of an identifier record, which is only written after the provider replies — so a duplicate
+  enqueue, a retry, or two workers taking the same job each saw nothing and each minted a
+  permanent identifier. It now also checks the work's own DOI.
 - **Choosing a minting status actually mints.** Selecting Draft, Registered, or Findable
   recorded the intent and nothing acted on it: the listener only enqueued a sync for a work
   that already had an identifier record, and `SyncDOIJob` returned early without one, so no
