@@ -13,7 +13,7 @@ Gem::Specification.new do |spec|
   spec.homepage    = ""
   spec.summary     = "Hyrax plugin for working with DOIs."
   spec.description = "Tools for working with DOIs in Hyrax including model attributes, minting, and fetching descriptive metadata."
-  spec.license     = "MIT"
+  spec.license     = "Apache-2.0"
 
   # Prevent pushing this gem to RubyGems.org. To allow pushes either set the 'allowed_push_host'
   # to allow pushing to a single host or delete this section to allow pushing to any host.
@@ -24,27 +24,32 @@ Gem::Specification.new do |spec|
       "public gem pushes."
   end
 
-  spec.files = Dir["{app,config,db,lib}/**/*", "MIT-LICENSE", "Rakefile", "README.md"]
+  spec.files = Dir["{app,config,db,lib}/**/*", "LICENSE", "Rakefile", "README.md", "CHANGELOG.md"]
 
-  spec.add_dependency "rails", ">= 5.2.4.3", "< 8.0"
+  spec.required_ruby_version = '>= 3.2'
 
-  spec.add_dependency "hyrax", ">= 2.9", "< 6.0"
+  spec.add_dependency "rails", "> 6.1", "< 8.0"
+
+  # 5.3.0 is the first release with the flexible metadata stack this gem needs. The floor is
+  # 5.2 anyway: the version bump lives on the release commit, which was never merged back,
+  # so Hyrax's main branch carries the flexible stack while still declaring 5.2.0. A 5.3
+  # floor locks out every application tracking main, Hyku among them.
+  spec.add_dependency "hyrax", ">= 5.2", "< 7.0"
   spec.add_dependency "flipflop", "~> 2.3"
-  spec.add_dependency "bolognese", ">= 1.8.6", "< 3.0"
-  spec.add_dependency 'addressable', '2.8.1' # remove once https://github.com/postrank-labs/postrank-uri/issues/49 is fixed
+  spec.add_dependency "faraday", "~> 2.0"
+
+  # Autofill resolves through doi.org, which redirects to each registration agency's own
+  # content-negotiation host. Faraday 2 moved redirect handling out of core.
+  spec.add_dependency "faraday-follow_redirects", "~> 0.3"
 
   spec.add_development_dependency 'ammeter'
   spec.add_development_dependency 'capybara'
-  spec.add_development_dependency 'chromedriver-helper', '~> 2.1'
   spec.add_development_dependency "bixby"
   spec.add_development_dependency "factory_bot_rails"
   spec.add_development_dependency "pg"
   spec.add_development_dependency 'rspec_junit_formatter'
   spec.add_development_dependency "rspec-rails"
   spec.add_development_dependency 'shoulda-matchers'
+  spec.add_development_dependency 'simplecov'
   spec.add_development_dependency 'webmock'
-  # Workaround for cc-test-reporter with SimpleCov 0.18.
-  # Stop upgrading SimpleCov until the following issue will be resolved.
-  # https://github.com/codeclimate/test-reporter/issues/418
-  spec.add_development_dependency('simplecov', '0.17.1', '< 0.18')
 end

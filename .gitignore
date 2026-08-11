@@ -6,3 +6,9 @@ coverage/
 tmp/
 rubocop.xml
 spec/examples.txt
+.DS_Store
+node_modules/
+yarn.lock
+Gemfile.koppie.lock
+Gemfile.allinson.lock
+Gemfile.dassie.lock

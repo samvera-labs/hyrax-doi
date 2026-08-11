@@ -45,9 +45,17 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        ci_test_app: [dassie]
+        # Both flex modes are required -- this gem is platform code. sirenia is the only
+        # configuration where Valkyrie resources live in Fedora while the gem's
+        # ActiveRecord tables live in Postgres. freyja runs with Wings loaded, covering
+        # applications still migrating off ActiveFedora. See CONTRIBUTING.md.
+        ci_test_app: [koppie, allinson, sirenia, freyja]
         ci_node_total: [4]
         ci_node_index: [0, 1, 2, 3]
+    # Compose names its project after the file, so shards of one app would otherwise share
+    # a set of volumes.
+    env:
+      COMPOSE_PROJECT_NAME: hyrax-doi-${{ matrix.ci_test_app }}-${{ matrix.ci_node_index }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -68,13 +76,13 @@ jobs:
           echo $HYRAX_SHA
       - name: Start containers
         run: |
-          GITHUB_SHA=latest docker compose -f docker-compose.yml up -d --quiet-pull --pull missing --no-build
+          GITHUB_SHA=latest docker compose -f docker-compose-${{ matrix.ci_test_app }}.yml up -d --quiet-pull --pull missing --no-build web
       - name: RSpec
         env:
           CI_NODE_TOTAL: ${{ matrix.ci_node_total }}
           CI_NODE_INDEX: ${{ matrix.ci_node_index }}
         run: >-
-          GITHUB_SHA=latest docker compose -f docker-compose.yml exec -T -w /app/samvera/hyrax-doi web sh -c
+          GITHUB_SHA=latest docker compose -f docker-compose-${{ matrix.ci_test_app }}.yml exec -T -w /app/samvera/hyrax-doi web sh -c
           "bundle install && yarn install && rspec_booster --job ${{ matrix.ci_node_index }}/${{ matrix.ci_node_total }}"
       - name: Capture Container Logs
         if: always()

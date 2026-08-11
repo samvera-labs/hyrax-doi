@@ -2,16 +2,28 @@
 RSpec.shared_examples "a DataCite DOI-enabled form" do
   subject { form }
 
-  describe "properties" do
-    it { is_expected.to delegate_method(:doi_status_when_public).to(:model) }
+  it 'reads the minting intent its work holds' do
+    work = form.model
+    work.doi_status_when_public = 'findable'
 
-    it 'includes properties in the list of terms' do
-      expect(subject.terms).to include(:doi_status_when_public)
-    end
+    expect(form.class.new(work).doi_status_when_public).to eq 'findable'
+  end
 
-    it 'does not include properties in primary or secondary' do
-      expect(subject.primary_terms).not_to include(:doi_status_when_public)
-      expect(subject.secondary_terms).not_to include(:doi_status_when_public)
-    end
+  it 'accepts an intent and writes it back to the work' do
+    form.validate('doi_status_when_public' => 'registered')
+    form.sync
+
+    expect(form.model.doi_status_when_public).to eq 'registered'
+  end
+
+  it 'returns the resource from sync, having set the intent' do
+    form.validate('doi_status_when_public' => 'registered')
+
+    expect(form.sync).to be_a Valkyrie::Resource
+  end
+
+  it 'keeps the field out of the generic term lists' do
+    expect(subject.primary_terms).not_to include(:doi_status_when_public)
+    expect(subject.secondary_terms).not_to include(:doi_status_when_public)
   end
 end

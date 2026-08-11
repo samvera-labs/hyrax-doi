@@ -14,17 +14,66 @@ module Hyrax
         end
       end
 
+      # An engine cannot add to the host's application.js or application.css, so name the
+      # gem's assets as their own entry points. Without this they ship but are never served,
+      # which is why the DOI tab's buttons did nothing in an application that had not
+      # required them by hand.
+      initializer 'hyrax_doi.assets.precompile' do |app|
+        app.config.assets.precompile += %w[hyrax/doi/doi_form.js hyrax/doi/doi_form.css]
+      end
+
       # Allow flipflop to load config/features.rb from the Hyrax gem:
       initializer 'configure' do
         Flipflop::FeatureLoader.current.append(self)
       end
 
-      config.after_initialize do
-        Hyrax::CurationConcern.actor_factory.use Hyrax::Actors::DOIActor
+      # Registers itself so installing the gem is enough. Hyrax ships an empty registrar
+      # hash and its own generator only writes one into a host initializer, which is easy
+      # to skip and leaves minting silently unavailable.
+      initializer 'hyrax_doi.register_registrars' do
+        config.to_prepare do
+          Hyrax.config.identifier_registrars =
+            { datacite: Hyrax::DOI::DataCiteRegistrar }.merge(Hyrax.config.identifier_registrars)
+        end
+      end
 
-        require 'bolognese'
-        Bolognese::Metadata.prepend Bolognese::Readers::HyraxWorkReader
-        Bolognese::Metadata.prepend Bolognese::Writers::HyraxWorkWriter
+      # Lets a non-flex application `include Hyrax::Schema(:doi)` and pick up
+      # config/metadata/doi.yaml from this gem. Unshifted so the application can still
+      # shadow it with its own doi.yaml -- first match wins.
+      initializer 'hyrax_doi.schema_search_path' do
+        root = Hyrax::DOI::Engine.root
+        paths = Hyrax.config.schema_loader_config_search_paths
+        paths.unshift(root) unless paths.include?(root)
+      end
+
+      # to_prepare rather than after_initialize so the prepend survives a dev reload,
+      # which discards and redefines the Hyrax constant.
+      config.to_prepare do
+        require 'hyrax/doi/flexible_schema_validator_service_decorator'
+
+        decorator = Hyrax::DOI::FlexibleSchemaValidatorServiceDecorator
+        service = Hyrax::FlexibleSchemaValidatorService
+        service.prepend(decorator) unless service.ancestors.include?(decorator)
+      end
+
+      # Contributes the DOI tab and the mint action to Hyrax's helper seams. Wired here
+      # rather than left to the install generator: a host that skips the generator would
+      # otherwise get a working registrar with no UI reaching it.
+      config.to_prepare do
+        # Prepended, not included, so form_tabs_for and show_actions_for reach Hyrax's
+        # implementations through super. A plain helper include would replace each method
+        # rather than wrap it, dropping both Hyrax's tabs and any other engine's actions.
+        { Hyrax::WorkFormHelper => Hyrax::DOI::WorkFormHelper,
+          Hyrax::WorksHelper => Hyrax::DOI::MintButtonHelper }.each do |target, mod|
+          target.prepend(mod) unless target.ancestors.include?(mod)
+        end
+      end
+
+      config.after_initialize do
+        # Subscribed rather than added as a transaction step: Hyrax documents its publisher
+        # as an extension point, while Transactions::Container is not one -- Hyrax's own
+        # redirects feature had to edit core to add a step there.
+        Hyrax.publisher.subscribe(Hyrax::DOI::PublisherListener.new)
 
         # Prepend our views in front of Hyrax but after the main app, so they have precedence
         # but can still be overridden

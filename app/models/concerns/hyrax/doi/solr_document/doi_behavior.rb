@@ -6,7 +6,11 @@ module Hyrax
         extend ActiveSupport::Concern
 
         included do
-          attribute :doi, ::SolrDocument::Solr::String, "doi_ssi"
+          # Keys must match what the indexer and config/metadata/doi.yaml write.
+          attribute :doi, ::SolrDocument::Solr::Array, 'doi_ssim'
+
+          # What the provider last reported, as distinct from the depositor's intent.
+          attribute :doi_state, ::SolrDocument::Solr::String, 'doi_state_ssi'
         end
       end
     end

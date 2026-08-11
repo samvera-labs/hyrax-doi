@@ -1,0 +1,24 @@
+---
+attributes:
+  doi:
+    type: string
+    multiple: true
+    # The DOI tab renders this field itself, so keep it out of the generic
+    # "Additional fields" accordion.
+    form:
+      display: false
+    view:
+      render_as: doi
+      html_dl: true
+    index_keys:
+      - doi_ssim
+      - doi_tesim
+    predicate: http://purl.org/ontology/bibo/doi
+  doi_status_when_public:
+    type: string
+    multiple: false
+    form:
+      display: false
+    index_keys:
+      - doi_status_when_public_ssi
+    predicate: http://samvera.org/ns/hyrax/doi#doi_status_when_public

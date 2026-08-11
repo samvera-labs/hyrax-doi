@@ -3,129 +3,80 @@ require 'rails_helper'
 # Generators are not automatically loaded by Rails
 require 'generators/hyrax/doi/add_to_work_type_generator'
 
-describe Hyrax::DOI::AddToWorkTypeGenerator, type: :generator do
-  # Tell the generator where to put its output (what it thinks of as Rails.root)
-  destination Hyrax::DOI::Engine.root.join("tmp", "generator_testing")
+RSpec.describe Hyrax::DOI::AddToWorkTypeGenerator, type: :generator do
+  destination Hyrax::DOI::Engine.root.join('tmp', 'generator_testing')
+
+  let(:model_path) { 'app/models/monograph.rb' }
+  let(:form_path) { 'app/forms/monograph_form.rb' }
+
+  def write(path, content)
+    full = File.join(destination_root, path)
+    FileUtils.mkdir_p(File.dirname(full))
+    File.write(full, content)
+  end
+
+  # The shapes `rails generate hyrax:work_resource` produces.
   before do
-    # This will wipe the destination root dir
     prepare_destination
-
-    # Setup work type files in generator testing destination root dir
-    # Model
-    FileUtils.mkdir_p destination_root.join(File.dirname(model_path))
-    FileUtils.cp Rails.root.join(model_path), destination_root.join(model_path)
-    # Helper
-    FileUtils.mkdir_p destination_root.join(File.dirname(form_path))
-    FileUtils.cp Rails.root.join(form_path), destination_root.join(form_path)
-    # Presenter
-    FileUtils.mkdir_p destination_root.join(File.dirname(presenter_path))
-    FileUtils.cp Rails.root.join(presenter_path), destination_root.join(presenter_path)
+    write model_path, <<~RUBY
+      # frozen_string_literal: true
+      class Monograph < Hyrax::Work
+        include Hyrax::Schema(:basic_metadata)
+      end
+    RUBY
+    write form_path, <<~RUBY
+      # frozen_string_literal: true
+      class MonographForm < Hyrax::Forms::ResourceForm(Monograph)
+        include Hyrax::FormFields(:basic_metadata)
+      end
+    RUBY
   end
 
-  let(:klass) { 'GenericWork' }
-  let(:model_path) { File.join('app', 'models', "#{klass.underscore}.rb") }
-  let(:form_path) { File.join('app', 'forms', 'hyrax', "#{klass.underscore}_form.rb") }
-  let(:presenter_path) { File.join('app', 'presenters', 'hyrax', "#{klass.underscore}_presenter.rb") }
+  describe 'the model' do
+    it 'adds both concerns' do
+      run_generator ['Monograph']
 
-  describe 'inject_into_model' do
-    it 'adds behavior module to model class' do
-      run_generator [klass]
       expect(file(model_path)).to contain('include Hyrax::DOI::DOIBehavior')
+      expect(file(model_path)).to contain('include Hyrax::DOI::DataCiteDOIBehavior')
     end
 
-    context 'with a namespaced model class' do
-      let(:klass) { 'NamespacedWorks::NestedWork' }
+    it 'adds only the base concern when DataCite is declined' do
+      run_generator ['Monograph', '--no-datacite']
 
-      it 'adds behavior module to model class' do
-        run_generator [klass]
-        expect(file(model_path)).to contain('include Hyrax::DOI::DOIBehavior')
-      end
-    end
-
-    context 'datacite enabled' do
-      it 'adds behavior module to model class' do
-        run_generator [klass, "--datacite"]
-        expect(file(model_path)).to contain('include Hyrax::DOI::DOIBehavior')
-        expect(file(model_path)).to contain('include Hyrax::DOI::DataCiteDOIBehavior')
-      end
-
-      context 'with a namespaced model class' do
-        let(:klass) { 'NamespacedWorks::NestedWork' }
-
-        it 'adds behavior module to model class' do
-          run_generator [klass, "--datacite"]
-          expect(file(model_path)).to contain('include Hyrax::DOI::DOIBehavior')
-          expect(file(model_path)).to contain('include Hyrax::DOI::DataCiteDOIBehavior')
-        end
-      end
+      expect(file(model_path)).to contain('include Hyrax::DOI::DOIBehavior')
+      expect(file(model_path)).not_to contain('DataCiteDOIBehavior')
     end
   end
 
-  describe 'inject_into_form' do
-    it 'adds behavior module to form class' do
-      run_generator [klass]
+  describe 'the form' do
+    it 'adds both concerns' do
+      run_generator ['Monograph']
+
       expect(file(form_path)).to contain('include Hyrax::DOI::DOIFormBehavior')
-    end
-
-    context 'with a namespaced model class' do
-      let(:klass) { 'NamespacedWorks::NestedWork' }
-
-      it 'adds behavior module to form class' do
-        run_generator [klass]
-        expect(file(form_path)).to contain('include Hyrax::DOI::DOIFormBehavior')
-      end
-    end
-
-    context 'datacite enabled' do
-      it 'adds behavior module to form class' do
-        run_generator [klass, "--datacite"]
-        expect(file(form_path)).to contain('include Hyrax::DOI::DOIFormBehavior')
-        expect(file(form_path)).to contain('include Hyrax::DOI::DataCiteDOIFormBehavior')
-      end
-
-      context 'with a namespaced model class' do
-        let(:klass) { 'NamespacedWorks::NestedWork' }
-
-        it 'adds behavior module to form class' do
-          run_generator [klass, "--datacite"]
-          expect(file(form_path)).to contain('include Hyrax::DOI::DOIFormBehavior')
-          expect(file(form_path)).to contain('include Hyrax::DOI::DataCiteDOIFormBehavior')
-        end
-      end
+      expect(file(form_path)).to contain('include Hyrax::DOI::DataCiteDOIFormBehavior')
     end
   end
 
-  describe 'inject_into_presenter' do
-    it 'adds behavior module to presenter class' do
-      run_generator [klass]
-      expect(file(presenter_path)).to contain('include Hyrax::DOI::DOIPresenterBehavior')
-    end
+  # insert_into_file does not raise on a missing anchor, so a generator written against
+  # the wrong class shape reports success while injecting nothing.
+  it 'produces a model that parses' do
+    run_generator ['Monograph']
 
-    context 'with a namespaced presenter class' do
-      let(:klass) { 'NamespacedWorks::NestedWork' }
+    body = File.read(File.join(destination_root, model_path))
+    expect(body).to match(/class Monograph < Hyrax::Work\n  include Hyrax::DOI::DOIBehavior\n/)
+  end
 
-      it 'adds behavior module to presenter class' do
-        run_generator [klass]
-        expect(file(presenter_path)).to contain('include Hyrax::DOI::DOIPresenterBehavior')
-      end
-    end
+  it 'says so rather than failing when a work type has no form' do
+    FileUtils.rm_f File.join(destination_root, form_path)
 
-    context 'datacite enabled' do
-      it 'adds behavior module to presenter class' do
-        run_generator [klass, "--datacite"]
-        expect(file(presenter_path)).to contain('include Hyrax::DOI::DOIPresenterBehavior')
-        expect(file(presenter_path)).to contain('include Hyrax::DOI::DataCiteDOIPresenterBehavior')
-      end
+    expect { run_generator ['Monograph'] }.not_to raise_error
+    expect(file(model_path)).to contain('include Hyrax::DOI::DOIBehavior')
+  end
 
-      context 'with a namespaced presenter class' do
-        let(:klass) { 'NamespacedWorks::NestedWork' }
+  it 'does not double the concerns when run twice' do
+    run_generator ['Monograph']
+    run_generator ['Monograph']
 
-        it 'adds behavior module to presenter class' do
-          run_generator [klass, "--datacite"]
-          expect(file(presenter_path)).to contain('include Hyrax::DOI::DOIPresenterBehavior')
-          expect(file(presenter_path)).to contain('include Hyrax::DOI::DataCiteDOIPresenterBehavior')
-        end
-      end
-    end
+    expect(File.read(File.join(destination_root, model_path)).scan('DOIBehavior').length).to eq 2
   end
 end

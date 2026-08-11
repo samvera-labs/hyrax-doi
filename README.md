@@ -1,5 +1,5 @@
 # Hyrax::DOI
-Code: [![CircleCI](https://circleci.com/gh/samvera-labs/hyrax-doi.svg?style=svg)](https://circleci.com/gh/samvera-labs/hyrax-doi)
+Code: [![Lint and Test](https://github.com/samvera-labs/hyrax-doi/actions/workflows/lint-test.yml/badge.svg)](https://github.com/samvera-labs/hyrax-doi/actions/workflows/lint-test.yml)
 [![Code Climate](https://codeclimate.com/github/samvera-labs/hyrax-doi/badges/gpa.svg)](https://codeclimate.com/github/samvera-labs/hyrax-doi)
 
 
@@ -8,125 +8,130 @@ Docs: [![Contribution Guidelines](http://img.shields.io/badge/CONTRIBUTING-Guide
 
 Jump in: [![Slack Status](http://slack.samvera.org/badge.svg)](http://slack.samvera.org/)
 
-Hyrax-doi is a Hyrax plugin that provides tools for working with DOIs including model attributes, minting, and fetching descriptive metadata.
+Hyrax-doi mints DOIs for works in a Hyrax application, keeps the provider's copy of their
+metadata current, and fills a deposit form from a DOI someone else has already minted.
 
 ## Features
-### DOI Creation and Updating
-DOIs are created and updated when a work of a DOI-enabled work type is saved.  This happens in a background job using the [external identifier interface](https://github.com/samvera/hyrax/pull/4458) provided by Hyrax.
 
->Note: At this point only functionality for registering DOIs wtih DataCite is implemented but other registrars should be also be possible.
+### Minting is always something a person asks for
 
-#### Draft DOI Creation (DataCite)
-The deposit form has a button for creating a draft DOI without requiring submitting the form.  This is useful if you need to know the DOI and embed it in the uploaded file(s).
+A DOI is never created as a side effect of saving a work. There are three ways to ask:
 
-#### DOI Status Support (DataCite)
-The uploader is allowed to choose the DOI status (draft, registered, findable) they want for the work when it becomes public.  If findable is chosen the DOI will remain as registered until the work become public.
+- **Choose a status on the deposit form.** *Do not mint* is the default; *Draft*,
+  *Registered*, and *Findable* each mint when the work is saved.
+- **Press "Create draft DOI" on the deposit form.** This reserves a DOI without submitting,
+  so it can be written into the files being uploaded.
+- **Press "Mint DOI" on the work's show page**, for a work deposited without one. Requires
+  edit permission on that work.
 
-#### Form Validation (DataCite)
-Hyrax-doi will provide defaults or placeholders for fields which Hyrax doesn't require but which are mandatory for DataCite.  In this case the uploader will be notified of the missing fields and given the opportunity of filling them in before submittign or of continuing with the defaults.
+**Updates are automatic, but only for works that already have a DOI.** Editing such a work
+pushes its new metadata to the provider. Editing a work without one does nothing.
 
-### Form autofilling
-When submitting a work with an existing DOI (like a scholarly article), the uploader can fill in the DOI and click a button to autofill the deposit form with metadata from the DOI.  This is not limited to DataCite and works with DOIs from a variety of registrars (DataCite, CrossRef, JaLC, ISTIC, , etc.)
+### Intent and state are separate
 
-### Metadata Crosswalking
-DOI submission and form autofilling happens by crosswalking the work's metadata with DataCite's schema through the [bolognese gem](https://github.com/datacite/bolognese) which enables crosswalking with a number of metadata formats besides those required by DOI registars including RIS, BibTeX, Crosscite, and Schema.org.
+The status chosen on the form is the depositor's *intent*. What the provider currently
+reports is recorded separately, and the two legitimately differ: a work marked *findable*
+stays `registered` at DataCite while it is private, and becomes findable when the work
+does — including when an embargo expires.
 
-## Compatibilty
-Hyrax-doi is compatible with Hyrax 2.9+ and tested with a [Hyrax 2.9.0 test application](https://github.com/ubiquitypress/hyrax_test_app) that mirrors the generated app used by Hyrax internally for testing.
+A draft DOI is reserved but does not resolve, so it is not shown on the show page.
+
+### Autofill from an existing DOI
+
+A depositor cataloguing something published elsewhere can paste its DOI and fill the form
+from the metadata its publisher registered. This reads metadata; it mints nothing, and the
+DOI is recorded as external so the gem never tries to update it.
+
+Metadata is read from doi.org by content negotiation, so **any registration agency
+resolves** — CrossRef, DataCite, JaLC, and the rest.
+
+### More than one identifier per work
+
+Identifiers are stored in their own table, one row per identifier, each with its own state
+and sync history. A work can hold a DOI and another identifier at the same time without
+either overwriting the other.
+
+## Compatibility
+
+Requires the **flexible metadata stack**, which first ships in **Hyrax 5.3.0**, and is
+**Valkyrie-only**. The gem supports both `HYRAX_FLEXIBLE=false` and `HYRAX_FLEXIBLE=true`.
+
+The declared floor is `hyrax >= 5.2` rather than 5.3: the 5.3.0 version bump was never
+merged back to Hyrax's `main`, so an application tracking `main` reports 5.2.0 while running
+the flexible stack. On a released Hyrax, use 5.3.0 or later.
+
+ActiveFedora is not supported as of 1.0.0; use the `0.3-stable` branch for those
+applications. An application migrating to Valkyrie is supported, provided its works are
+Valkyrie resources.
+
+Tested against Hyrax's own test applications in four configurations — koppie, allinson,
+sirenia, and freyja — covering both flex modes, both Postgres and Fedora metadata
+backends, and an application with Wings loaded. See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Installation
-Add this line to your application's Gemfile:
+
+Add the gem:
 
 ```ruby
 gem 'hyrax-doi'
 ```
 
-And then execute:
+Then:
+
 ```bash
-$ bundle
-```
-
-Then run the install generator
-```
-rails g hyrax:doi:install
-```
-Use the `--datacite` flag if working with DataCite DOIs:
-```
+bundle install
 rails g hyrax:doi:install --datacite
+rails db:migrate
 ```
 
-## Usage
+The generator adds an initializer, the identifier table's migration, the DOI attributes to
+your `SolrDocument`, and the engine's routes.
 
-### Enable DOI functionality for a work type
-Run the generator to add DOI support to a given work type:
-```
-rails g hyrax:doi:add_to_work_type MyWorkType
-```
-Add the `--datacite` flag if creating DataCite DOIs:
-```
-rails g hyrax:doi:add_to_work_type MyWorkType --datacite
-```
+If the generator reports that it could not mount the engine, add the mount by hand — the
+DOI tab's buttons and the show page's mint button all post to these routes, so without it
+they answer 404:
 
-### Configuration
-After the install generator is run, Hyrax-doi can be configured in the `config/initializers/hyrax-doi.rb` initializer.
-
-If your application does not already set `host` in `default_url_options`, you will need to configure it for creating full urls to work show pages to be registered with DOIs.
-
-DataCite credentials can either be set in environment variables (DATACITE_PREFIX, DATACITE_USERNAME, and DATACITE_PASSWORD) or set in the initializer.  Hyrax-doi defaults to using DataCite's test environment but can be switched to the production environment by setting the mode:
-```
-Hyrax::DOI::DataCiteRegistrar.mode = :production
+```ruby
+# config/routes.rb, before any catch-all route
+mount Hyrax::DOI::Engine, at: '/doi', as: 'hyrax_doi'
 ```
 
-### Using with Hyku
-Hyrax-doi is currently implemented for a single-tenant Hyrax application with configuration shared application wide.  Work to support per tenant configuration is under way and will live in its own engine or be contributed directly to Hyku.
+The mount point is yours to choose; the views build their URLs from it. It must be named
+`hyrax_doi`.
+
+Then enable DOIs on each work type that should have them:
+
+```bash
+rails g hyrax:doi:add_to_work_type Monograph
+```
+
+Set your DataCite credentials in the environment:
+
+```bash
+DATACITE_PREFIX=10.5072
+DATACITE_USERNAME=...
+DATACITE_PASSWORD=...
+DATACITE_MODE=test        # or production; defaults to test
+```
+
+That is a working installation: the DOI tab appears on the deposit form for the work types
+you enabled. Minting is governed by the `doi_minting` feature flag, which is on by default
+and can be switched off per tenant from the Hyrax admin dashboard.
+
+If your application does not already set `host` in `default_url_options`, set it — the URL
+registered with each DOI is built from it.
+
+## Configuration
+
+Everything above works with no configuration. For per-tenant credentials, restricting which
+work types may mint, deriving DataCite's required fields from your own metadata, or storing
+the DOI in an attribute other than `doi`, see
+[docs/CONFIGURATION.md](docs/CONFIGURATION.md).
 
 ## Development
 
-### Setting up Development Environment
-After checking out the code, initialize the internal hyrax test application:
-```
-git submodule init
-git submodule update
-```
+See [CONTRIBUTING.md](CONTRIBUTING.md) for setting up a development environment, running
+specs against the four test apps, and linting.
 
-### Running Rake Tasks and Generators
-When working on this engine rake tasks from Hyrax can be run by prepending the `app` namespace (e.g. `rake app:db:migrate`). Generators provided by rails or other gems/engines can be run like normal from this engine's root (e.g. `rails g job CheckDOIResolution`).
-
-### Development Server
-
-To run a development server locally, start the required services using Docker Compose:
-```
-docker compose up -d
-bundle exec rails server -b 0.0.0.0
-```
-
-To stop the services:
-```
-docker compose down
-```
-
-### Testing
-
-Tests are run automatically in CI with rubocop and codeclimate. These tests must pass before pull requests can be merged.
-
-To run the tests locally, start the test services using Docker Compose:
-```
-docker compose up -d
-docker compose exec web bash
-cd /app/samvera/hyrax-doi
-bundle
-bundle exec rspec
-```
-
-### Linting
-
-To run the linter locally, start the test services using Docker Compose:
-```
-docker compose up -d
-docker compose exec web bash
-cd /app/samvera/hyrax-doi
-bundle
-bundle exec rubocop
-```
-
-You shouldn't need to run anything from inside `vendor/engines/hyrax` unless explicitly told to do so.
+For community guidelines — code of conduct, commit conventions, and the pull request
+process — see [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md).

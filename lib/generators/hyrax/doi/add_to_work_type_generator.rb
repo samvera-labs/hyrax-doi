@@ -18,79 +18,50 @@ module Hyrax
       # Namespaces passed as the argument will still appear in class_path
       class_option :skip_namespace, default: true
 
-      # DataCite-specific support
-      class_option :datacite, type: :boolean, default: false, desc: "Add DataCite-specific behavior."
+      class_option :datacite, type: :boolean, default: true,
+                              desc: 'Add DataCite behavior, which is what makes the work type mintable.'
 
-      desc "Add DOI support to given work type"
+      desc 'Add DOI support to given work type'
       def inject_into_model
-        # rubocop:disable Style/RedundantSelf
-        # For some reason I had to use self.destination_root here to get all contexts to work (calling from hyrax app, calling from this engine to test app, rspec tests)
-        self.destination_root = Rails.root if self.destination_root.blank? || self.destination_root == Hyrax::DOI::Engine.root.to_s
-        model_file = File.join(self.destination_root, 'app', 'models', *class_path, "#{file_name}.rb")
-        # rubocop:enable Style/RedundantSelf
-
-        insert_into_file model_file, after: 'include ::Hyrax::WorkBehavior' do
-          "\n" \
-          "  # Adds behaviors for hyrax-doi plugin.\n" \
-          "  include Hyrax::DOI::DOIBehavior"
-        end
-
-        return unless options[:datacite]
-
-        # DataCite specific behavior
-        insert_into_file model_file, after: 'include Hyrax::DOI::DOIBehavior' do
-          "\n" \
-          "  # Adds behaviors for DataCite DOIs via hyrax-doi plugin.\n" \
-          "  include Hyrax::DOI::DataCiteDOIBehavior"
-        end
+        inject_after(model_file, /class \S+ < Hyrax::Work\b.*\n/, concerns('Hyrax::DOI'), indent: '  ')
       end
 
-      desc "Add DOI support to given work type form"
+      desc 'Add DOI support to given work type form'
       def inject_into_form
-        # rubocop:disable Style/RedundantSelf
-        # For some reason I had to use self.destination_root here to get all contexts to work (calling from hyrax app, calling from this engine to test app, rspec tests)
-        self.destination_root = Rails.root if self.destination_root.blank? || self.destination_root == Hyrax::DOI::Engine.root.to_s
-        form_file = File.join(self.destination_root, 'app', 'forms', 'hyrax', *class_path, "#{file_name}_form.rb")
-        # rubocop:enable Style/RedundantSelf
-
-        insert_into_file form_file, after: 'Hyrax::Forms::WorkForm' do
-          "\n" \
-          "    # Adds behaviors for hyrax-doi plugin.\n" \
-          "    include Hyrax::DOI::DOIFormBehavior"
-        end
-
-        return unless options[:datacite]
-
-        # DataCite specific behavior
-        insert_into_file form_file, after: 'include Hyrax::DOI::DOIFormBehavior' do
-          "\n" \
-          "    # Adds behaviors for DataCite DOIs via hyrax-doi plugin.\n" \
-          "    include Hyrax::DOI::DataCiteDOIFormBehavior"
-        end
+        inject_after(form_file, /< Hyrax::Forms::ResourceForm\(\S+\)\s*\n/,
+                     concerns('Hyrax::DOI', suffix: 'FormBehavior'), indent: '  ')
       end
 
-      desc "Add DOI support to given work type presenter"
-      def inject_into_presenter
-        # rubocop:disable Style/RedundantSelf
-        # For some reason I had to use self.destination_root here to get all contexts to work (calling from hyrax app, calling from this engine to test app, rspec tests)
-        self.destination_root = Rails.root if self.destination_root.blank? || self.destination_root == Hyrax::DOI::Engine.root.to_s
-        presenter_file = File.join(self.destination_root, 'app', 'presenters', 'hyrax', *class_path, "#{file_name}_presenter.rb")
-        # rubocop:enable Style/RedundantSelf
+      private
 
-        insert_into_file presenter_file, after: '::WorkShowPresenter' do
-          "\n" \
-          "    # Adds behaviors for hyrax-doi plugin.\n" \
-          "    include Hyrax::DOI::DOIPresenterBehavior"
+      # A Valkyrie work type has no presenter of its own -- Hyrax uses
+      # Hyrax::WorkShowPresenter unless an application writes one -- so the presenter
+      # behaviors are documented rather than injected. The show page reads its DOI through
+      # the renderer and the SolrDocument either way.
+      def concerns(namespace, suffix: 'Behavior')
+        names = ["#{namespace}::DOI#{suffix}"]
+        names << "#{namespace}::DataCiteDOI#{suffix}" if options[:datacite]
+        names
+      end
+
+      def inject_after(path, anchor, modules, indent:)
+        unless File.exist?(path)
+          say_status :skip, "#{path} not found", :yellow
+          return
         end
 
-        return unless options[:datacite]
+        body = modules.map { |m| "#{indent}include #{m}\n" }.join
+        # force: false leaves an already-configured work type alone, so the generator can
+        # be re-run after adding --datacite.
+        inject_into_file path, body, after: anchor, force: false
+      end
 
-        # DataCite specific behavior
-        insert_into_file presenter_file, after: 'include Hyrax::DOI::DOIPresenterBehavior' do
-          "\n" \
-          "    # Adds behaviors for DataCite DOIs via hyrax-doi plugin.\n" \
-          "    include Hyrax::DOI::DataCiteDOIPresenterBehavior"
-        end
+      def model_file
+        File.join(destination_root, 'app', 'models', *class_path, "#{file_name}.rb")
+      end
+
+      def form_file
+        File.join(destination_root, 'app', 'forms', *class_path, "#{file_name}_form.rb")
       end
     end
   end

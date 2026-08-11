@@ -4,15 +4,19 @@ module Hyrax
     module DataCiteDOIBehavior
       extend ActiveSupport::Concern
 
+      # The depositor's intent -- what state the DOI should reach once the work is
+      # public -- not the state DataCite currently reports. Observed state lives on the
+      # PersistentIdentifier record, because it is provider-specific: DataCite's
+      # draft/registered/findable and EZID's reserved/public/unavailable do not share a
+      # vocabulary.
+      #
+      # Blank means do not mint.
+      #
+      # Skipped when the host already declares it -- see Hyrax::DOI::DOIBehavior.
       included do
-        property :doi_status_when_public, predicate: ::RDF::URI('http://samvera.org/ns/hyrax/doi#doi_status_when_public'), multiple: false do |index|
-          index.as :stored_sortable
-        end
-
-        validates :doi_status_when_public, inclusion: { in: Hyrax::DOI::DataCiteRegistrar::STATES }, allow_nil: true
+        attribute :doi_status_when_public, Valkyrie::Types::String unless has_attribute?(:doi_status_when_public)
       end
 
-      # Override
       def doi_registrar
         'datacite'
       end

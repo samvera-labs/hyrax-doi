@@ -1,15 +1,98 @@
 ---
 en:
   hyrax:
+    doi:
+      flexible_schema_validators:
+        doi_validator:
+          warnings:
+            property_missing: >-
+              This profile has no `doi` property. DOIs will still work if a work class
+              declares the attribute itself, but the DOI will not appear on the show page
+              and will not be indexed from the profile.
+            no_view_block: >-
+              The `doi` property has no `view:` options, so it will not be rendered on the
+              show page. Add `view: { render_as: doi, html_dl: true }`.
+            unreachable_available_on: >-
+              The `doi` property's `available_on.class` names no class declared in this
+              profile, so no work type will receive it.
+      form:
+        intro: >-
+          A DOI is a permanent link to this work. Use this tab either to record a DOI this
+          work was already given elsewhere, or to mint a new one.
+        saved_note: Nothing is minted or recorded until this work is saved.
+        legend: DOI for this work
+        missing_required_confirm: >-
+          DataCite requires %{fields} for a registered or findable DOI, and this form leaves
+          them blank. No DOI will be created until they are filled in. Save anyway?
+
+        modes:
+          none:
+            title: Do not mint a DOI
+            help: >-
+              The default. You can record or mint one at any time after this work is
+              deposited.
+          existing:
+            title: This work already has a DOI
+            help: >-
+              It was published elsewhere first. Enter that DOI and we can fill in the rest
+              of this form from the metadata its publisher registered.
+          mint:
+            title: Mint a new DOI for this work
+            help: This repository registers the DOI with DataCite on your behalf.
+
+        existing:
+          field_label: Existing DOI
+          field_hint: >-
+            Enter just the part after the resolver, for example 10.1038/nature12373.
+
+        autofill:
+          label: Fill in this form from that DOI
+          working: Looking up that DOI...
+          confirm: >-
+            This replaces anything already filled in on this form. Continue?
+          error: Could not reach doi.org. Try again in a moment.
+          missing: Enter a DOI above first.
+          empty: >-
+            No metadata could be read for that DOI. Check it, or fill the form in by hand.
+
+        status:
+          minted_notice: >-
+            This work already has a DOI, so options it can no longer return to are
+            unavailable.
+          permanent_note_html: >-
+            Registered and findable DOIs are permanent — they cannot be withdrawn once this
+            work is public. Choose <strong>Draft</strong> if you are unsure.
+          badges:
+            reversible: Reversible
+            permanent: Permanent
+          options:
+            draft: Draft
+            registered: Registered
+            findable: Findable
+          help:
+            draft: Reserved for later. Does not resolve yet and can still be deleted.
+            registered: >-
+              Resolves permanently once this work is public. Not listed in DataCite search.
+            findable: Resolves and appears in DataCite search once this work is public.
+
+        draft:
+          label: Reserve a DOI now
+          working: Reserving a DOI...
+          error: Could not reach DataCite. Try again in a moment.
+          reserved_label: Reserved DOI
+          reserved_hint: >-
+            Reserved for this work. It does not resolve yet, and is saved with the work when
+            you submit this form.
+          copy: Copy
+          copied: Copied
+          help_html: >-
+            Optional. Only if you must know the DOI <em>before</em> this work is saved — to
+            print it inside the file you are about to upload, for instance.
+      mint_button:
+        label: Mint DOI
+        working: Minting...
     works:
       form:
-        mint:
-          button:
-            disable_with: Creating draft DOI...
-        autofill:
-          button:
-            disable_with: Autofilling form...
-            confirm: This operation is destructive and will replace any information already filled in on this form.
         tab:
           doi: DOI
   errors:

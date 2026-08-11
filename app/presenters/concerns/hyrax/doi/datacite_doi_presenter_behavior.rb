@@ -6,14 +6,12 @@ module Hyrax
 
       delegate :doi_status_when_public, to: :solr_document
 
-      # Should this make a request to DataCite?
-      # Or maybe DataCite could supply badges?
+      # What DataCite reports, falling back to the depositor's intent when nothing has been
+      # registered yet. The two legitimately differ -- a work intended to be findable stays
+      # registered while it is private -- so this reads observed state rather than
+      # recomputing it from intent and visibility.
       def doi_status
-        if doi_status_when_public == 'findable' && !solr_document.public?
-          'registered'
-        else
-          doi_status_when_public
-        end
+        doi_state.presence || doi_status_when_public
       end
     end
   end
